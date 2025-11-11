@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Textarea } from "./ui/textarea";
-import { Label } from "./ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Textarea } from "../ui/textarea";
+import { Label } from "../ui/label";
 import { Calendar, Clock, MapPin, Heart } from "lucide-react";
-import { Performance } from "./PerformanceCard";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { Performance } from "../performances/PerformanceCard";
+import { ImageWithFallback } from "../common/figma/ImageWithFallback";
 
 interface DateProposalProps {
   performance: Performance | null;

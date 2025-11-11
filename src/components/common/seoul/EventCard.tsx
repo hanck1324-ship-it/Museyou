@@ -1,5 +1,5 @@
 import { ImageWithFallback } from "../figma/ImageWithFallback";
-import { cn } from "../ui/utils";
+import { cn } from "../../ui/utils";
 
 interface EventCardProps {
   image: string;

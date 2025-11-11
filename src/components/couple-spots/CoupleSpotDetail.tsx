@@ -1,10 +1,10 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { MapPin, Heart, Star, Navigation, Users, Clock, Gift, Calendar, Cloud, Music, MapPinned, UtensilsCrossed, ExternalLink } from "lucide-react";
 import { CoupleSpot } from "./CoupleSpotCard";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { ImageWithFallback } from "../common/figma/ImageWithFallback";
 
 interface CoupleSpotDetailProps {
   spot: CoupleSpot | null;

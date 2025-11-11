@@ -5,16 +5,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Button } from "./components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./components/ui/sheet";
 import { Search, Music, Theater, Palette, Users, Heart, LogIn, LogOut, UserCircle, SlidersHorizontal, X } from "lucide-react";
-import { PerformanceCard, Performance } from "./components/PerformanceCard";
-import { PerformanceDetail } from "./components/PerformanceDetail";
-import { PromotionCard, Promotion } from "./components/PromotionCard";
-import { MatchingCard, UserMatch } from "./components/MatchingCard";
-import { UserProfile } from "./components/UserProfile";
-import { DateProposal } from "./components/DateProposal";
-import { CoupleSpotCard, CoupleSpot } from "./components/CoupleSpotCard";
-import { CoupleSpotDetail } from "./components/CoupleSpotDetail";
-import { AuthDialog } from "./components/AuthDialog";
-import { HomePage } from "./components/HomePage";
+import { PerformanceCard, Performance } from "./components/performances/PerformanceCard";
+import { PerformanceDetail } from "./components/performances/PerformanceDetail";
+import { PromotionCard, Promotion } from "./components/promotions/PromotionCard";
+import { MatchingCard, UserMatch } from "./components/matching/MatchingCard";
+import { UserProfile } from "./components/matching/UserProfile";
+import { DateProposal } from "./components/matching/DateProposal";
+import { CoupleSpotCard, CoupleSpot } from "./components/couple-spots/CoupleSpotCard";
+import { CoupleSpotDetail } from "./components/couple-spots/CoupleSpotDetail";
+import { AuthDialog } from "./components/auth/AuthDialog";
+import { HomePage } from "./components/home/HomePage";
 import { toast } from "sonner@2.0.3";
 import {
   authApi,
@@ -24,7 +24,7 @@ import {
   coupleSpotApi,
   seedData,
   getAccessToken,
-} from "./utils/api";
+} from "./lib/api/api";
 
 export default function App() {
   // Page State

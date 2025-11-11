@@ -1,6 +1,6 @@
 import { Heart, Lightbulb, Sparkles, Music, Users, Theater, ArrowRight, Calendar, MapPin, Star } from "lucide-react";
 import { motion } from "motion/react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { MuseYouLogo } from "./MuseYouLogo";
 
 interface HomePageProps {

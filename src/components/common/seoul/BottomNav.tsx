@@ -1,5 +1,5 @@
 import { Home, Sparkles, Map, User } from "lucide-react";
-import { cn } from "../ui/utils";
+import { cn } from "../../ui/utils";
 
 interface BottomNavProps {
   activeTab?: "home" | "recommend" | "map" | "profile";

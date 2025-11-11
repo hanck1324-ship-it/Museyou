@@ -1,9 +1,7 @@
 import { motion } from "motion/react";
 import museYouLogo from "figma:asset/30d8eb2264f1d14c16f1555f23c2913e56460bad.png";
 
-interface MuseYouLogoProps {
-  size?: "sm" | "md" | "lg" | "xl";
-}
+
 
 export function MuseYouLogo({ size = "lg" }: MuseYouLogoProps) {
   const sizes = {

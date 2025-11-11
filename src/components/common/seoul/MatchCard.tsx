@@ -1,6 +1,6 @@
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { PrimaryButton } from "./PrimaryButton";
-import { cn } from "../ui/utils";
+import { cn } from "../../ui/utils";
 
 interface MatchCardProps {
   avatar: string;
