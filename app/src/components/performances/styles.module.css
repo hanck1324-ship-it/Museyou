@@ -1,0 +1,18 @@
+/* Performance feature styles */
+
+.performanceCard {
+  @apply transition-all duration-300 hover:shadow-lg;
+}
+
+.performanceFilter {
+  @apply backdrop-blur-sm bg-white/60 border border-purple-100 rounded-xl;
+}
+
+.performanceGrid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6;
+}
+
+.performanceDetail {
+  @apply space-y-4;
+}
+
