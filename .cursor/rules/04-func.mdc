@@ -1,0 +1,809 @@
+# Phase 3: 기능 구현 단계
+
+UI가 완성되었다면, 실제 동작하는 기능을 구현하는 단계입니다.
+
+---
+
+## 1. Supabase 연동 (백엔드)
+
+### 기본 설정 확인
+```typescript
+// lib/supabase/config.ts
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+```
+
+### 데이터 조회 (Read)
+```typescript
+// ✅ Good: 에러 처리 포함
+async function fetchPerformances() {
+  const { data, error } = await supabase
+    .from('performances')
+    .select('*')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching performances:', error);
+    throw new Error('공연 목록을 불러오는데 실패했습니다');
+  }
+
+  return data;
+}
+
+// ❌ Bad: 에러 무시
+const { data } = await supabase.from('performances').select('*');
+```
+
+### 데이터 생성 (Create)
+```typescript
+async function createReview(performanceId: string, content: string, rating: number) {
+  const { data, error } = await supabase
+    .from('reviews')
+    .insert({
+      performance_id: performanceId,
+      content,
+      rating,
+      user_id: user.id,
+      created_at: new Date().toISOString()
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+```
+
+### 데이터 수정 (Update)
+```typescript
+async function updateProfile(userId: string, updates: Partial<Profile>) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', userId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+```
+
+### 데이터 삭제 (Delete)
+```typescript
+async function deleteReview(reviewId: string) {
+  const { error } = await supabase
+    .from('reviews')
+    .delete()
+    .eq('id', reviewId);
+
+  if (error) throw error;
+}
+```
+
+### 실시간 구독 (Realtime)
+```typescript
+// 실시간 리뷰 업데이트 구독
+useEffect(() => {
+  const channel = supabase
+    .channel('reviews-changes')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'reviews',
+        filter: `performance_id=eq.${performanceId}`
+      },
+      (payload) => {
+        console.log('Change received!', payload);
+        // 리뷰 목록 업데이트
+        refetchReviews();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [performanceId]);
+```
+
+---
+
+## 2. 상태 관리 (Zustand)
+
+### Store 생성
+```typescript
+// store/useAuthStore.ts
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { supabase } from '@/lib/supabase/config';
+
+interface AuthState {
+  user: User | null;
+  session: Session | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  
+  // Actions
+  initialize: () => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  signup: (email: string, password: string, profile: Partial<Profile>) => Promise<void>;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      session: null,
+      isAuthenticated: false,
+      isLoading: true,
+
+      initialize: async () => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session) {
+            set({
+              user: session.user,
+              session,
+              isAuthenticated: true,
+              isLoading: false
+            });
+          } else {
+            set({ isLoading: false });
+          }
+        } catch (error) {
+          console.error('Auth initialization error:', error);
+          set({ isLoading: false });
+        }
+      },
+
+      login: async (email, password) => {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) throw error;
+
+        set({
+          user: data.user,
+          session: data.session,
+          isAuthenticated: true
+        });
+      },
+
+      logout: async () => {
+        await supabase.auth.signOut();
+        set({
+          user: null,
+          session: null,
+          isAuthenticated: false
+        });
+      },
+
+      signup: async (email, password, profile) => {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: profile
+          }
+        });
+
+        if (error) throw error;
+
+        // 프로필 테이블에도 저장
+        if (data.user) {
+          await supabase.from('profiles').insert({
+            id: data.user.id,
+            ...profile
+          });
+        }
+
+        set({
+          user: data.user,
+          session: data.session,
+          isAuthenticated: true
+        });
+      }
+    }),
+    {
+      name: 'auth-storage',
+      partialize: (state) => ({
+        // 세션 정보는 저장하지 않음 (보안)
+        user: state.user,
+        isAuthenticated: state.isAuthenticated
+      })
+    }
+  )
+);
+```
+
+### Store 사용
+```tsx
+function Header() {
+  const { user, isAuthenticated, logout } = useAuthStore();
+
+  return (
+    <header>
+      {isAuthenticated ? (
+        <div>
+          <span>{user?.email}</span>
+          <button onClick={logout}>로그아웃</button>
+        </div>
+      ) : (
+        <Link to="/login">로그인</Link>
+      )}
+    </header>
+  );
+}
+```
+
+---
+
+## 3. 인증 및 권한
+
+### 보호된 라우트
+```tsx
+// components/common/ProtectedRoute.tsx
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuthStore } from '@/store/useAuthStore';
+
+export function ProtectedRoute() {
+  const { isAuthenticated, isLoading } = useAuthStore();
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location.pathname }} />;
+  }
+
+  return <Outlet />;
+}
+
+// App.tsx에서 사용
+<Route element={<ProtectedRoute />}>
+  <Route path="/matching" element={<MatchingPage />} />
+  <Route path="/profile" element={<ProfilePage />} />
+</Route>
+```
+
+### 인증 초기화
+```tsx
+// App.tsx
+function App() {
+  const initialize = useAuthStore(state => state.initialize);
+
+  useEffect(() => {
+    initialize();
+  }, []);
+
+  // ...
+}
+```
+
+### Row Level Security (RLS) 정책 예시
+```sql
+-- Supabase Dashboard에서 설정
+
+-- 리뷰는 본인만 수정/삭제 가능
+CREATE POLICY "Users can update own reviews"
+ON reviews FOR UPDATE
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own reviews"
+ON reviews FOR DELETE
+USING (auth.uid() = user_id);
+
+-- 프로필은 본인만 수정 가능
+CREATE POLICY "Users can update own profile"
+ON profiles FOR UPDATE
+USING (auth.uid() = id);
+```
+
+---
+
+## 4. 폼 처리 (React Hook Form + Zod)
+
+### Zod 스키마 정의
+```typescript
+// lib/validations/review.schema.ts
+import { z } from 'zod';
+
+export const reviewSchema = z.object({
+  performanceId: z.string().uuid(),
+  rating: z.number().min(1).max(5),
+  content: z.string()
+    .min(10, '리뷰는 최소 10자 이상 작성해주세요')
+    .max(500, '리뷰는 최대 500자까지 작성 가능합니다'),
+  isPublic: z.boolean().default(true)
+});
+
+export type ReviewFormData = z.infer<typeof reviewSchema>;
+```
+
+### 폼 구현
+```tsx
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { reviewSchema, type ReviewFormData } from '@/lib/validations/review.schema';
+
+function ReviewForm({ performanceId, onSuccess }: ReviewFormProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting }
+  } = useForm<ReviewFormData>({
+    resolver: zodResolver(reviewSchema),
+    defaultValues: {
+      performanceId,
+      rating: 5,
+      isPublic: true
+    }
+  });
+
+  const onSubmit = async (data: ReviewFormData) => {
+    try {
+      await createReview(data);
+      toast.success('리뷰가 등록되었습니다');
+      onSuccess?.();
+    } catch (error) {
+      toast.error('리뷰 등록에 실패했습니다');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div>
+        <label>평점</label>
+        <select {...register('rating', { valueAsNumber: true })}>
+          <option value={5}>⭐⭐⭐⭐⭐</option>
+          <option value={4}>⭐⭐⭐⭐</option>
+          <option value={3}>⭐⭐⭐</option>
+          <option value={2}>⭐⭐</option>
+          <option value={1}>⭐</option>
+        </select>
+        {errors.rating && <p>{errors.rating.message}</p>}
+      </div>
+
+      <div>
+        <label>리뷰 내용</label>
+        <textarea {...register('content')} />
+        {errors.content && <p>{errors.content.message}</p>}
+      </div>
+
+      <div>
+        <label>
+          <input type="checkbox" {...register('isPublic')} />
+          공개 리뷰
+        </label>
+      </div>
+
+      <button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? '등록 중...' : '리뷰 등록'}
+      </button>
+    </form>
+  );
+}
+```
+
+---
+
+## 5. 파일 업로드 (Supabase Storage)
+
+### 이미지 업로드
+```typescript
+async function uploadImage(file: File, bucket: string = 'performances') {
+  // 파일명 생성 (중복 방지)
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Math.random()}.${fileExt}`;
+  const filePath = `${bucket}/${fileName}`;
+
+  // 업로드
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
+
+  if (error) throw error;
+
+  // Public URL 가져오기
+  const { data: { publicUrl } } = supabase.storage
+    .from(bucket)
+    .getPublicUrl(filePath);
+
+  return publicUrl;
+}
+```
+
+### 이미지 업로드 컴포넌트
+```tsx
+function ImageUpload({ onUploadComplete }: ImageUploadProps) {
+  const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 파일 타입 체크
+    if (!file.type.startsWith('image/')) {
+      toast.error('이미지 파일만 업로드 가능합니다');
+      return;
+    }
+
+    // 파일 크기 체크 (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('파일 크기는 5MB 이하여야 합니다');
+      return;
+    }
+
+    // 미리보기
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // 업로드
+    try {
+      setUploading(true);
+      const url = await uploadImage(file);
+      onUploadComplete?.(url);
+      toast.success('이미지가 업로드되었습니다');
+    } catch (error) {
+      toast.error('이미지 업로드에 실패했습니다');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        disabled={uploading}
+      />
+      
+      {preview && (
+        <img src={preview} alt="Preview" className="w-32 h-32 object-cover" />
+      )}
+      
+      {uploading && <LoadingSpinner />}
+    </div>
+  );
+}
+```
+
+---
+
+## 6. 무한 스크롤
+
+### 커스텀 훅
+```typescript
+// hooks/useInfiniteScroll.ts
+import { useEffect, useRef, useState } from 'react';
+
+interface UseInfiniteScrollOptions {
+  onLoadMore: () => void;
+  hasMore: boolean;
+  isLoading: boolean;
+}
+
+export function useInfiniteScroll({
+  onLoadMore,
+  hasMore,
+  isLoading
+}: UseInfiniteScrollOptions) {
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (isLoading || !hasMore) return;
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onLoadMore();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [onLoadMore, hasMore, isLoading]);
+
+  return loadMoreRef;
+}
+```
+
+### 사용 예시
+```tsx
+function PerformanceList() {
+  const [performances, setPerformances] = useState<Performance[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const loadMore = async () => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+    try {
+      const { data } = await supabase
+        .from('performances')
+        .select('*')
+        .range(page * 10, (page + 1) * 10 - 1);
+
+      if (data.length === 0) {
+        setHasMore(false);
+      } else {
+        setPerformances(prev => [...prev, ...data]);
+        setPage(prev => prev + 1);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadMoreRef = useInfiniteScroll({
+    onLoadMore: loadMore,
+    hasMore,
+    isLoading
+  });
+
+  return (
+    <div>
+      {performances.map(perf => (
+        <PerformanceCard key={perf.id} performance={perf} />
+      ))}
+      
+      <div ref={loadMoreRef}>
+        {isLoading && <LoadingSpinner />}
+        {!hasMore && <p>더 이상 공연이 없습니다</p>}
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## 7. 검색 기능
+
+### 디바운스 검색
+```typescript
+// hooks/useDebounce.ts
+import { useEffect, useState } from 'react';
+
+export function useDebounce<T>(value: T, delay: number = 500): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+```
+
+### 검색 구현
+```tsx
+function PerformanceSearch() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [results, setResults] = useState<Performance[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  useEffect(() => {
+    if (!debouncedSearchTerm) {
+      setResults([]);
+      return;
+    }
+
+    searchPerformances(debouncedSearchTerm);
+  }, [debouncedSearchTerm]);
+
+  const searchPerformances = async (term: string) => {
+    setIsSearching(true);
+    try {
+      const { data } = await supabase
+        .from('performances')
+        .select('*')
+        .ilike('title', `%${term}%`);
+
+      setResults(data || []);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  return (
+    <div>
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="공연 검색..."
+      />
+
+      {isSearching && <LoadingSpinner />}
+
+      {results.map(perf => (
+        <PerformanceCard key={perf.id} performance={perf} />
+      ))}
+    </div>
+  );
+}
+```
+
+---
+
+## 8. 에러 처리
+
+### Error Boundary
+```tsx
+// components/common/ErrorBoundary.tsx
+import React from 'react';
+
+interface Props {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+interface State {
+  hasError: boolean;
+  error?: Error;
+}
+
+export class ErrorBoundary extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <div className="p-4 text-center">
+          <h2 className="text-xl font-bold mb-2">오류가 발생했습니다</h2>
+          <p className="text-gray-600">{this.state.error?.message}</p>
+          <button
+            onClick={() => this.setState({ hasError: false })}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded"
+          >
+            다시 시도
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+```
+
+### Toast 알림
+```tsx
+// sonner 라이브러리 사용 (shadcn/ui)
+import { toast } from 'sonner';
+
+// 성공
+toast.success('리뷰가 등록되었습니다');
+
+// 에러
+toast.error('리뷰 등록에 실패했습니다');
+
+// 정보
+toast.info('로그인이 필요한 기능입니다');
+
+// 로딩
+const toastId = toast.loading('업로드 중...');
+// ... 작업 완료 후
+toast.success('업로드 완료!', { id: toastId });
+```
+
+---
+
+## 9. 최적화
+
+### React.memo
+```tsx
+// 불필요한 리렌더링 방지
+export const PerformanceCard = React.memo(function PerformanceCard({
+  performance,
+  onLike
+}: PerformanceCardProps) {
+  // ...
+});
+```
+
+### useMemo / useCallback
+```tsx
+// 값 메모이제이션
+const sortedPerformances = useMemo(() => {
+  return performances.sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+}, [performances]);
+
+// 함수 메모이제이션
+const handleLike = useCallback((id: string) => {
+  // ...
+}, []);
+```
+
+---
+
+## 10. 완료 체크리스트
+
+### API 연동
+- [ ] Supabase CRUD 동작 확인
+- [ ] 에러 처리 구현
+- [ ] 로딩 상태 표시
+
+### 인증
+- [ ] 로그인/로그아웃 동작
+- [ ] 회원가입 동작
+- [ ] 보호된 라우트 동작
+- [ ] 세션 유지 확인
+
+### 폼
+- [ ] 유효성 검사 동작
+- [ ] 에러 메시지 표시
+- [ ] 제출 성공/실패 처리
+
+### 기타
+- [ ] 파일 업로드 동작
+- [ ] 검색 기능 동작
+- [ ] 무한 스크롤 동작
+
+---
+
+## 다음 단계
+
+→ **recheck.401** (최종 검토)로 진행
+
+**진행 전 확인:**
+- [ ] 모든 기능이 정상 동작하는가?
+- [ ] 에러 처리가 되어 있는가?
+- [ ] TypeScript 에러가 없는가?
+- [ ] ESLint 경고가 없는가?

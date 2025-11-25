@@ -15,3 +15,4 @@ export const boardPostSchema = z.object({
 
 export type BoardPostFormData = z.infer<typeof boardPostSchema>;
 
+

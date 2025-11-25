@@ -1,0 +1,386 @@
+# Performance Detail - UI 디자인
+
+## 현재 구현 상태 ✅
+
+### 컴포넌트 경로
+`app/src/components/performances/PerformanceDetail.tsx`
+
+### 사용 중인 UI 라이브러리
+- shadcn/ui Dialog
+- shadcn/ui Tabs
+- shadcn/ui Badge
+- shadcn/ui Button
+- Lucide React 아이콘
+
+## 디자인 시스템
+
+### Dialog 스타일
+
+#### Container
+```tsx
+className="
+  max-w-2xl 
+  max-h-[90vh] 
+  overflow-y-auto 
+  w-[95vw] sm:w-full
+"
+```
+
+#### Header
+```tsx
+<DialogTitle className="
+  pr-6 
+  text-base sm:text-lg lg:text-xl
+">
+```
+
+### 이미지 스타일
+
+```tsx
+className="
+  relative 
+  h-48 sm:h-64 
+  rounded-lg 
+  overflow-hidden
+"
+```
+
+### Badge 스타일
+
+#### 카테고리 Badge
+```tsx
+className="text-xs sm:text-sm"
+```
+
+#### 지역 Badge
+```tsx
+variant="outline"
+className="text-xs sm:text-sm"
+```
+
+### Tabs 스타일
+
+#### TabsList
+```tsx
+className="
+  grid w-full grid-cols-3 h-auto
+"
+```
+
+#### TabsTrigger
+```tsx
+className="
+  text-xs sm:text-sm 
+  py-2
+"
+```
+
+### 타이포그래피
+
+#### 섹션 제목 (h4)
+- 모바일: text-sm (14px)
+- 데스크톱: text-base (16px)
+- Weight: 600
+- 하단 여백: 4px (mb-1)
+
+#### 본문 텍스트
+- 모바일: text-xs (12px)
+- 데스크톱: text-sm (14px)
+- Color: text-muted-foreground
+- Line height: 1.6
+
+#### 아이콘 텍스트
+- 크기: text-sm
+- 아이콘: 12-16px
+- Gap: 8px (gap-2)
+
+### 간격
+
+#### Dialog 내부
+```tsx
+// 최상위 컨테이너
+className="space-y-3 sm:space-y-4"
+
+// 섹션 내부
+className="space-y-3"
+
+// 그리드
+className="grid grid-cols-2 gap-3"
+```
+
+### 색상
+
+#### 아이콘
+- 기본: text-muted-foreground
+- 특정 액션: emerald-500
+
+#### 텍스트
+- 제목: text-foreground
+- 본문: text-muted-foreground
+- 링크: text-primary
+
+## 현재 구현된 섹션
+
+### 공연정보 Tab
+```tsx
+<TabsContent value="info" className="space-y-3 sm:space-y-4 pt-4">
+  {/* 설명 섹션 */}
+  <div>
+    <h4>공연 설명</h4>
+    <p>{description}</p>
+  </div>
+  
+  {/* 주최/관람료 그리드 */}
+  <div className="grid grid-cols-2 gap-3">
+    <div>주최</div>
+    <div>관람료</div>
+  </div>
+  
+  {/* 일시/장소 정보 */}
+  <div className="space-y-2 pt-2 border-t">
+    <div>📅 날짜</div>
+    <div>🕐 시간</div>
+    <div>📍 장소</div>
+  </div>
+</TabsContent>
+```
+
+### 장소/경로 Tab
+```tsx
+<TabsContent value="location" className="space-y-3 sm:space-y-4 pt-4">
+  {/* 장소 정보 */}
+  <div>
+    <h4>공연장소</h4>
+    <p>{venue}</p>
+    <p>{district}</p>
+  </div>
+  
+  {/* 지도 영역 (placeholder) */}
+  <div className="bg-muted h-40 sm:h-48 rounded-lg">
+    지도 영역
+  </div>
+  
+  {/* 길찾기 버튼 */}
+  <Button className="w-full">
+    🧭 길찾기
+  </Button>
+  
+  {/* 교통편 */}
+  <div className="space-y-2">
+    <h4>교통편</h4>
+    <div>🚇 🚌 🚗</div>
+  </div>
+</TabsContent>
+```
+
+### 리뷰 Tab
+```tsx
+<TabsContent value="reviews" className="pt-4">
+  <ReviewSection performanceId={performance.id} />
+</TabsContent>
+```
+
+## 개선 제안 🎨
+
+### 1. 지도 통합 🗺️
+```tsx
+// Google Maps 또는 Kakao Map
+import { GoogleMap, Marker } from '@react-google-maps/api';
+
+<GoogleMap
+  center={{ lat: venue.latitude, lng: venue.longitude }}
+  zoom={15}
+  className="h-48 rounded-lg"
+>
+  <Marker position={{ lat: venue.latitude, lng: venue.longitude }} />
+</GoogleMap>
+```
+
+### 2. 이미지 갤러리 📸
+```tsx
+// 여러 이미지 슬라이드
+<Carousel className="h-64">
+  {performance.images.map(img => (
+    <CarouselItem key={img.id}>
+      <img src={img.url} alt={img.alt} />
+    </CarouselItem>
+  ))}
+</Carousel>
+```
+
+### 3. 공유 버튼 추가 📤
+```tsx
+<div className="flex gap-2">
+  <Button variant="outline" onClick={handleShare}>
+    <Share2 className="mr-2 size-4" />
+    공유하기
+  </Button>
+  
+  <Button variant="outline" onClick={handleCopyLink}>
+    <Link className="mr-2 size-4" />
+    링크 복사
+  </Button>
+</div>
+```
+
+### 4. 예매 버튼 🎫
+```tsx
+<Button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600">
+  <Ticket className="mr-2" />
+  예매하기
+</Button>
+```
+
+### 5. 찜하기 버튼 ❤️
+```tsx
+<Button 
+  variant={isLiked ? "default" : "outline"}
+  onClick={handleToggleLike}
+>
+  <Heart className={cn(
+    "mr-2",
+    isLiked && "fill-current"
+  )} />
+  {isLiked ? "찜 해제" : "찜하기"}
+</Button>
+```
+
+### 6. 로딩 상태 ⏳
+```tsx
+{isLoading ? (
+  <DialogContent>
+    <Skeleton className="h-64 w-full" />
+    <Skeleton className="h-4 w-3/4" />
+    <Skeleton className="h-4 w-1/2" />
+  </DialogContent>
+) : (
+  // 실제 콘텐츠
+)}
+```
+
+### 7. 관련 공연 추천 🎭
+```tsx
+<TabsContent value="related">
+  <h4>비슷한 공연</h4>
+  <div className="grid grid-cols-2 gap-3">
+    {relatedPerformances.map(perf => (
+      <PerformanceCard key={perf.id} performance={perf} />
+    ))}
+  </div>
+</TabsContent>
+```
+
+### 8. 타임라인 표시 📅
+```tsx
+// 공연 일정이 여러 날일 경우
+<div className="space-y-2">
+  <h4>공연 일정</h4>
+  {performance.schedule.map(date => (
+    <div key={date} className="flex items-center justify-between p-3 border rounded-lg">
+      <span>{date}</span>
+      <Button size="sm">예매</Button>
+    </div>
+  ))}
+</div>
+```
+
+## 애니메이션 개선
+
+### 탭 전환 애니메이션
+```tsx
+import { motion, AnimatePresence } from 'framer-motion';
+
+<AnimatePresence mode="wait">
+  <motion.div
+    key={activeTab}
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -10 }}
+    transition={{ duration: 0.2 }}
+  >
+    {/* Tab content */}
+  </motion.div>
+</AnimatePresence>
+```
+
+### 이미지 로드 애니메이션
+```tsx
+<motion.img
+  initial={{ opacity: 0, scale: 0.95 }}
+  animate={{ opacity: 1, scale: 1 }}
+  transition={{ duration: 0.3 }}
+  src={performance.image}
+/>
+```
+
+## 다크모드 지원 🌙
+
+```tsx
+// Dialog
+className="
+  bg-white dark:bg-gray-900
+  text-gray-900 dark:text-gray-100
+"
+
+// 지도 영역
+className="
+  bg-muted dark:bg-gray-800
+"
+
+// 보더
+className="
+  border-t dark:border-gray-700
+"
+```
+
+## 접근성 개선
+
+### ARIA 라벨
+```tsx
+<Dialog
+  aria-labelledby="performance-title"
+  aria-describedby="performance-description"
+>
+  <DialogTitle id="performance-title">
+    {performance.title}
+  </DialogTitle>
+  
+  <div id="performance-description">
+    {performance.description}
+  </div>
+</Dialog>
+```
+
+### 키보드 네비게이션
+```tsx
+// 탭 키보드 네비게이션
+<Tabs defaultValue="info" onValueChange={handleTabChange}>
+  <TabsList role="tablist">
+    <TabsTrigger 
+      value="info"
+      role="tab"
+      aria-selected={activeTab === 'info'}
+    >
+      공연정보
+    </TabsTrigger>
+  </TabsList>
+</Tabs>
+```
+
+## 반응형 개선
+
+### 모바일 최적화
+```tsx
+// 모바일에서 버튼 스택
+<div className="flex flex-col sm:flex-row gap-2">
+  <Button className="w-full sm:w-auto">예매하기</Button>
+  <Button className="w-full sm:w-auto">찜하기</Button>
+</div>
+
+// 모바일에서 탭 스크롤 가능
+<TabsList className="
+  w-full
+  overflow-x-auto
+  sm:overflow-x-visible
+">
+```

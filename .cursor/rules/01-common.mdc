@@ -1,0 +1,372 @@
+# MuseYou 프로젝트 공통 규칙
+
+## 1. 기본 조건
+- 명시된 파일 이외 수정 금지
+- 명시하지 않은 라이브러리 설치 금지
+- 독립적인 부품들의 조립 형태로 구현
+- shadcn/ui 컴포넌트 최대 활용
+
+## 2. 기술 스택
+
+| 항목 | 기술 | 버전 | 비고 |
+|---|---|---|---|
+| 프레임워크 | React + Vite | 18.x / 6.x | SPA 방식 |
+| 언어 | TypeScript | 5.x | Strict mode |
+| 라우팅 | React Router | 6.x | BrowserRouter |
+| 상태관리 | Zustand | 5.x | persist 미들웨어 |
+| 백엔드 | Supabase | 2.x | Auth + Database + Storage |
+| UI 컴포넌트 | shadcn/ui | latest | Radix UI 기반 |
+| 스타일링 | Tailwind CSS | 3.x | + CSS Variables |
+| 폼 관리 | React Hook Form | 7.x | + Zod 검증 |
+| 유효성 검사 | Zod | 3.x | Schema validation |
+| 아이콘 | Lucide React | latest | Tree-shakeable |
+| 애니메이션 | Framer Motion | 11.x | 선택적 사용 |
+| 패키지 매니저 | pnpm / npm | - | 프로젝트에 따라 |
+
+## 3. 네이밍 규칙
+
+### 파일명
+- **컴포넌트**: PascalCase (`PerformanceCard.tsx`)
+- **페이지 폴더**: kebab-case (`performance-detail/`)
+- **훅**: camelCase + use 접두사 (`usePerformance.ts`)
+- **유틸**: camelCase (`formatDate.ts`)
+- **타입**: PascalCase (`performance.types.ts`)
+- **스타일**: kebab-case (`styles.module.css`)
+
+### 변수/함수명
+```typescript
+// 변수: camelCase
+const performanceList = [];
+const isLoading = false;
+
+// 상수: UPPER_SNAKE_CASE
+const MAX_REVIEW_LENGTH = 500;
+const API_BASE_URL = 'https://...';
+
+// 함수: camelCase (동사로 시작)
+function fetchPerformances() {}
+function handleSubmit() {}
+
+// 타입/인터페이스: PascalCase
+interface Performance {}
+type PerformanceStatus = 'active' | 'ended';
+
+// 컴포넌트: PascalCase
+function PerformanceCard() {}
+```
+
+## 4. 폴더 구조
+
+```
+app/src/
+├── components/
+│   ├── auth/                    # 인증 관련
+│   │   ├── AuthDialog.tsx
+│   │   ├── hooks/
+│   │   └── prompts/             # ✅ 필수
+│   │
+│   ├── common/                  # 공통 컴포넌트
+│   │   ├── navigation/
+│   │   ├── seoul/               # 서울시 디자인 시스템
+│   │   └── figma/
+│   │
+│   ├── performances/            # 공연
+│   │   ├── PerformanceCard.tsx
+│   │   ├── PerformanceDetail.tsx
+│   │   ├── hooks/
+│   │   ├── prompts/
+│   │   └── styles.module.css
+│   │
+│   ├── matching/                # 매칭
+│   ├── muse-companions/         # 뮤즈 동반
+│   ├── boards/                  # 게시판
+│   └── ui/                      # shadcn/ui 컴포넌트
+│
+├── lib/
+│   ├── api/                     # API 클라이언트
+│   ├── supabase/                # Supabase 설정
+│   ├── utils/                   # 유틸리티 함수
+│   └── validations/             # Zod 스키마
+│
+├── store/                       # Zustand 스토어
+│   ├── useAuthStore.ts
+│   └── usePerformanceStore.ts
+│
+├── styles/
+│   ├── globals.css              # 글로벌 스타일
+│   └── design-tokens.css        # 디자인 토큰
+│
+└── types/                       # 공통 타입 정의
+    ├── performance.ts
+    ├── user.ts
+    └── common.ts
+```
+
+## 5. Import 순서
+
+```typescript
+// 1. React 및 프레임워크
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+
+// 2. 외부 라이브러리
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { motion } from 'framer-motion';
+
+// 3. 내부 모듈 (@/ 절대 경로)
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabase/config';
+
+// 4. 타입
+import type { Performance } from '@/types/performance';
+
+// 5. 스타일
+import styles from './styles.module.css';
+```
+
+## 6. 컴포넌트 작성 규칙
+
+### 기본 템플릿
+```tsx
+'use client'; // 클라이언트 컴포넌트인 경우만
+
+import React from 'react';
+import type { ComponentProps } from 'react';
+
+interface PerformanceCardProps {
+  performance: Performance;
+  onLike?: (id: string) => void;
+  className?: string;
+}
+
+export function PerformanceCard({
+  performance,
+  onLike,
+  className
+}: PerformanceCardProps) {
+  // 훅은 최상단
+  const [isLiked, setIsLiked] = React.useState(false);
+
+  // 이벤트 핸들러
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    onLike?.(performance.id);
+  };
+
+  // 렌더링
+  return (
+    <div className={className}>
+      {/* JSX */}
+    </div>
+  );
+}
+```
+
+### 필수 사항
+- [ ] TypeScript 타입 정의 (Props, State)
+- [ ] Props destructuring 사용
+- [ ] Optional props에 `?` 표시
+- [ ] className props 지원 (스타일 확장 가능)
+
+## 7. 스타일링 규칙
+
+### Tailwind CSS 우선
+```tsx
+// ✅ Good: Tailwind 활용
+<div className="flex items-center gap-4 p-4 rounded-lg bg-white shadow-md">
+
+// ✅ Good: 조건부 클래스
+<div className={cn(
+  "flex items-center gap-4",
+  isActive && "bg-primary text-white",
+  className
+)}>
+
+// ❌ Bad: 인라인 스타일 (특별한 이유 없이)
+<div style={{ display: 'flex', gap: '16px' }}>
+```
+
+### CSS Module은 복잡한 경우만
+```tsx
+// styles.module.css
+.card {
+  /* Tailwind로 표현 어려운 복잡한 스타일 */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  backdrop-filter: blur(10px);
+}
+
+// 컴포넌트
+<div className={cn("flex items-center", styles.card)}>
+```
+
+### 디자인 토큰 사용
+```tsx
+// ✅ Good: CSS 변수 사용
+<div className="bg-primary text-primary-foreground">
+
+// ❌ Bad: 하드코딩
+<div style={{ backgroundColor: '#6366f1', color: '#ffffff' }}>
+```
+
+## 8. 상태 관리 규칙
+
+### Zustand Store 구조
+```typescript
+// store/useAuthStore.ts
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      isAuthenticated: false,
+      
+      login: async (email, password) => {
+        // 로그인 로직
+        const { user } = await supabase.auth.signIn({ email, password });
+        set({ user, isAuthenticated: true });
+      },
+      
+      logout: () => {
+        supabase.auth.signOut();
+        set({ user: null, isAuthenticated: false });
+      },
+    }),
+    {
+      name: 'auth-storage', // localStorage key
+    }
+  )
+);
+```
+
+### 사용 예시
+```tsx
+function Header() {
+  const { user, isAuthenticated, logout } = useAuthStore();
+  
+  return (
+    <header>
+      {isAuthenticated ? (
+        <button onClick={logout}>로그아웃</button>
+      ) : (
+        <Link to="/login">로그인</Link>
+      )}
+    </header>
+  );
+}
+```
+
+## 9. 코드 품질
+
+### ESLint 규칙
+```json
+{
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "error",
+    "no-console": "warn",
+    "react-hooks/exhaustive-deps": "warn",
+    "no-duplicate-imports": "error",
+    "prefer-const": "error"
+  }
+}
+```
+
+### TypeScript 규칙
+- **any 사용 금지** - 정말 모르면 `unknown` 사용
+- **타입 단언 최소화** - `as` 대신 타입 가드 사용
+- **옵셔널 체이닝 활용** - `user?.name` 
+- **nullish coalescing** - `value ?? 'default'`
+
+## 10. 작업 전 체크리스트
+
+### 시작 전
+- [ ] 관련 prompts 파일 읽기
+- [ ] 비슷한 컴포넌트 있는지 확인
+- [ ] package.json 확인 (라이브러리)
+- [ ] 디자인/피그마 확인
+
+### 개발 중
+- [ ] 타입 먼저 정의
+- [ ] shadcn/ui 컴포넌트 재사용
+- [ ] console.log 디버깅 후 제거
+- [ ] any 타입 사용 안 함
+
+### 완료 후
+- [ ] ESLint 경고 해결
+- [ ] TypeScript 에러 해결
+- [ ] `npm run build` 성공 확인
+- [ ] Git 커밋 (컨벤션 준수)
+
+---
+
+## 11. MuseYou 특화 규칙
+
+### Supabase 사용
+```typescript
+// ✅ Good: 에러 처리 포함
+const { data, error } = await supabase
+  .from('performances')
+  .select('*')
+  .eq('status', 'active');
+
+if (error) {
+  console.error('Error fetching performances:', error);
+  return;
+}
+
+// ❌ Bad: 에러 무시
+const { data } = await supabase.from('performances').select('*');
+```
+
+### 인증 체크
+```tsx
+// ✅ Good: 인증이 필요한 페이지
+function MatchingPage() {
+  const { isAuthenticated } = useAuthStore();
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: '/matching' } });
+    }
+  }, [isAuthenticated, navigate]);
+
+  if (!isAuthenticated) return null;
+
+  return <div>매칭 페이지</div>;
+}
+```
+
+### 이미지 처리
+```tsx
+// Supabase Storage URL 처리
+const getImageUrl = (path: string) => {
+  if (!path) return '/placeholder.jpg';
+  
+  if (path.startsWith('http')) return path;
+  
+  return supabase.storage
+    .from('performances')
+    .getPublicUrl(path).data.publicUrl;
+};
+```
+
+---
+
+**최종 원칙:**
+
+> "오늘 작성한 코드를,
+> 6개월 후 내가 다시 봐도 이해할 수 있게"
+>
+> **타입 먼저, any는 절대 안 돼!**

@@ -1,0 +1,589 @@
+# Phase 2: UI 구현 단계
+
+와이어프레임을 바탕으로 실제 UI를 구현하는 단계입니다.
+
+---
+
+## 1. 컴포넌트 구조
+
+### 폴더 구조
+```
+components/
+├── ui/              # shadcn/ui 컴포넌트 (자동 생성)
+│   ├── button.tsx
+│   ├── card.tsx
+│   ├── dialog.tsx
+│   └── ...
+│
+├── common/          # 공통 재사용 컴포넌트
+│   ├── navigation/
+│   ├── Header.tsx
+│   ├── Footer.tsx
+│   └── MobileNav.tsx
+│
+├── performances/    # 도메인별 컴포넌트
+│   ├── PerformanceCard.tsx
+│   ├── PerformanceDetail.tsx
+│   ├── PerformanceList.tsx
+│   ├── hooks/
+│   ├── prompts/
+│   └── styles.module.css
+│
+└── layouts/         # 레이아웃 컴포넌트
+    ├── MainLayout.tsx
+    └── AuthLayout.tsx
+```
+
+### 규칙
+- 컴포넌트당 하나의 파일
+- 복잡한 경우 폴더로 그룹화
+- prompts/ 폴더 필수 (주요 기능)
+- TypeScript 타입 필수 정의
+
+---
+
+## 2. shadcn/ui 컴포넌트 활용
+
+### 설치 방법
+```bash
+# 개별 컴포넌트 설치
+npx shadcn@latest add button
+npx shadcn@latest add card
+npx shadcn@latest add dialog
+npx shadcn@latest add input
+npx shadcn@latest add form
+
+# 또는 한번에
+npx shadcn@latest add button card dialog input form select textarea
+```
+
+### 커스터마이징
+```tsx
+// components/ui/button.tsx (shadcn이 생성)
+import { cn } from "@/lib/utils";
+
+// ✅ variants 추가 가능
+const buttonVariants = cva(
+  "inline-flex items-center justify-center...",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        destructive: "bg-destructive text-destructive-foreground",
+        outline: "border border-input bg-background hover:bg-accent",
+        // ✅ 커스텀 variant 추가
+        gradient: "bg-gradient-to-r from-purple-500 to-pink-500 text-white",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+      },
+    },
+  }
+);
+```
+
+### 사용 예시
+```tsx
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+function PerformanceCard({ performance }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{performance.title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p>{performance.description}</p>
+        <Button variant="gradient" size="lg">
+          예매하기
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+---
+
+## 3. 스타일링 가이드
+
+### Tailwind CSS 활용
+
+#### 레이아웃
+```tsx
+<div className="flex flex-col gap-4">         {/* Flexbox 세로 */}
+<div className="grid grid-cols-3 gap-6">     {/* Grid 3열 */}
+<div className="container mx-auto px-4">     {/* 컨테이너 */}
+<div className="max-w-7xl mx-auto">          {/* 최대 너비 제한 */}
+```
+
+#### 간격
+```tsx
+<div className="p-4">    {/* padding 1rem */}
+<div className="m-8">    {/* margin 2rem */}
+<div className="mt-6">   {/* margin-top 1.5rem */}
+<div className="gap-4">  {/* gap 1rem (flex/grid) */}
+```
+
+#### 색상
+```tsx
+<div className="bg-primary text-primary-foreground">  {/* 테마 색상 */}
+<div className="bg-gray-100 text-gray-900">           {/* 회색 계열 */}
+<div className="bg-gradient-to-r from-purple-500 to-pink-500">  {/* 그라데이션 */}
+```
+
+#### 타이포그래피
+```tsx
+<h1 className="text-3xl font-bold">          {/* 제목 */}
+<p className="text-base text-gray-600">      {/* 본문 */}
+<span className="text-sm text-muted-foreground">  {/* 보조 텍스트 */}
+```
+
+#### 반응형
+```tsx
+<div className="
+  w-full              /* mobile: 100% */
+  md:w-1/2           /* tablet: 50% */
+  lg:w-1/3           /* desktop: 33.33% */
+">
+
+<div className="
+  text-2xl           /* mobile: 24px */
+  md:text-3xl        /* tablet: 30px */
+  lg:text-4xl        /* desktop: 36px */
+">
+```
+
+### cn() 유틸리티 활용
+```tsx
+import { cn } from "@/lib/utils";
+
+// 조건부 클래스
+<div className={cn(
+  "flex items-center gap-2",
+  isActive && "bg-primary text-white",
+  isDisabled && "opacity-50 cursor-not-allowed",
+  className  // 외부에서 전달받은 className
+)}>
+
+// variant에 따른 스타일
+const variants = {
+  primary: "bg-primary text-white",
+  secondary: "bg-secondary text-white",
+  outline: "border-2 border-primary text-primary"
+};
+
+<button className={cn("px-4 py-2 rounded", variants[variant])}>
+```
+
+### CSS Module (복잡한 경우만)
+```css
+/* styles.module.css */
+.performanceCard {
+  /* Tailwind로 표현 어려운 복잡한 스타일 */
+  background: linear-gradient(135deg, rgba(139,92,246,0.1) 0%, rgba(236,72,153,0.1) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(139,92,246,0.2);
+}
+
+.performanceCard::before {
+  content: '';
+  position: absolute;
+  /* 복잡한 pseudo-element */
+}
+```
+
+```tsx
+// 컴포넌트에서 사용
+import styles from './styles.module.css';
+
+<div className={cn("p-4 rounded-lg", styles.performanceCard)}>
+```
+
+---
+
+## 4. 구현 순서
+
+### 1단계: 레이아웃 컴포넌트
+```tsx
+// ✅ Header
+components/common/Header.tsx
+
+// ✅ Footer  
+components/common/Footer.tsx
+
+// ✅ MobileNav
+components/common/MobileNav.tsx
+
+// ✅ MainLayout
+components/layouts/MainLayout.tsx
+```
+
+### 2단계: 공통 UI 컴포넌트
+```tsx
+// shadcn/ui 설치
+npx shadcn@latest add button card dialog input form
+
+// 커스텀 공통 컴포넌트
+components/common/LoadingSpinner.tsx
+components/common/EmptyState.tsx
+components/common/ErrorMessage.tsx
+```
+
+### 3단계: 도메인별 컴포넌트 (우선순위 순)
+
+#### 공연 (Performances)
+```tsx
+components/performances/
+├── PerformanceCard.tsx      # 공연 카드
+├── PerformanceDetail.tsx    # 공연 상세
+├── PerformanceList.tsx      # 공연 목록
+├── PerformanceFilter.tsx    # 필터
+├── ReviewSection.tsx        # 리뷰 섹션
+└── prompts/
+    ├── 01-wireframe.md
+    ├── 02-ui.md
+    └── 03-func.md
+```
+
+#### 매칭 (Matching)
+```tsx
+components/matching/
+├── MatchingCard.tsx
+├── UserProfile.tsx
+├── DateProposal.tsx
+└── prompts/
+```
+
+#### 인증 (Auth)
+```tsx
+components/auth/
+├── AuthDialog.tsx
+├── LoginForm.tsx
+├── SignupForm.tsx
+└── prompts/
+```
+
+---
+
+## 5. 컴포넌트 작성 가이드
+
+### Props 타입 정의
+```tsx
+interface PerformanceCardProps {
+  performance: Performance;
+  onLike?: (id: string) => void;
+  onShare?: (id: string) => void;
+  variant?: 'default' | 'compact' | 'featured';
+  className?: string;
+}
+
+export function PerformanceCard({
+  performance,
+  onLike,
+  onShare,
+  variant = 'default',
+  className
+}: PerformanceCardProps) {
+  // ...
+}
+```
+
+### 상태 관리
+```tsx
+// 간단한 상태: useState
+const [isLiked, setIsLiked] = React.useState(false);
+
+// 복잡한 상태: useReducer
+const [state, dispatch] = React.useReducer(reducer, initialState);
+
+// 전역 상태: Zustand
+const { user } = useAuthStore();
+```
+
+### 이벤트 핸들러
+```tsx
+// 명확한 이름
+const handleLike = () => {
+  setIsLiked(!isLiked);
+  onLike?.(performance.id);
+};
+
+const handleShare = async () => {
+  try {
+    await navigator.share({ url: window.location.href });
+  } catch (error) {
+    console.error('Share failed:', error);
+  }
+};
+```
+
+### 조건부 렌더링
+```tsx
+// Early return
+if (isLoading) {
+  return <LoadingSpinner />;
+}
+
+if (error) {
+  return <ErrorMessage message={error.message} />;
+}
+
+if (!performance) {
+  return <EmptyState message="공연을 찾을 수 없습니다" />;
+}
+
+// 조건부 렌더링
+{isAuthenticated && (
+  <Button onClick={handleLike}>좋아요</Button>
+)}
+
+{performances.length > 0 ? (
+  <PerformanceList performances={performances} />
+) : (
+  <EmptyState message="공연이 없습니다" />
+)}
+```
+
+---
+
+## 6. 이미지 처리
+
+### Supabase Storage 이미지
+```tsx
+import { supabase } from '@/lib/supabase/config';
+
+// 이미지 URL 가져오기
+const getImageUrl = (path: string) => {
+  if (!path) return '/placeholder.jpg';
+  
+  if (path.startsWith('http')) {
+    return path;
+  }
+  
+  const { data } = supabase.storage
+    .from('performances')
+    .getPublicUrl(path);
+    
+  return data.publicUrl;
+};
+
+// 사용
+<img 
+  src={getImageUrl(performance.imageUrl)} 
+  alt={performance.title}
+  className="w-full h-48 object-cover rounded-lg"
+/>
+```
+
+### 이미지 최적화
+```tsx
+// lazy loading
+<img 
+  src={imageUrl} 
+  alt={title}
+  loading="lazy"
+  className="w-full h-48 object-cover"
+/>
+
+// placeholder 처리
+const [imgSrc, setImgSrc] = React.useState(imageUrl);
+
+<img 
+  src={imgSrc}
+  alt={title}
+  onError={() => setImgSrc('/placeholder.jpg')}
+  className="w-full h-48 object-cover"
+/>
+```
+
+---
+
+## 7. 애니메이션
+
+### Tailwind 트랜지션
+```tsx
+// 호버 효과
+<button className="
+  transition-colors duration-200
+  hover:bg-primary/90
+  active:scale-95
+">
+
+// 페이드 인/아웃
+<div className="
+  transition-opacity duration-300
+  opacity-0 hover:opacity-100
+">
+```
+
+### Framer Motion (복잡한 애니메이션)
+```tsx
+import { motion } from 'framer-motion';
+
+// 페이드 인
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5 }}
+>
+  <PerformanceCard {...props} />
+</motion.div>
+
+// 리스트 애니메이션
+<motion.div
+  initial="hidden"
+  animate="visible"
+  variants={{
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  }}
+>
+  {performances.map(perf => (
+    <motion.div
+      key={perf.id}
+      variants={{
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 }
+      }}
+    >
+      <PerformanceCard performance={perf} />
+    </motion.div>
+  ))}
+</motion.div>
+```
+
+---
+
+## 8. 접근성 (a11y)
+
+### 시맨틱 HTML
+```tsx
+// ✅ Good
+<nav>
+<main>
+<article>
+<button>
+
+// ❌ Bad
+<div onClick={...}>  // 클릭 가능한 경우 button 사용
+```
+
+### ARIA 속성
+```tsx
+// 버튼
+<button 
+  aria-label="공연 좋아요"
+  aria-pressed={isLiked}
+>
+  <Heart />
+</button>
+
+// 링크
+<a 
+  href={url}
+  aria-label={`${performance.title} 상세 보기`}
+>
+  자세히 보기
+</a>
+
+// 모달
+<Dialog aria-labelledby="dialog-title">
+  <DialogTitle id="dialog-title">로그인</DialogTitle>
+  ...
+</Dialog>
+```
+
+### 키보드 네비게이션
+```tsx
+// 탭 순서
+<button tabIndex={0}>주요 버튼</button>
+<button tabIndex={-1}>숨김 버튼</button>
+
+// 키보드 이벤트
+<div
+  role="button"
+  tabIndex={0}
+  onClick={handleClick}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      handleClick();
+    }
+  }}
+>
+```
+
+---
+
+## 9. 필수 체크리스트
+
+### 컴포넌트
+- [ ] TypeScript 타입 정의 완료
+- [ ] Props destructuring 사용
+- [ ] className props 지원 (확장 가능)
+- [ ] 로딩/에러 상태 처리
+
+### 디자인
+- [ ] Figma/디자인과 일치
+- [ ] 디자인 토큰 (CSS Variables) 사용
+- [ ] 반응형 디자인 적용
+- [ ] 다크모드 대응 (선택사항)
+
+### 스타일
+- [ ] Tailwind CSS 우선 사용
+- [ ] shadcn/ui 컴포넌트 활용
+- [ ] cn() 유틸리티 사용
+- [ ] 일관된 간격/색상 사용
+
+### 접근성
+- [ ] 시맨틱 HTML 사용
+- [ ] ARIA 라벨 적용
+- [ ] 키보드 네비게이션 지원
+- [ ] alt 텍스트 (이미지)
+
+---
+
+## 10. 완료 확인
+
+### 테스트
+```bash
+# 개발 서버 실행
+npm run dev
+
+# 체크 항목
+- [ ] 모든 페이지가 정상적으로 렌더링되는가?
+- [ ] 반응형이 잘 작동하는가? (모바일/태블릿/데스크톱)
+- [ ] 이미지가 깨지지 않는가?
+- [ ] 버튼/링크가 모두 작동하는가?
+- [ ] 로딩 상태가 표시되는가?
+```
+
+### 코드 품질
+```bash
+# ESLint 체크
+npm run lint
+
+# TypeScript 체크
+npx tsc --noEmit
+```
+
+---
+
+## 다음 단계
+
+→ **04-func.mdc** (기능 구현 단계)로 진행
+
+**진행 전 확인:**
+- [ ] UI가 디자인대로 구현되었는가?
+- [ ] 반응형이 잘 작동하는가?
+- [ ] shadcn/ui 컴포넌트를 잘 활용했는가?
+- [ ] 재사용 가능한 컴포넌트로 분리했는가?

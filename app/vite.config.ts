@@ -50,6 +50,10 @@
         '@radix-ui/react-accordion@1.2.3': '@radix-ui/react-accordion',
         '@jsr/supabase__supabase-js@2.49.8': '@jsr/supabase__supabase-js',
         '@': path.resolve(__dirname, './src'),
+        '@commons': path.resolve(__dirname, '../commons'),
+        '@components': path.resolve(__dirname, '../components'),
+        '@lib': path.resolve(__dirname, '../lib'),
+        '@assets': path.resolve(__dirname, '../assets'),
       },
     },
     build: {

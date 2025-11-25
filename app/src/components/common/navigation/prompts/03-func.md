@@ -429,3 +429,4 @@ describe('Navigation', () => {
 - [ ] 색상 대비 (WCAG AA)
 - [ ] 터치 타겟 크기 (최소 48x48px)
 
+

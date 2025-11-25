@@ -214,6 +214,9 @@ export const coupleSpotApi = {
   },
 };
 
+// Muse Companion APIs (alias for coupleSpotApi for backward compatibility)
+export const museCompanionApi = coupleSpotApi;
+
 // Seed data (for initial setup)
 export const seedData = async (data: {
   performances?: any[];

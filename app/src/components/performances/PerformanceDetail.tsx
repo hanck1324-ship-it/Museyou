@@ -6,6 +6,7 @@ import { MapPin, Calendar, Clock, Star, Navigation } from "lucide-react";
 import { Performance } from "./PerformanceCard";
 import { ImageWithFallback } from "../common/figma/ImageWithFallback";
 import { ReviewSection } from "./ReviewSection";
+import { PerformanceMap } from "./PerformanceMap";
 
 interface PerformanceDetailProps {
   performance: Performance | null;
@@ -95,15 +96,16 @@ export function PerformanceDetail({ performance, open, onOpenChange }: Performan
 
             <TabsContent value="location" className="space-y-3 sm:space-y-4 pt-4">
               <div className="space-y-3">
-                <div>
-                  <h4 className="mb-1 text-sm sm:text-base">공연장소</h4>
-                  <p className="text-xs sm:text-sm text-muted-foreground">{performance.venue}</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">서울시 {performance.district}</p>
-                </div>
-
-                <div className="bg-muted h-40 sm:h-48 rounded-lg flex items-center justify-center">
-                  <p className="text-xs sm:text-sm text-muted-foreground px-4 text-center">지도 영역 (Google Maps API 연동)</p>
-                </div>
+                {/* 카카오 맵 표시 */}
+                <PerformanceMap 
+                  venue={{
+                    name: performance.venue,
+                    address: `서울시 ${performance.district}`,
+                    // TODO: 실제 API에서 좌표 받아오기 (현재는 서울 시청 기본값)
+                    lat: 37.5665, 
+                    lng: 126.9780
+                  }}
+                />
 
                 <Button className="w-full text-sm" onClick={handleNavigate}>
                   <Navigation className="size-4 mr-2" />

@@ -1,0 +1,418 @@
+# Performance Card - 기능 명세
+
+## 현재 구현 상태 ✅
+
+### Props 인터페이스
+```typescript
+interface Performance {
+  id: string;
+  title: string;
+  category: string;
+  venue: string;
+  district: string;
+  date: string;
+  time: string;
+  price: string;
+  image: string;
+  rating: number;
+  reviewCount: number;
+  description: string;
+  organizer: string;
+}
+
+interface PerformanceCardProps {
+  performance: Performance;
+  onViewDetails: (performance: Performance) => void;
+  onDateProposal?: (performance: Performance) => void;
+}
+```
+
+## 주요 기능
+
+### 1. 공연 정보 표시 ✅
+- 제목, 카테고리, 장소, 날짜, 시간
+- 평점 및 리뷰 수
+- 가격 정보
+- 이미지 (fallback 포함)
+
+**구현 위치:** `PerformanceCard.tsx` 라인 30-91
+
+### 2. 이벤트 처리 ✅
+#### 상세정보 버튼
+```typescript
+onClick={() => onViewDetails(performance)}
+```
+- 상세 페이지 모달 열기
+- Performance 객체 전달
+
+#### 데이트 신청 버튼 (optional)
+```typescript
+onClick={() => onDateProposal(performance)}
+```
+- 매칭 신청 플로우 시작
+- onDateProposal prop이 있을 때만 표시
+
+### 3. 이미지 처리 ✅
+- `ImageWithFallback` 컴포넌트 사용
+- 로드 실패 시 fallback 이미지
+- Lazy loading 지원
+
+## 개선이 필요한 기능 🔧
+
+### 1. 좋아요 기능 ⭐
+**현재:** 미구현  
+**필요한 기능:**
+```typescript
+// 추가 Props
+interface PerformanceCardProps {
+  // ... 기존 props
+  isLiked?: boolean;
+  onToggleLike?: (performanceId: string) => void;
+}
+
+// 구현 예시
+const handleToggleLike = (e: React.MouseEvent) => {
+  e.stopPropagation(); // 카드 클릭 이벤트 방지
+  onToggleLike?.(performance.id);
+};
+```
+
+**Supabase 연동:**
+```typescript
+// commons/api/performances.ts
+export async function toggleLike(userId: string, performanceId: string) {
+  const { data, error } = await supabase
+    .from('likes')
+    .upsert({ user_id: userId, performance_id: performanceId });
+  
+  if (error) throw error;
+  return data;
+}
+```
+
+### 2. 장바구니 추가 🛒
+**현재:** 미구현  
+**필요한 기능:**
+```typescript
+interface PerformanceCardProps {
+  // ... 기존 props
+  onAddToCart?: (performance: Performance) => void;
+}
+
+// Zustand Store
+interface CartStore {
+  items: Performance[];
+  addItem: (item: Performance) => void;
+  removeItem: (id: string) => void;
+}
+```
+
+### 3. 공유 기능 📤
+**현재:** 미구현  
+**필요한 기능:**
+```typescript
+const handleShare = async () => {
+  if (navigator.share) {
+    await navigator.share({
+      title: performance.title,
+      text: performance.description,
+      url: window.location.href
+    });
+  } else {
+    // Fallback: 링크 복사
+    await navigator.clipboard.writeText(window.location.href);
+    toast.success('링크가 복사되었습니다');
+  }
+};
+```
+
+### 4. 실시간 평점 업데이트 📊
+**현재:** 정적 데이터  
+**개선:**
+```typescript
+// Supabase Realtime 구독
+useEffect(() => {
+  const channel = supabase
+    .channel('performance-ratings')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'reviews',
+        filter: `performance_id=eq.${performance.id}`
+      },
+      (payload) => {
+        // 평점 재계산
+        refetchRating();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [performance.id]);
+```
+
+### 5. 이미지 최적화 🖼️
+**현재:** 원본 이미지 로드  
+**개선:**
+```typescript
+// Supabase Storage 이미지 변환
+const getOptimizedImage = (url: string, size: 'small' | 'medium' | 'large') => {
+  const sizes = {
+    small: 'w=300&h=200',
+    medium: 'w=600&h=400',
+    large: 'w=1200&h=800'
+  };
+  
+  return `${url}?${sizes[size]}&format=webp`;
+};
+
+// 사용
+<img src={getOptimizedImage(performance.image, 'medium')} />
+```
+
+## 상태 관리
+
+### 현재 상태
+- 부모 컴포넌트에서 모든 상태 관리
+- Props drilling 발생 가능성
+
+### 개선 방안
+```typescript
+// hooks/usePerformanceCard.ts
+export function usePerformanceCard(performanceId: string) {
+  const [isLiked, setIsLiked] = useState(false);
+  const [inCart, setInCart] = useState(false);
+  
+  const toggleLike = async () => {
+    // Supabase 연동
+    const { error } = await supabase
+      .from('likes')
+      .upsert({ performance_id: performanceId });
+    
+    if (!error) setIsLiked(!isLiked);
+  };
+  
+  return {
+    isLiked,
+    inCart,
+    toggleLike,
+    addToCart,
+  };
+}
+```
+
+## 에러 처리
+
+### 현재
+- 기본 에러 처리 (ImageWithFallback)
+
+### 개선 필요
+```typescript
+// 에러 바운더리
+<ErrorBoundary fallback={<PerformanceCardError />}>
+  <PerformanceCard {...props} />
+</ErrorBoundary>
+
+// 네트워크 에러 처리
+try {
+  await toggleLike(performance.id);
+} catch (error) {
+  if (error.message.includes('network')) {
+    toast.error('네트워크 연결을 확인해주세요');
+  } else if (error.message.includes('auth')) {
+    toast.error('로그인이 필요합니다');
+    router.push('/login');
+  } else {
+    toast.error('오류가 발생했습니다');
+  }
+}
+```
+
+## 성능 최적화
+
+### 1. 메모이제이션
+```typescript
+export const PerformanceCard = React.memo(
+  PerformanceCardComponent,
+  (prevProps, nextProps) => {
+    return prevProps.performance.id === nextProps.performance.id &&
+           prevProps.isLiked === nextProps.isLiked;
+  }
+);
+```
+
+### 2. 이미지 Lazy Loading
+```typescript
+<img
+  src={performance.image}
+  loading="lazy"
+  decoding="async"
+/>
+```
+
+### 3. 가상화 (Virtual List)
+목록에 수백 개의 카드가 있을 때:
+```typescript
+import { useVirtualizer } from '@tanstack/react-virtual';
+
+// 부모 컴포넌트에서
+const virtualizer = useVirtualizer({
+  count: performances.length,
+  getScrollElement: () => parentRef.current,
+  estimateSize: () => 350, // 카드 높이
+});
+```
+
+## 테스트 케이스
+
+### Unit Tests
+```typescript
+describe('PerformanceCard', () => {
+  it('renders performance information correctly', () => {
+    render(<PerformanceCard performance={mockPerformance} />);
+    expect(screen.getByText(mockPerformance.title)).toBeInTheDocument();
+  });
+  
+  it('calls onViewDetails when button is clicked', () => {
+    const handleViewDetails = jest.fn();
+    render(
+      <PerformanceCard 
+        performance={mockPerformance} 
+        onViewDetails={handleViewDetails}
+      />
+    );
+    
+    fireEvent.click(screen.getByText('상세정보'));
+    expect(handleViewDetails).toHaveBeenCalledWith(mockPerformance);
+  });
+  
+  it('shows date proposal button when onDateProposal is provided', () => {
+    const handleDateProposal = jest.fn();
+    render(
+      <PerformanceCard 
+        performance={mockPerformance}
+        onViewDetails={jest.fn()}
+        onDateProposal={handleDateProposal}
+      />
+    );
+    
+    expect(screen.getByRole('button', { name: /heart/i })).toBeInTheDocument();
+  });
+});
+```
+
+## API 연동 계획
+
+### Supabase 테이블 구조
+```sql
+-- performances 테이블
+CREATE TABLE performances (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  category TEXT NOT NULL,
+  venue TEXT NOT NULL,
+  district TEXT NOT NULL,
+  date DATE NOT NULL,
+  time TEXT NOT NULL,
+  price TEXT,
+  image_url TEXT,
+  description TEXT,
+  organizer TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ratings 테이블 (평균 평점 계산용)
+CREATE TABLE reviews (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  performance_id UUID REFERENCES performances(id),
+  user_id UUID REFERENCES users(id),
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+  content TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- likes 테이블
+CREATE TABLE likes (
+  user_id UUID REFERENCES users(id),
+  performance_id UUID REFERENCES performances(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (user_id, performance_id)
+);
+```
+
+### API 함수
+```typescript
+// commons/api/performances.ts
+
+// 공연 목록 조회
+export async function fetchPerformances(filters?: PerformanceFilters) {
+  let query = supabase
+    .from('performances')
+    .select('*, reviews(rating)');
+  
+  if (filters?.category) {
+    query = query.eq('category', filters.category);
+  }
+  
+  if (filters?.district) {
+    query = query.eq('district', filters.district);
+  }
+  
+  const { data, error } = await query;
+  
+  if (error) throw error;
+  
+  // 평점 계산
+  return data.map(perf => ({
+    ...perf,
+    rating: calculateAvgRating(perf.reviews),
+    reviewCount: perf.reviews.length
+  }));
+}
+
+// 좋아요 토글
+export async function toggleLike(userId: string, performanceId: string) {
+  const { data: existing } = await supabase
+    .from('likes')
+    .select()
+    .eq('user_id', userId)
+    .eq('performance_id', performanceId)
+    .single();
+  
+  if (existing) {
+    // 이미 좋아요한 경우 삭제
+    return await supabase
+      .from('likes')
+      .delete()
+      .eq('user_id', userId)
+      .eq('performance_id', performanceId);
+  } else {
+    // 좋아요 추가
+    return await supabase
+      .from('likes')
+      .insert({ user_id: userId, performance_id: performanceId });
+  }
+}
+```
+
+## 다음 단계 로드맵
+
+### Phase 1 (1주)
+- [ ] 좋아요 기능 구현
+- [ ] API 연동 (Supabase)
+- [ ] 에러 처리 강화
+
+### Phase 2 (2주)
+- [ ] 장바구니 기능
+- [ ] 공유 기능
+- [ ] 성능 최적화 (메모이제이션)
+
+### Phase 3 (3주)
+- [ ] 실시간 평점 업데이트
+- [ ] 이미지 최적화
+- [ ] 테스트 코드 작성

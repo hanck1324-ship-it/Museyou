@@ -1,0 +1,275 @@
+# Performance Card - UI 디자인
+
+## 현재 구현 상태 ✅
+
+### 컴포넌트 경로
+`app/src/components/performances/PerformanceCard.tsx`
+
+### 사용 중인 UI 라이브러리
+- shadcn/ui Card 컴포넌트
+- shadcn/ui Badge 컴포넌트
+- shadcn/ui Button 컴포넌트
+- Lucide React 아이콘
+
+## 디자인 시스템
+
+### 색상 팔레트
+
+#### Primary (Emerald)
+```css
+--emerald-50: #f0fdf4
+--emerald-500: #10b981
+--emerald-600: #059669
+--emerald-700: #047857
+```
+
+#### Accent (Pink) - 하트 버튼
+```css
+--pink-50: #fdf2f8
+--pink-300: #f9a8d4
+--pink-400: #f472b6
+--pink-500: #ec4899
+```
+
+#### Neutral
+```css
+--white-90: rgba(255, 255, 255, 0.9)
+--black-60: rgba(0, 0, 0, 0.6)
+```
+
+### 타이포그래피
+
+#### 제목
+- 모바일: text-base (16px)
+- 데스크톱: text-lg (18px)
+- Weight: 600
+- Line height: 1.4
+
+#### 정보 텍스트
+- 모바일: text-xs (12px)
+- 데스크톱: text-sm (14px)
+- Color: text-muted-foreground
+- Hover: text-foreground
+
+#### 버튼 텍스트
+- 모바일: text-xs (12px)
+- 데스크톱: text-sm (14px)
+- Weight: 500
+
+### 간격
+
+#### 카드 패딩
+- 모바일: 12px (p-3)
+- 데스크톱: 24px (p-6)
+
+#### 내부 간격
+- 작은 간격: 6px (gap-1.5)
+- 중간 간격: 8px (gap-2)
+- 큰 간격: 16px (space-y-4)
+
+### 아이콘 크기
+- 모바일: 12-14px (size-3, size-3.5)
+- 데스크톱: 16px (size-4)
+- 색상: emerald-500 (포인트 색상)
+
+### 그림자
+- Default: shadow-md
+- Hover: shadow-2xl
+
+### 둥글기
+- 카드: rounded-lg
+- Badge: rounded-full (pill 형태)
+- Button: rounded-md
+
+## 현재 구현 스타일
+
+### Card Container
+```tsx
+className="
+  group 
+  overflow-hidden 
+  hover:shadow-2xl 
+  transition-all duration-300 
+  hover:-translate-y-1 
+  backdrop-blur-sm 
+  bg-white/90 
+  border-2 
+  hover:border-emerald-200
+"
+```
+
+### Image Container
+```tsx
+className="
+  relative h-40 sm:h-48 
+  overflow-hidden
+"
+```
+
+### Image
+```tsx
+className="
+  w-full h-full 
+  object-cover 
+  transition-transform duration-500 
+  group-hover:scale-110
+"
+```
+
+### Category Badge
+```tsx
+className="
+  absolute top-2 sm:top-3 right-2 sm:right-3 
+  text-xs sm:text-sm 
+  bg-white/95 backdrop-blur-sm 
+  text-black 
+  hover:bg-white 
+  shadow-lg border-0
+"
+```
+
+### Title
+```tsx
+className="
+  line-clamp-2 
+  text-base sm:text-lg 
+  group-hover:text-emerald-600 
+  transition-colors
+"
+```
+
+### Rating Display
+```tsx
+className="
+  flex items-center gap-1 shrink-0 
+  bg-yellow-50 
+  px-2 py-1 
+  rounded-full
+"
+```
+
+### Info Row
+```tsx
+className="
+  flex items-center gap-2 
+  text-xs sm:text-sm 
+  text-muted-foreground 
+  hover:text-foreground 
+  transition-colors
+"
+```
+
+### Primary Button
+```tsx
+className="
+  flex-1 
+  text-xs sm:text-sm 
+  h-8 sm:h-10 
+  bg-gradient-to-r from-emerald-500 to-emerald-600 
+  hover:from-emerald-600 hover:to-emerald-700 
+  shadow-md hover:shadow-lg 
+  transition-all
+"
+```
+
+### Heart Button
+```tsx
+variant="outline"
+size="icon"
+className="
+  border-2 border-pink-300 
+  hover:bg-gradient-to-r hover:from-pink-50 hover:to-rose-50 
+  size-8 sm:size-10 
+  hover:border-pink-400 
+  transition-all
+"
+```
+
+## 개선 제안 🎨
+
+### 1. 다크모드 지원
+```tsx
+// 다크모드 대응 클래스 추가
+className="
+  bg-white/90 dark:bg-gray-800/90
+  border-gray-200 dark:border-gray-700
+  text-gray-900 dark:text-gray-100
+"
+```
+
+### 2. 로딩 상태
+```tsx
+// Skeleton UI 추가
+{isLoading && <PerformanceCardSkeleton />}
+```
+
+### 3. 에러 상태
+```tsx
+// 이미지 로드 실패 시 폴백
+<ImageWithFallback 
+  fallback="/placeholder-performance.jpg"
+/>
+```
+
+### 4. 애니메이션 강화
+```tsx
+// Framer Motion 활용
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.3 }}
+>
+  <Card>...</Card>
+</motion.div>
+```
+
+### 5. 좋아요 상태 표시
+```tsx
+// 좋아요된 상태 시각적 피드백
+<Heart 
+  className={cn(
+    "size-4",
+    isLiked ? "fill-pink-500 text-pink-500" : "text-pink-500"
+  )}
+/>
+```
+
+## 브랜드 가이드
+
+### MuseYou 브랜드 컬러
+- Primary: Emerald (문화/자연/성장)
+- Accent: Pink (사랑/매칭/연결)
+- Background: White/90 (투명감/세련됨)
+
+### 디자인 철학
+- 깔끔하고 현대적
+- 부드러운 애니메이션
+- 명확한 계층 구조
+- 문화예술 느낌
+
+## 접근성 개선 사항
+
+### 현재
+- ✅ semantic HTML (Card 구조)
+- ✅ 아이콘 + 텍스트 조합
+- ⚠️ ARIA 라벨 미흡
+
+### 개선 필요
+```tsx
+<Card 
+  role="article" 
+  aria-label={`${performance.title} 공연 카드`}
+>
+  <Button
+    aria-label={`${performance.title} 상세정보 보기`}
+  >
+    상세정보
+  </Button>
+  
+  <Button
+    aria-label={`${performance.title} 데이트 신청하기`}
+  >
+    <Heart />
+  </Button>
+</Card>
+```
