@@ -214,6 +214,37 @@ export const coupleSpotApi = {
   },
 };
 
+// Artist Post APIs
+export const artistPostApi = {
+  async getAll() {
+    return await apiCall('/artist-posts');
+  },
+
+  async getById(id: string) {
+    return await apiCall(`/artist-posts/${id}`);
+  },
+
+  async create(postData: any) {
+    return await apiCall('/artist-posts', {
+      method: 'POST',
+      body: JSON.stringify(postData),
+    }, true);
+  },
+
+  async update(id: string, postData: any) {
+    return await apiCall(`/artist-posts/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(postData),
+    }, true);
+  },
+
+  async delete(id: string) {
+    return await apiCall(`/artist-posts/${id}`, {
+      method: 'DELETE',
+    }, true);
+  },
+};
+
 // Seed data (for initial setup)
 export const seedData = async (data: {
   performances?: any[];

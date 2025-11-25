@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "../ui/button";
-import { Textarea } from "../ui/textarea";
+import { Textarea } from "../ui/forms/textarea";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Star, ThumbsUp } from "lucide-react";
 import { Separator } from "../ui/separator";

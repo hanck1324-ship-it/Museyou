@@ -4,7 +4,7 @@ import { Button } from "../ui/buttons/button";
 import { MapPin, Heart, Star, Clock, Users, Calendar, Cloud } from "lucide-react";
 import { ImageWithFallback } from "../common/figma/ImageWithFallback";
 
-export interface CoupleSpot {
+export interface MuseCompanion {
   id: string;
   title: string;
   category: string;
@@ -17,7 +17,7 @@ export interface CoupleSpot {
   description: string;
   priceRange: string;
   tags: string[];
-  coupleDiscount?: string;
+  companionBenefit?: string;
   // Enhanced fields for detailed recommendations
   recommendedDate?: string;
   weather?: {
@@ -43,12 +43,12 @@ export interface CoupleSpot {
   }[];
 }
 
-interface CoupleSpotCardProps {
-  spot: CoupleSpot;
-  onViewDetails: (spot: CoupleSpot) => void;
+interface MuseCompanionCardProps {
+  spot: MuseCompanion;
+  onViewDetails: (spot: MuseCompanion) => void;
 }
 
-export function CoupleSpotCard({ spot, onViewDetails }: CoupleSpotCardProps) {
+export function MuseCompanionCard({ spot, onViewDetails }: MuseCompanionCardProps) {
   return (
     <Card className="group overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 backdrop-blur-sm bg-white/90 border-2 border-purple-200 hover:border-purple-300 relative animate-pulse-glow">
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-purple-500/5 to-pink-400/5 pointer-events-none" />
@@ -63,13 +63,13 @@ export function CoupleSpotCard({ spot, onViewDetails }: CoupleSpotCardProps) {
         <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex gap-2">
           <Badge className="bg-gradient-to-r from-emerald-500 via-purple-500 to-pink-400 text-white border-0 text-xs sm:text-sm shadow-lg backdrop-blur-sm animate-float">
             <Users className="size-3 mr-1" />
-            <span className="hidden sm:inline">문화공구</span>
-            <span className="sm:hidden">문화공구</span>
+            <span className="hidden sm:inline">Muse 동행자</span>
+            <span className="sm:hidden">Muse 동행자</span>
           </Badge>
         </div>
-        {spot.coupleDiscount && (
+        {spot.companionBenefit && (
           <Badge className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gradient-to-r from-red-500 to-rose-500 text-white border-0 text-xs sm:text-sm shadow-lg backdrop-blur-sm">
-            {spot.coupleDiscount}
+            {spot.companionBenefit}
           </Badge>
         )}
       </div>

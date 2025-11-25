@@ -11,8 +11,8 @@ import { PromotionCard, Promotion } from "./components/promotions/PromotionCard"
 import { MatchingCard, UserMatch } from "./components/matching/MatchingCard";
 import { UserProfile } from "./components/matching/UserProfile";
 import { DateProposal } from "./components/matching/DateProposal";
-import { CoupleSpotCard, CoupleSpot } from "./components/Muse_matching/MuseSpotCard";
-import { CoupleSpotDetail } from "./components/Muse_matching/MuseSpotDetail";
+import { MuseCompanionCard, MuseCompanion } from "./components/muse-companions/MuseCompanionCard";
+import { MuseCompanionDetail } from "./components/muse-companions/MuseCompanionDetail";
 import { AuthDialog } from "./components/auth/AuthDialog";
 import { HomePage } from "./components/home/HomePage";
 import { toast } from "sonner";
@@ -21,7 +21,7 @@ import {
   performanceApi,
   matchingApi,
   promotionApi,
-  coupleSpotApi,
+  museCompanionApi,
   seedData,
   getAccessToken,
 } from "./lib/api/api";
@@ -37,7 +37,7 @@ export default function App() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [proposalPerformance, setProposalPerformance] = useState<Performance | null>(null);
   const [proposalOpen, setProposalOpen] = useState(false);
-  const [selectedSpot, setSelectedSpot] = useState<CoupleSpot | null>(null);
+  const [selectedSpot, setSelectedSpot] = useState<MuseCompanion | null>(null);
   const [spotDetailOpen, setSpotDetailOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("all");
@@ -51,7 +51,7 @@ export default function App() {
   const [performances, setPerformances] = useState<Performance[]>([]);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [matches, setMatches] = useState<UserMatch[]>([]);
-  const [coupleSpots, setCoupleSpots] = useState<CoupleSpot[]>([]);
+  const [companionSpots, setCompanionSpots] = useState<MuseCompanion[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -196,10 +196,10 @@ export default function App() {
     },
   ];
 
-  const sampleCoupleSpots: CoupleSpot[] = [
+  const sampleCompanionSpots: MuseCompanion[] = [
     {
       id: "1",
-      title: "뮤지컬 '레미제라블' - 커플석 패키지",
+      title: "뮤지컬 '레미제라블' - Muse 동행자 패키지",
       category: "뮤지컬",
       location: "블루스퀘어",
       district: "용산구",
@@ -209,14 +209,14 @@ export default function App() {
       reviewCount: 234,
       description: "감동적인 스토리와 아름다운 음악으로 특별한 날을 더욱 특별하게 만들어줄 뮤지컬입니다. 단체관람객 할인 가능.",
       priceRange: "2인 150,000원~",
-      tags: ["기념일추천", "감동", "커플석", "선물포함"],
-      coupleDiscount: "커플 할인 20%",
+      tags: ["기념일추천", "감동", "동행석", "선물포함"],
+      companionBenefit: "동행자 할인 20%",
       recommendedDate: "2025.11.09 (토) 19:00",
       weather: { condition: "맑음", temperature: "16°C", icon: "☀️" },
       performanceAvailable: true,
       performanceInfo: "공연 시간: 2시간 30분 (인터미션 15분 포함)",
       nearbyAttractions: ["용산공원 (도보 10분)", "한강공원 이촌한강공원 (도보 15분)", "국립중앙박물관 (차량 5분)"],
-      specialFeatures: ["커플석 특별 할인", "공연 후 배우 사진 촬영 이벤트", "기념일 축하 메시지 서비스"],
+      specialFeatures: ["동행석 특별 할인", "공연 후 배우 사진 촬영 이벤트", "기념일 축하 메시지 서비스"],
       address: "서울특별시 용산구 이태원로 294",
       coordinates: { lat: 37.5326, lng: 126.9917 },
       nearbyRestaurants: [
@@ -243,7 +243,7 @@ export default function App() {
       performanceAvailable: false,
       performanceInfo: "정적인 전시 관람",
       nearbyAttractions: ["덕수궁 돌담길 (도보 5분)", "정동극장 (도보 7분)", "서울광장 (도보 10분)"],
-      specialFeatures: ["야간 특별 조명", "루프탑 뷰포인트", "커플 사진 촬영 서비스"],
+      specialFeatures: ["야간 특별 조명", "루프탑 뷰포인트", "동행 사진 촬영 서비스"],
       address: "서울특별시 중구 덕수궁길 61",
       coordinates: { lat: 37.5658, lng: 126.9750 },
       nearbyRestaurants: [
@@ -265,7 +265,7 @@ export default function App() {
       description: "노을이 지는 한강에서 즐기는 야외 클래식 공연. 돗자리를 깔고 와인과 함께 음악을 즐길 수 있습니다. 단체관람객 할인 가능.",
       priceRange: "무료 (idot자리 대여 5,000원)",
       tags: ["야외", "노을", "피크닉", "무료"],
-      coupleDiscount: "커플 돗자리 세트 10% 할인",
+      companionBenefit: "동행자 돗자리 세트 10% 할인",
       recommendedDate: "2025.11.08 (토) 17:30",
       weather: { condition: "맑음", temperature: "18°C", icon: "☀️" },
       performanceAvailable: true,
@@ -282,7 +282,7 @@ export default function App() {
     },
     {
       id: "4",
-      title: "남산 N서울타워 야경 데이트",
+      title: "남산 N서울타워 야경 동행",
       category: "야경명소",
       location: "N서울타워",
       district: "용산구",
@@ -293,13 +293,13 @@ export default function App() {
       description: "서울의 야경을 한눈에 볼 수 있는 최고의 전망대. 단체관람객 할인 가능.",
       priceRange: "2인 32,000원 (전망대)",
       tags: ["야경", "사진촬영", "기념일", "인생샷"],
-      coupleDiscount: "커플 패키지 15% 할인",
+      companionBenefit: "동행자 패키지 15% 할인",
       recommendedDate: "2025.11.06 (목) 18:30",
       weather: { condition: "맑음", temperature: "15°C", icon: "☀️" },
       performanceAvailable: false,
       performanceInfo: "전망대 관람",
       nearbyAttractions: ["남산 케이블카 (도보 5분)", "남산공원 산책로 (도보 3분)", "명동 거리 (도보 15분)"],
-      specialFeatures: ["360도 전망", "야경 사진 촬영", "커플 포토존", "사랑의 자물쇠"],
+      specialFeatures: ["360도 전망", "야경 사진 촬영", "동행 포토존", "사랑의 자물쇠"],
       address: "서울특별시 용산구 남산공원길 105",
       coordinates: { lat: 37.5512, lng: 126.9882 },
       nearbyRestaurants: [
@@ -441,10 +441,10 @@ export default function App() {
         setPromotions(promoData.promotions);
       }
 
-      // Load couple spots
-      const spotData = await coupleSpotApi.getAll();
+      // Load Muse companion spots
+      const spotData = await museCompanionApi.getAll();
       if (spotData.spots) {
-        setCoupleSpots(spotData.spots);
+        setCompanionSpots(spotData.spots);
       }
 
       // Load matches if logged in
@@ -462,7 +462,7 @@ export default function App() {
       // Fall back to sample data
       setPerformances(samplePerformances);
       setPromotions(samplePromotions);
-      setCoupleSpots(sampleCoupleSpots);
+      setCompanionSpots(sampleCompanionSpots);
       setMatches(sampleMatches);
     }
   };
@@ -474,13 +474,13 @@ export default function App() {
       const result = await seedData({
         performances: samplePerformances,
         promotions: samplePromotions,
-        coupleSpots: sampleCoupleSpots,
+        companionSpots: sampleCompanionSpots,
       });
 
       if (result.success) {
         setPerformances(samplePerformances);
         setPromotions(samplePromotions);
-        setCoupleSpots(sampleCoupleSpots);
+        setCompanionSpots(sampleCompanionSpots);
         setIsDataSeeded(true);
         toast.success('데이터가 로드되었습니다!');
       }
@@ -489,7 +489,7 @@ export default function App() {
       // Use sample data anyway
       setPerformances(samplePerformances);
       setPromotions(samplePromotions);
-      setCoupleSpots(sampleCoupleSpots);
+      setCompanionSpots(sampleCompanionSpots);
     }
   };
 
@@ -678,7 +678,7 @@ export default function App() {
     setProposalOpen(true);
   };
 
-  const handleViewSpotDetail = (spot: CoupleSpot) => {
+  const handleViewCompanionDetail = (spot: MuseCompanion) => {
     setSelectedSpot(spot);
     setSpotDetailOpen(true);
   };
@@ -797,11 +797,11 @@ export default function App() {
               <span className="text-xs sm:text-sm">뮤즈찾기</span>
             </TabsTrigger>
             <TabsTrigger 
-              value="couple" 
+              value="companions" 
               className="flex-col sm:flex-row gap-1 sm:gap-2 py-2 sm:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:via-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
             >
               <Users className="size-4" />
-              <span className="text-xs sm:text-sm">문화공구</span>
+              <span className="text-xs sm:text-sm">Muse 동행자 찾기</span>
             </TabsTrigger>
             <TabsTrigger 
               value="promotions" 
@@ -1017,23 +1017,23 @@ export default function App() {
             </div>
           </TabsContent>
 
-          {/* Couple Date Tab */}
-          <TabsContent value="couple" className="space-y-4">
+          {/* Muse Companion Tab */}
+          <TabsContent value="companions" className="space-y-4">
             <div className="backdrop-blur-sm bg-gradient-to-r from-emerald-50 via-purple-50 to-pink-50 border border-purple-100 rounded-xl p-4 lg:p-6 shadow-lg">
               <h2 className="text-transparent bg-gradient-to-r from-emerald-600 via-purple-600 to-pink-600 bg-clip-text mb-4">
-                문화공구
+                Muse 동행자 찾기
               </h2>
               <p className="text-muted-foreground text-sm">
-                함께 모여 문화예술을 즐기는 단체 관람 프로그램입니다. 단체 할인 혜택을 받을 수 있어요.
+                함께 문화예술을 즐길 동행자를 찾고, 특별한 혜택이 있는 프로그램을 확인해 보세요.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-              {coupleSpots.map((spot) => (
-                <CoupleSpotCard
+              {companionSpots.map((spot) => (
+                <MuseCompanionCard
                   key={spot.id}
                   spot={spot}
-                  onViewDetail={handleViewSpotDetail}
+                  onViewDetails={handleViewCompanionDetail}
                 />
               ))}
             </div>
@@ -1093,7 +1093,7 @@ export default function App() {
       )}
 
       {selectedSpot && (
-        <CoupleSpotDetail
+        <MuseCompanionDetail
           spot={selectedSpot}
           open={spotDetailOpen}
           onOpenChange={setSpotDetailOpen}

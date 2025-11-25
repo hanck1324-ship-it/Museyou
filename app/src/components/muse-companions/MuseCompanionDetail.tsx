@@ -3,16 +3,16 @@ import { Badge } from "../ui/data-display/badge";
 import { Button } from "../ui/buttons/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/navigation/tabs";
 import { MapPin, Heart, Star, Navigation, Users, Clock, Gift, Calendar, Cloud, Music, MapPinned, UtensilsCrossed, ExternalLink } from "lucide-react";
-import { CoupleSpot } from "./MuseSpotCard";
+import { MuseCompanion } from "./MuseCompanionCard";
 import { ImageWithFallback } from "../common/figma/ImageWithFallback";
 
-interface CoupleSpotDetailProps {
-  spot: CoupleSpot | null;
+interface MuseCompanionDetailProps {
+  spot: MuseCompanion | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function CoupleSpotDetail({ spot, open, onOpenChange }: CoupleSpotDetailProps) {
+export function MuseCompanionDetail({ spot, open, onOpenChange }: MuseCompanionDetailProps) {
   if (!spot) return null;
 
   const handleNavigate = () => {
@@ -41,7 +41,7 @@ export function CoupleSpotDetail({ spot, open, onOpenChange }: CoupleSpotDetailP
             <span>{spot.title}</span>
             <Badge className="bg-gradient-to-r from-emerald-500 via-purple-500 to-pink-400 text-white border-0">
               <Users className="size-3 mr-1" />
-              문화공구
+              Muse 동행자
             </Badge>
           </DialogTitle>
           <DialogDescription>
@@ -70,12 +70,12 @@ export function CoupleSpotDetail({ spot, open, onOpenChange }: CoupleSpotDetailP
             </div>
           </div>
 
-          {spot.coupleDiscount && (
+          {spot.companionBenefit && (
             <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-950/20 dark:to-pink-950/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
               <div className="flex items-center gap-2">
                 <Gift className="size-4 text-red-600" />
                 <p className="text-sm">
-                  <span className="font-medium text-red-600">단체 할인</span> {spot.coupleDiscount}
+                  <span className="font-medium text-red-600">동행자 혜택</span> {spot.companionBenefit}
                 </p>
               </div>
             </div>
@@ -84,7 +84,7 @@ export function CoupleSpotDetail({ spot, open, onOpenChange }: CoupleSpotDetailP
           <Tabs defaultValue="info" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="info">상세정보</TabsTrigger>
-              <TabsTrigger value="course">데이트 코스</TabsTrigger>
+              <TabsTrigger value="course">동행 코스</TabsTrigger>
               <TabsTrigger value="nearby">주변 맛집</TabsTrigger>
               <TabsTrigger value="tips">팁 & 후기</TabsTrigger>
             </TabsList>
@@ -206,7 +206,7 @@ export function CoupleSpotDetail({ spot, open, onOpenChange }: CoupleSpotDetailP
 
             <TabsContent value="course" className="space-y-4">
               <div className="space-y-3">
-                <h4>추천 데이트 코스</h4>
+                <h4>추천 동행 코스</h4>
                 
                 <div className="space-y-3">
                   <div className="bg-muted p-3 rounded-lg">
@@ -263,7 +263,7 @@ export function CoupleSpotDetail({ spot, open, onOpenChange }: CoupleSpotDetailP
 
                 <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 p-3 rounded-lg border border-purple-200 dark:border-purple-800">
                   <p className="text-xs text-muted-foreground">
-                    💡 주변에 산책하기 좋은 공원과 포토존이 많아 데이트 코스로 완벽해요!
+                    💡 주변에 산책하기 좋은 공원과 포토존이 많아 동행 코스로 완벽해요!
                   </p>
                 </div>
               </div>
@@ -353,7 +353,7 @@ export function CoupleSpotDetail({ spot, open, onOpenChange }: CoupleSpotDetailP
 
             <TabsContent value="tips" className="space-y-4">
               <div className="space-y-3">
-                <h4>데이트 팁</h4>
+                <h4>동행 팁</h4>
                 
                 <div className="space-y-2">
                   <div className="bg-muted p-3 rounded-lg">
@@ -382,7 +382,7 @@ export function CoupleSpotDetail({ spot, open, onOpenChange }: CoupleSpotDetailP
                   <h4 className="mb-2 text-sm">이용자들의 한줄평</h4>
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground italic">
-                      "분위기 정말 로맨틱해요! 기념일 데이트로 완벽했습니다 ❤️"
+                      "분위기 정말 로맨틱해요! 기념일 동행로 완벽했습니다 ❤️"
                     </p>
                     <p className="text-sm text-muted-foreground italic">
                       "조용하고 아늑해서 대화하기 좋았어요"
