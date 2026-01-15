@@ -391,9 +391,9 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50/50 via-purple-50/50 to-blue-50/50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-b border-gray-200/50 dark:border-gray-800/50 shadow-sm">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 border-b border-purple-100 dark:border-gray-700 shadow-lg">
         <div className="container mx-auto px-4 py-3 lg:py-4 space-y-3">
           <div className="flex items-center justify-between gap-4">
             {/* Logo */}
@@ -453,10 +453,10 @@ export default function App() {
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 dark:text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-purple-400 dark:text-purple-500" />
             <Input
               placeholder="공연, 전시, 장소 검색..."
-              className="pl-10 border-gray-200 dark:border-gray-700 focus:border-emerald-500 dark:focus:border-emerald-500 bg-white dark:bg-gray-800/50 backdrop-blur-sm transition-all shadow-sm"
+              className="pl-10 border-purple-200 dark:border-purple-800 focus:border-purple-400 dark:focus:border-purple-600 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm transition-all"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -467,27 +467,27 @@ export default function App() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-4 lg:py-6">
         <Tabs defaultValue="performances" className="space-y-4 lg:space-y-6">
-          <TabsList className="grid w-full grid-cols-3 h-auto bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 shadow-sm p-1.5 rounded-lg">
+          <TabsList className="grid w-full grid-cols-3 h-auto backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 border border-purple-100 dark:border-gray-700 shadow-md p-1">
             <TabsTrigger
               value="performances"
-              className="flex-col sm:flex-row gap-1 sm:gap-2 py-2.5 sm:py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all rounded-md"
+              className="flex-col sm:flex-row gap-1 sm:gap-2 py-2 sm:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
             >
               <Music className="size-4" />
-              <span className="text-xs sm:text-sm font-medium">공연·전시</span>
+              <span className="text-xs sm:text-sm">공연·전시</span>
             </TabsTrigger>
             <TabsTrigger
               value="matching"
-              className="flex-col sm:flex-row gap-1 sm:gap-2 py-2.5 sm:py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-md transition-all rounded-md"
+              className="flex-col sm:flex-row gap-1 sm:gap-2 py-2 sm:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
             >
               <Heart className="size-4" />
-              <span className="text-xs sm:text-sm font-medium">뮤즈찾기</span>
+              <span className="text-xs sm:text-sm">뮤즈찾기</span>
             </TabsTrigger>
             <TabsTrigger
               value="promotions"
-              className="flex-col sm:flex-row gap-1 sm:gap-2 py-2.5 sm:py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-md transition-all rounded-md"
+              className="flex-col sm:flex-row gap-1 sm:gap-2 py-2 sm:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
             >
               <Theater className="size-4" />
-              <span className="text-xs sm:text-sm font-medium">지자체 홍보</span>
+              <span className="text-xs sm:text-sm">지자체 홍보</span>
             </TabsTrigger>
           </TabsList>
 
@@ -677,11 +677,11 @@ export default function App() {
 
           {/* Matching Tab */}
           <TabsContent value="matching" className="space-y-4">
-            <div className="bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 rounded-xl p-5 lg:p-6 shadow-sm">
-              <h2 className="text-transparent bg-gradient-to-r from-pink-600 to-rose-600 dark:from-pink-400 dark:to-rose-400 bg-clip-text mb-3 text-xl font-bold">
+            <div className="backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 border border-pink-100 dark:border-pink-900/50 rounded-xl p-4 lg:p-6 shadow-lg">
+              <h2 className="text-transparent bg-gradient-to-r from-pink-600 to-rose-600 dark:from-pink-400 dark:to-rose-400 bg-clip-text mb-4">
                 당신의 뮤즈를 찾아보세요
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+              <p className="text-muted-foreground dark:text-gray-400 text-sm">
                 비슷한 관심사를 가진 사람들과 문화예술을 함께 즐기며, 영감을 주고받는 특별한 인연을 만나보세요.
               </p>
             </div>
