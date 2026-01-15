@@ -9,12 +9,12 @@ import { Switch } from "../ui/forms/switch";
 import { Badge } from "../ui/badge";
 import { LogIn, UserPlus, Palette } from "lucide-react";
 import { authApi } from "../../lib/api/api";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAuthSuccess: () => void;
+  onAuthSuccess: (user: any) => void;
 }
 
 export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProps) {
@@ -68,8 +68,10 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
 
     try {
       await authApi.login(loginEmail, loginPassword);
+      // Get user profile after login
+      const profileData = await authApi.getProfile();
       toast.success("로그인 성공!");
-      onAuthSuccess();
+      onAuthSuccess(profileData?.profile || { email: loginEmail });
       onOpenChange(false);
       
       // Reset form
@@ -191,7 +193,9 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
       
       // Auto login after signup
       await authApi.login(signupEmail, signupPassword);
-      onAuthSuccess();
+      // Get user profile after login
+      const profileData = await authApi.getProfile();
+      onAuthSuccess(profileData?.profile || { email: signupEmail, name: signupName });
       onOpenChange(false);
 
       // Reset form

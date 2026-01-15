@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Button } from "./components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./components/ui/sheet";
 import { Search, Music, Theater, Palette, Heart, LogIn, LogOut, UserCircle, SlidersHorizontal, X } from "lucide-react";
+import { ThemeToggle } from "./components/common/ThemeToggle";
 import { PerformanceCard, Performance } from "./components/performances/PerformanceCard";
 import { PerformanceDetail } from "./components/performances/PerformanceDetail";
 import { PromotionCard, Promotion } from "./components/promotions/PromotionCard";
@@ -14,6 +15,7 @@ import { UserProfile } from "./components/matching/UserProfile";
 import { AuthDialog } from "./components/auth/AuthDialog";
 import { HomePage } from "./components/home/HomePage";
 import { toast } from "sonner";
+import { handleError, ErrorType } from "./lib/utils/errorHandler";
 import {
   authApi,
   performanceApi,
@@ -47,6 +49,7 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [likedPerformances, setLikedPerformances] = useState<Set<string>>(new Set());
 
   const districts = ["all", "강남구", "강북구", "종로구", "중구", "용산구", "서초구", "마포구", "송파구", "성북구", "영등포구"];
   const categories = ["all", "클래식", "연극", "뮤지컬", "무용", "전통예술", "전시"];
@@ -79,14 +82,35 @@ export default function App() {
         setIsLoggedIn(true);
         const profileData = await authApi.getProfile();
         setCurrentUser(profileData.profile);
+        
+        // 좋아요한 공연 목록 로드
+        await loadLikedPerformances();
       }
 
       // Load data from backend
       await loadData();
     } catch (error) {
-      console.error('Error initializing app:', error);
+      handleError(error, {
+        showToast: true,
+        logError: true,
+        customMessage: '앱 초기화 중 오류가 발생했습니다.',
+      });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadLikedPerformances = async () => {
+    try {
+      const likesData = await performanceApi.getLikes();
+      if (likesData && likesData.likes) {
+        // performance_id 또는 performanceId 모두 지원
+        const likedIds = new Set(likesData.likes.map((like: any) => like.performance_id || like.performanceId));
+        setLikedPerformances(likedIds);
+      }
+    } catch (error) {
+      console.error('Error loading liked performances:', error);
+      // 에러가 발생해도 앱은 계속 동작하도록 함
     }
   };
 
@@ -112,8 +136,11 @@ export default function App() {
         }
       }
     } catch (error) {
-      console.error('Error loading data:', error);
-      toast.error('데이터를 불러오는 중 오류가 발생했습니다.');
+      handleError(error, {
+        showToast: true,
+        logError: true,
+        customMessage: '데이터를 불러오는 중 오류가 발생했습니다.',
+      });
     }
   };
 
@@ -130,20 +157,30 @@ export default function App() {
         setMatches(matchData.matches);
       }
     } catch (error) {
-      console.error('Error loading matches:', error);
+      handleError(error, {
+        showToast: false, // 조용히 처리 (로그인 성공 메시지가 이미 표시됨)
+        logError: true,
+      });
     }
+
+    // 좋아요한 공연 목록 로드
+    await loadLikedPerformances();
   };
 
   const handleLogout = async () => {
     try {
-      await authApi.signOut();
+      await authApi.logout();
       setIsLoggedIn(false);
       setCurrentUser(null);
       setMatches([]); // Clear matches data
+      setLikedPerformances(new Set()); // Clear liked performances
       toast.success('로그아웃되었습니다.');
     } catch (error) {
-      console.error('Logout error:', error);
-      toast.error('로그아웃 중 오류가 발생했습니다.');
+      handleError(error, {
+        showToast: true,
+        logError: true,
+        customMessage: '로그아웃 중 오류가 발생했습니다.',
+      });
     }
   };
 
@@ -269,7 +306,7 @@ export default function App() {
     }
 
     try {
-      const result = await matchingApi.like(userId);
+      const result = await matchingApi.sendLike(userId);
       if (result.success) {
         if (result.isMatch) {
           toast.success("🎉 매칭되었습니다! 메시지를 보낼 수 있어요.");
@@ -292,13 +329,54 @@ export default function App() {
     toast.info("메시지 기능은 곧 출시됩니다!");
   };
 
+  const handleToggleLike = async (performanceId: string) => {
+    if (!isLoggedIn) {
+      toast.error("로그인이 필요합니다.");
+      setAuthDialogOpen(true);
+      return;
+    }
+
+    try {
+      const result = await performanceApi.toggleLike(performanceId);
+      
+      // 좋아요 상태 업데이트
+      setLikedPerformances(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(performanceId)) {
+          newSet.delete(performanceId);
+          toast.success('좋아요를 취소했습니다.');
+        } else {
+          newSet.add(performanceId);
+          toast.success('좋아요를 추가했습니다! ❤️');
+        }
+        return newSet;
+      });
+    } catch (error: any) {
+      const errorInfo = handleError(error, {
+        showToast: false, // 직접 처리
+        logError: true,
+      });
+
+      // 인증 에러인 경우 로그인 다이얼로그 표시
+      if (errorInfo.type === 'AUTH' || errorInfo.type === ErrorType.AUTH) {
+        toast.error('로그인이 필요합니다.');
+        setAuthDialogOpen(true);
+      } else {
+        toast.error(errorInfo.userMessage);
+      }
+      
+      // 에러 발생 시 상태 롤백은 PerformanceCard에서 처리
+      throw error;
+    }
+  };
+
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="text-muted-foreground">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 dark:border-purple-400 mx-auto"></div>
+          <p className="text-muted-foreground dark:text-gray-400">로딩 중...</p>
         </div>
       </div>
     );
@@ -313,9 +391,9 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50/50 via-purple-50/50 to-blue-50/50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-purple-100 shadow-lg">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-b border-gray-200/50 dark:border-gray-800/50 shadow-sm">
         <div className="container mx-auto px-4 py-3 lg:py-4 space-y-3">
           <div className="flex items-center justify-between gap-4">
             {/* Logo */}
@@ -335,25 +413,26 @@ export default function App() {
 
             {/* Auth buttons */}
             <div className="flex items-center gap-2 shrink-0">
+              <ThemeToggle />
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => navigate("/boards")}
-                className="hidden sm:inline-flex border-purple-200 text-purple-600 hover:bg-purple-50"
+                className="hidden sm:inline-flex border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30"
               >
                 커뮤니티
               </Button>
               {isLoggedIn && currentUser ? (
                 <>
-                  <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-emerald-50 to-purple-50 border border-purple-100">
-                    <UserCircle className="size-4 text-purple-600" />
-                    <span className="text-sm">{currentUser.name}</span>
+                  <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-emerald-50 to-purple-50 dark:from-emerald-900/30 dark:to-purple-900/30 border border-purple-100 dark:border-purple-800">
+                    <UserCircle className="size-4 text-purple-600 dark:text-purple-400" />
+                    <span className="text-sm dark:text-gray-200">{currentUser.name}</span>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleLogout}
-                    className="border-purple-200 hover:bg-purple-50 transition-all"
+                    className="border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all"
                   >
                     <LogOut className="size-4 sm:mr-2" />
                     <span className="hidden sm:inline">로그아웃</span>
@@ -374,10 +453,10 @@ export default function App() {
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-purple-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 dark:text-gray-500" />
             <Input
               placeholder="공연, 전시, 장소 검색..."
-              className="pl-10 border-purple-200 focus:border-purple-400 bg-white/50 backdrop-blur-sm transition-all"
+              className="pl-10 border-gray-200 dark:border-gray-700 focus:border-emerald-500 dark:focus:border-emerald-500 bg-white dark:bg-gray-800/50 backdrop-blur-sm transition-all shadow-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -388,27 +467,27 @@ export default function App() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-4 lg:py-6">
         <Tabs defaultValue="performances" className="space-y-4 lg:space-y-6">
-          <TabsList className="grid w-full grid-cols-3 h-auto backdrop-blur-sm bg-white/60 border border-purple-100 shadow-md p-1">
+          <TabsList className="grid w-full grid-cols-3 h-auto bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 shadow-sm p-1.5 rounded-lg">
             <TabsTrigger
               value="performances"
-              className="flex-col sm:flex-row gap-1 sm:gap-2 py-2 sm:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
+              className="flex-col sm:flex-row gap-1 sm:gap-2 py-2.5 sm:py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all rounded-md"
             >
               <Music className="size-4" />
-              <span className="text-xs sm:text-sm">공연·전시</span>
+              <span className="text-xs sm:text-sm font-medium">공연·전시</span>
             </TabsTrigger>
             <TabsTrigger
               value="matching"
-              className="flex-col sm:flex-row gap-1 sm:gap-2 py-2 sm:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
+              className="flex-col sm:flex-row gap-1 sm:gap-2 py-2.5 sm:py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500 data-[state=active]:text-white data-[state=active]:shadow-md transition-all rounded-md"
             >
               <Heart className="size-4" />
-              <span className="text-xs sm:text-sm">뮤즈찾기</span>
+              <span className="text-xs sm:text-sm font-medium">뮤즈찾기</span>
             </TabsTrigger>
             <TabsTrigger
               value="promotions"
-              className="flex-col sm:flex-row gap-1 sm:gap-2 py-2 sm:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
+              className="flex-col sm:flex-row gap-1 sm:gap-2 py-2.5 sm:py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-md transition-all rounded-md"
             >
               <Theater className="size-4" />
-              <span className="text-xs sm:text-sm">지자체 홍보</span>
+              <span className="text-xs sm:text-sm font-medium">지자체 홍보</span>
             </TabsTrigger>
           </TabsList>
 
@@ -568,14 +647,17 @@ export default function App() {
                   key={performance.id}
                   performance={performance}
                   onViewDetails={handleViewDetails}
+                  isLiked={likedPerformances.has(performance.id)}
+                  onToggleLike={handleToggleLike}
+                  isLoggedIn={isLoggedIn}
                 />
               ))}
             </div>
 
             {filteredPerformances.length === 0 && (
               <div className="text-center py-12">
-                <Palette className="size-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">검색 결과가 없습니다.</p>
+                <Palette className="size-12 mx-auto text-muted-foreground dark:text-gray-500 mb-4" />
+                <p className="text-muted-foreground dark:text-gray-400">검색 결과가 없습니다.</p>
                 <Button 
                   variant="outline" 
                   className="mt-4"
@@ -595,11 +677,11 @@ export default function App() {
 
           {/* Matching Tab */}
           <TabsContent value="matching" className="space-y-4">
-            <div className="backdrop-blur-sm bg-white/60 border border-pink-100 rounded-xl p-4 lg:p-6 shadow-lg">
-              <h2 className="text-transparent bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text mb-4">
+            <div className="bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 rounded-xl p-5 lg:p-6 shadow-sm">
+              <h2 className="text-transparent bg-gradient-to-r from-pink-600 to-rose-600 dark:from-pink-400 dark:to-rose-400 bg-clip-text mb-3 text-xl font-bold">
                 당신의 뮤즈를 찾아보세요
               </h2>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
                 비슷한 관심사를 가진 사람들과 문화예술을 함께 즐기며, 영감을 주고받는 특별한 인연을 만나보세요.
               </p>
             </div>
@@ -618,11 +700,11 @@ export default function App() {
 
           {/* Promotions Tab */}
           <TabsContent value="promotions" className="space-y-4">
-            <div className="backdrop-blur-sm bg-white/60 border border-purple-100 rounded-xl p-4 lg:p-6 shadow-lg">
-              <h2 className="text-transparent bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text mb-4">
+            <div className="backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 border border-purple-100 dark:border-purple-900/50 rounded-xl p-4 lg:p-6 shadow-lg">
+              <h2 className="text-transparent bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400 bg-clip-text mb-4">
                 서울시 자치구별 문화예술 행사
               </h2>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground dark:text-gray-400 text-sm">
                 각 자치구에서 진행하는 무료 공연, 축제, 문화 프로그램을 확인하세요.
               </p>
             </div>

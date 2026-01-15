@@ -1,462 +1,155 @@
 # 🎭 MuseYou (뮤즈유)
 
-> 문화예술을 함께 즐기는 특별한 플랫폼
+> 문화예술을 함께 즐기고, 파트너를 찾고, 지자체 문화 프로그램을 한 곳에서 발견하는 플랫폼
 
-[![React](https://img.shields.io/badge/React-18.3-blue)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-6.3-646CFF)](https://vitejs.dev/)
-[![Supabase](https://img.shields.io/badge/Supabase-2.81-3ECF8E)](https://supabase.com/)
+[![React](https://img.shields.io/badge/React-18.3-blue)](https://react.dev/) [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue)](https://www.typescriptlang.org/) [![Vite](https://img.shields.io/badge/Vite-SWC-646CFF)](https://vitejs.dev/) [![Supabase](https://img.shields.io/badge/Supabase-DB%2FAuth-3ECF8E)](https://supabase.com/)
 
 ---
 
-## 📋 목차
+## 왜 만들었나요?
 
-- [프로젝트 소개](#-프로젝트-소개)
-- [주요 기능](#-주요-기능)
-- [기술 스택](#️-기술-스택)
-- [시작하기](#-시작하기)
-- [프로젝트 구조](#-프로젝트-구조)
-- [개발 가이드](#-개발-가이드)
-- [기여하기](#-기여하기)
-- [라이선스](#-라이선스)
+- 서울·수도권 문화예술 정보를 한눈에 모아 **검색·필터링·상세보기**까지 빠르게 경험하도록.
+- 공연을 함께 볼 **문화 동반자(Muse)**를 찾고, 상호작용(좋아요/매칭/메시지)을 지원하도록.
+- 자치구 문화 프로그램을 모아 **지역 커뮤니티 활성화**와 참여 장벽을 낮추도록.
+- 코드캠프 스타일의 **프롬프트 중심 개발 규칙**을 도입해, 누구나 30분 내 온보딩 가능한 프로젝트를 만들기 위해.
 
----
-
-## 🎯 프로젝트 소개
-
-**MuseYou**는 서울시 문화예술 공연 정보를 제공하고, 함께 관람할 파트너를 매칭하며, 
-단체 관람 프로그램(문화공구)을 제공하는 플랫폼입니다.
-
-### 비전
-문화예술인-지자체-관람객이 서로 상생하는 생태계를 만들어, 
-모두가 쉽게 문화예술을 즐길 수 있는 세상을 만듭니다.
-
-### 핵심 가치
-- 🤝 **연결**: 문화를 매개로 사람들을 연결합니다
-- 🎨 **접근성**: 누구나 쉽게 문화예술을 접할 수 있도록 합니다
-- 💡 **혁신**: 새로운 방식으로 문화를 즐기는 경험을 제공합니다
+현재 상태: 문서/프롬프트 시스템 100% 구축 ✅, 실제 기능 고도화(Phase 4) 대기 중 ⏳  
+참고: `IMPLEMENTATION_STATUS.md`, `MUSEYOU_UPGRADE_PLAN.md`
 
 ---
 
-## ✨ 주요 기능
+## 핵심 기능 한눈에 보기
 
-### 🎪 서울시 문화예술 공연
-- 클래식, 연극, 뮤지컬, 전시 등 다양한 공연 정보 제공
-- 실시간 공연 일정 및 예매 정보
-- 지역별, 카테고리별 필터링
-- 리뷰 및 평점 시스템
-
-### 💕 문화 파트너 매칭
-- 취향이 맞는 Muse(문화 동반자) 찾기
-- 프로필 기반 매칭 시스템
-- 안전한 채팅 및 만남 주선
-- 공연 후기 및 경험 공유
-
-### 👥 문화공구 (단체 관람)
-- 함께 모여 문화예술을 즐기는 프로그램
-- 단체 할인 혜택 제공
-- 지역 커뮤니티 활성화
-- 정기 모임 및 이벤트
-
-### 🏛️ 지자체 홍보
-- 서울시 자치구별 문화예술 행사 정보
-- 지역 문화 축제 및 이벤트
-- 지자체 문화 정책 소개
-
-### 📝 커뮤니티 게시판
-- 공연 후기 및 리뷰
-- 문화 정보 공유
-- Q&A 및 모임 공지
+- **공연/전시 탐색**: 카테고리·지역·가격·날짜 필터 + 검색, 카드형 리스트, 디테일 다이얼로그.
+- **좋아요 & 개인화**: 로그인 후 공연 좋아요 토글, 좋아요 목록 초기 로드.
+- **문화 파트너 매칭**: 매칭 카드, 프로필/메시지/좋아요 액션, 매칭 성공 토스트.
+- **단체 관람 공동구매**: 공연/전시별 최소 인원 모집 → 목표 인원 달성 시 할인 확정, 미달 시 환불 또는 대체 옵션 안내, 진행 상황·마감일까지 실시간 진행률 표시, 알림(푸시/이메일)로 상태 공유, **환불 규칙**: 지정된 기간까지는 일정 비율 환불, 마감 시점 이후에는 환불 불가 옵션 설정
+- **지자체 홍보**: 자치구별 문화 프로그램/프로모션 카드 노출.
+- **인증/세션**: Supabase Auth 연동, 로그인/회원가입 다이얼로그, 세션 기반 상태 복구.
+- **커뮤니티**: `/boards/*` 라우트로 게시판 페이지 진입 가능.
+- **에러·네트워크 안정성**: 전역 `ErrorBoundary` + 네트워크 모니터링(`setupNetworkMonitor`).
 
 ---
 
-## 🛠️ 기술 스택
+## 프롬프트 기반 개발 방식
 
-### Frontend
-| 항목 | 기술 | 버전 | 설명 |
-|------|------|------|------|
-| 프레임워크 | React + Vite | 18.3 / 6.3 | 빠른 개발 환경 |
-| 언어 | TypeScript | 5.0 | 타입 안전성 |
-| 라우팅 | React Router | 6.x | SPA 라우팅 |
-| 상태관리 | Zustand | 5.x | 경량 상태 관리 |
-| UI 컴포넌트 | shadcn/ui | latest | Radix UI 기반 |
-| 스타일링 | Tailwind CSS | 3.x | 유틸리티 우선 |
-| 폼 관리 | React Hook Form | 7.x | 성능 최적화된 폼 |
-| 검증 | Zod | 3.x | 스키마 기반 검증 |
-| 아이콘 | Lucide React | latest | Tree-shakeable |
-| 애니메이션 | Framer Motion | 11.x | 부드러운 애니메이션 |
+프롬프트로 설계·UI·기능을 미리 정의하고, 이를 기반으로 구현합니다.  
+문서 전체 목록: `PROMPTS_GUIDE.md`, `components/README.md`
 
-### Backend
-| 항목 | 기술 | 설명 |
-|------|------|------|
-| BaaS | Supabase | 인증, DB, Storage |
-| 서버 | Hono | 경량 웹 프레임워크 |
-| 인증 | Supabase Auth | 이메일/소셜 로그인 |
-| 데이터베이스 | PostgreSQL | Supabase DB |
-| 스토리지 | Supabase Storage | 이미지 업로드 |
+- `components/**/prompts/01.wireframe.txt` : 레이아웃/반응형/상태 정의
+- `components/**/prompts/02.ui.txt` : 색상·타이포·간격·다크모드 등 디자인 시스템
+- `components/**/prompts/03.func.txt` : Props, 상태, 이벤트, Supabase 연동, 테스트 계획
+- 공통 규칙: `.cursor/rules/*.mdc` (원칙, 공통, wireframe, ui, func, test, all-test)
 
-### DevOps
-| 항목 | 기술 | 설명 |
-|------|------|------|
-| 패키지 매니저 | pnpm | 빠른 설치 속도 |
-| 린터 | ESLint | 코드 품질 |
-| 포매터 | Prettier | 코드 스타일 |
-| Git | Conventional Commits | 커밋 규칙 |
+주요 Prompt 예시
+- 공연 카드: `components/performances/performance-card/prompts/` (좋아요·장바구니·공유·평점·최적화)
+- 공연 상세: `components/performances/performance-detail/prompts/` (지도, 갤러리, 예매, 추천)
+- 매칭 카드: `components/matching/matching-card/prompts/` (스와이프, 애니메이션, 프로필 모달)
+- 인증 다이얼로그: `components/auth/auth-dialog/prompts/` (소셜 로그인, 비밀번호 재설정, 이메일 인증)
+- 공통 네비게이션: `components/common/navigation/prompts/`
 
 ---
 
-## 🚀 시작하기
+## 기술 스택
 
-### 사전 요구사항
-- Node.js 18.0 이상
-- pnpm 8.0 이상
-- Git
+- **언어/도구**: React 18, TypeScript, Vite(SWC) + React Router
+- **UI**: shadcn/ui(Radix 기반), Tailwind CSS, lucide-react, embla-carousel
+- **상태/폼/검증**: Zustand, React Hook Form, Zod
+- **데이터**: Supabase (Auth/DB/Storage), Apollo Client(준비), GraphQL
+- **지도/차트/애니메이션**: react-kakao-maps-sdk, Recharts, Framer Motion(Motion)
+- **품질**: ESLint, TypeScript strict, Prettier, Conventional Commits, .cursor 규칙
 
-### 1. 저장소 클론
+---
+
+## 로컬 실행
+
+사전 요구사항: Node 18+, pnpm 8+
+
 ```bash
-git clone https://github.com/yourusername/museyou.git
-cd Museyou
-```
+# 1) 의존성 설치
+pnpm install
 
-### 2. 환경 변수 설정
-`.env` 파일 생성:
-```bash
-# Supabase
+# 2) 환경변수(.env) 예시
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-# (선택) 기타 API Keys
-```
-
-### 3. 의존성 설치
-```bash
-cd app
-pnpm install
-```
-
-### 4. 개발 서버 실행
-```bash
+# 3) 개발 서버 (Vite, 기본 3000 포트)
 pnpm dev
-```
 
-서버가 실행되면 http://localhost:3001 에서 확인할 수 있습니다.
-
-### 5. 빌드
-```bash
+# 4) 빌드 / 린트
 pnpm build
+pnpm lint
 ```
 
-빌드 결과물은 `app/build/` 폴더에 생성됩니다.
+참고: package 스크립트가 Next 용으로 남아있을 수 있습니다. 현재 코드는 Vite + React Router 구조이므로 실행은 `pnpm dev` 기준으로 안내합니다. (정리는 추후 스크립트 정합성 단계에서 수행)
 
 ---
 
-## 📁 프로젝트 구조
+## 프로젝트 구조 (요약)
 
 ```
 Museyou/
-├── .cursor/                      # AI 코딩 규칙
-│   └── rules/
-│       ├── 00-principle.mdc      # 개발 원칙
-│       ├── 01-common.mdc         # 공통 규칙
-│       ├── 02-wireframe.mdc      # 와이어프레임 단계
-│       ├── 03-ui.mdc            # UI 구현
-│       ├── 04-func.mdc          # 기능 구현
-│       ├── 05-test.mdc          # 테스트
-│       └── 06-all-test.mdc      # 전체 통합 테스트
+├── src/                      # 현재 작동 중인 React + Vite 소스
+│   ├── main.tsx / RootApp.tsx
+│   ├── App.tsx               # 홈/공연/매칭/프로모션 탭 UI
+│   ├── boards/               # 게시판 라우터 및 페이지
+│   ├── components/           # UI/도메인 컴포넌트
+│   ├── lib/                  # api, apollo, validations, utils
+│   ├── store/                # Zustand 스토어
+│   └── styles/               # 글로벌 스타일
 │
-├── commons/                      # 공통 유틸 (코드캠프 스타일)
-│   ├── api/                      # API 클라이언트
-│   ├── hooks/                    # 커스텀 훅
-│   ├── stores/                   # Zustand 스토어
-│   ├── types/                    # TypeScript 타입
-│   └── utils/                    # 유틸리티 함수
+├── components/               # 프롬프트 전용 설계 문서
+│   ├── performances/performance-card/prompts/
+│   ├── performances/performance-detail/prompts/
+│   ├── matching/matching-card/prompts/
+│   └── auth/auth-dialog/prompts/
 │
-├── components/                   # 컴포넌트
-│   ├── auth/                     # 인증
-│   │   ├── login/
-│   │   │   ├── index.tsx
-│   │   │   ├── hook.ts
-│   │   │   ├── queries.ts
-│   │   │   └── prompts/         # 설계 문서
-│   │   └── signup/
-│   │
-│   ├── performances/             # 공연
-│   │   ├── performance-detail/
-│   │   ├── performance-list/
-│   │   └── performance-card/
-│   │
-│   ├── matching/                 # 매칭
-│   ├── boards/                   # 게시판
-│   ├── common/                   # 공통 컴포넌트
-│   └── ui/                       # shadcn/ui
-│
-├── app/                          # 페이지
-│   ├── src/
-│   │   ├── components/           # 앱 컴포넌트
-│   │   ├── lib/                  # 라이브러리 설정
-│   │   └── styles/               # 글로벌 스타일
-│   ├── package.json
-│   └── vite.config.ts
-│
-├── docs/                         # 문서
-│   ├── DEVELOPMENT_WORKFLOW.md   # 개발 워크플로우
-│   └── CONTRIBUTING.md           # 기여 가이드
-│
-├── assets/                       # 정적 파일
-│   ├── icons/
-│   ├── images/
-│   └── fonts/
-│
-├── README.md                     # 이 파일
-├── STRUCTURE_MIGRATION_PLAN.md  # 구조 마이그레이션 계획
-├── setup-structure.sh            # 폴더 구조 설정 스크립트
-└── .gitmessage                   # Git 커밋 템플릿
+├── docs/                     # 워크플로우/개선 가이드
+├── .cursor/rules/            # AI 코딩 규칙 세트
+├── PROMPTS_GUIDE.md          # 프롬프트 사용법
+├── IMPLEMENTATION_STATUS.md  # 진행 현황(문서 100% / 구현 0% 진행 전)
+├── MUSEYOU_UPGRADE_PLAN.md   # 업그레이드 로드맵
+└── vite.config.ts / tsconfig.json / tailwind.config.ts
 ```
 
 ---
 
-## 📖 개발 가이드
+## 개발 워크플로우
 
-### 필독 문서
-
-#### 1. AI 코딩 규칙 (`.cursor/rules/`)
-개발 시 참고해야 할 단계별 가이드입니다.
-
-- **00-principle.mdc**: 개발 원칙 및 워크플로우
-- **01-common.mdc**: 프로젝트 공통 규칙
-- **02-wireframe.mdc**: 와이어프레임 단계 가이드
-- **03-ui.mdc**: UI 구현 가이드
-- **04-func.mdc**: 기능 구현 가이드
-- **05-test.mdc**: 테스트 가이드
-- **06-all-test.mdc**: 전체 통합 테스트 및 코드 품질 검증
-
-#### 2. 개발 워크플로우
-```
-Phase 1: 와이어프레임 (02-wireframe.mdc)
-   ↓
-Phase 2: UI 구현 (03-ui.mdc)
-   ↓
-Phase 3: 기능 구현 (04-func.mdc)
-   ↓
-Phase 4: 테스트 (05-test.mdc)
-   ↓
-Phase 5: 전체 통합 테스트 (06-all-test.mdc)
-   ↓
-✅ 배포 준비 완료
-```
-
-### 개발 명령어
-```bash
-# 개발 서버
-pnpm dev
-
-# 빌드
-pnpm build
-
-# 린트
-pnpm lint
-
-# 타입 체크
-npx tsc --noEmit
-```
-
-### Git 커밋 규칙
-```bash
-# 커밋 시 템플릿 자동 적용
-git commit
-
-# 커밋 메시지 형식
-<타입>: <제목> (50자 이내)
-
-[본문]
-
-[푸터]
-```
-
-**타입:**
-- `feat`: 새로운 기능
-- `fix`: 버그 수정
-- `docs`: 문서 수정
-- `style`: 코드 포맷팅
-- `refactor`: 리팩토링
-- `test`: 테스트 추가/수정
-- `chore`: 빌드, 설정 변경
-
-**예시:**
-```
-feat: 공연 검색 기능 추가
-
-- 키워드 기반 공연 검색 구현
-- 실시간 자동완성 기능
-- 검색 기록 localStorage 저장
-
-Closes #42
-```
-
-### 코드 품질 규칙
-
-#### 1. TypeScript any 금지
-```typescript
-// ❌ Bad
-const data: any = await fetchData();
-
-// ✅ Good
-interface Performance {
-  id: string;
-  title: string;
-  // ...
-}
-const data: Performance[] = await fetchData();
-```
-
-#### 2. DRY 원칙 (Don't Repeat Yourself)
-- 같은 코드를 3번 이상 복사하면 **즉시 공통화**
-- 재사용 가능한 로직은 `commons/utils/`로 분리
-- 재사용 가능한 컴포넌트는 `components/common/`으로 분리
-
-#### 3. 컴포넌트 설계
-- 파일 길이: 300줄 이하
-- 하나의 컴포넌트는 하나의 역할만
-- 복잡한 로직은 커스텀 훅으로 분리
+1. **프롬프트 읽기**: 대상 컴포넌트의 01/02/03 파일 확인 → 요구사항·디자인·기능 파악  
+2. **규칙 준수**: `.cursor/rules/` 단계별 가이드(wireframe → ui → func → test)  
+3. **구현**: wireframe → UI 스타일링 → 기능/연동 → 테스트  
+4. **검증**: ESLint, TS, (필요 시) Vitest/Playwright 준비  
+5. **커밋**: Conventional Commits + `.gitmessage` 템플릿  
+6. **PR**: 체크리스트 충족 후 제출
 
 ---
 
-## 🤝 기여하기
+## 우선순위 작업(Phase 1 추천)
 
-### 기여 절차
-
-1. **Fork & Clone**
-   ```bash
-   git clone https://github.com/yourusername/museyou.git
-   cd Museyou
-   ```
-
-2. **브랜치 생성**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-3. **개발**
-   - `.cursor/rules/` 가이드 참고
-   - 커밋 규칙 준수
-
-4. **테스트**
-   ```bash
-   pnpm lint
-   npx tsc --noEmit
-   pnpm build
-   ```
-
-5. **Pull Request**
-   - 명확한 제목과 설명 작성
-   - 관련 이슈 번호 연결
-
-### PR 체크리스트
-- [ ] ESLint 에러 0개
-- [ ] TypeScript 에러 0개
-- [ ] `any` 타입 사용 0건
-- [ ] 중복 코드 없음
-- [ ] 빌드 성공 (`pnpm build`)
-- [ ] 커밋 메시지 규칙 준수
+- 공연 카드: 좋아요 기능, 장바구니/공유, 이미지·성능 최적화  
+- 공연 상세: Kakao Map 통합, 갤러리, 예매/공유/추천  
+- 매칭 카드: 스와이프 인터랙션, 프로필 모달, 채팅 연동  
+- 인증: 소셜 로그인(카카오/구글), 비밀번호 재설정, 이메일 인증  
+자세한 요구사항은 각 `components/**/prompts`와 `docs/COMPONENT_IMPROVEMENT_GUIDE.md` 참고.
 
 ---
 
-## 🎓 학습 자료
+## 팀 내 약속
 
-### 프로젝트 문서
-- [폴더 구조 마이그레이션 계획](./STRUCTURE_MIGRATION_PLAN.md)
-- [개발 워크플로우](./docs/DEVELOPMENT_WORKFLOW.md)
-- [기여 가이드](./docs/CONTRIBUTING.md)
-
-### 외부 자료
-- [React 공식 문서](https://react.dev/)
-- [TypeScript 핸드북](https://www.typescriptlang.org/docs/)
-- [Supabase 문서](https://supabase.com/docs)
-- [shadcn/ui 문서](https://ui.shadcn.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
+- `any` 금지, 중복 로직 공통화, 컴포넌트 단일 책임
+- 파일 300줄 이하 권장, 복잡 로직은 커스텀 훅 분리
+- 에러는 `handleError` / `ErrorBoundary`로 수집·표시, 사용자 친화 메시지 사용
+- 네트워크 상태 감지(`setupNetworkMonitor`)로 오프라인 대비
 
 ---
 
-## 📊 성능 목표
+## 문의 / 링크
 
-| 항목 | 목표 | 현재 |
-|------|------|------|
-| First Contentful Paint | < 1.8s | - |
-| Largest Contentful Paint | < 2.5s | - |
-| Time to Interactive | < 3.8s | - |
-| Lighthouse Performance | > 90 | - |
-| Lighthouse Accessibility | > 90 | - |
-| 번들 크기 (gzipped) | < 500KB | - |
+- Issues: GitHub Issues 활용
+- 문서: `PROMPTS_GUIDE.md`, `docs/DEVELOPMENT_WORKFLOW.md`, `docs/COMPONENT_IMPROVEMENT_GUIDE.md`
 
 ---
 
-## 🔒 보안
-
-- Supabase Row Level Security (RLS) 적용
-- XSS 방어
-- CSRF 보호
-- 환경 변수로 민감 정보 관리
-- HTTPS 통신
-
----
-
-## 🗺️ 로드맵
-
-### Phase 1: MVP (현재)
-- [x] 기본 프로젝트 구조
-- [x] 인증 시스템
-- [x] 공연 목록/상세
-- [x] 기본 UI 컴포넌트
-
-### Phase 2: 핵심 기능
-- [ ] 매칭 시스템
-- [ ] 채팅 기능
-- [ ] 결제 시스템
-- [ ] 알림 시스템
-
-### Phase 3: 확장
-- [ ] 모바일 앱
-- [ ] 추천 알고리즘
-- [ ] 소셜 기능 강화
-- [ ] 지역 확대
-
----
-
-## 👥 팀
-
-- **개발자**: [이름]
-- **디자이너**: [이름]
-- **기획자**: [이름]
-
----
-
-## 📝 라이선스
-
-이 프로젝트는 MIT 라이선스를 따릅니다. 자세한 내용은 [LICENSE](./LICENSE) 파일을 참조하세요.
-
----
-
-## 📞 문의
-
-- **Email**: contact@museyou.com
-- **GitHub Issues**: [이슈 등록](https://github.com/yourusername/museyou/issues)
-- **Discord**: [커뮤니티 참여](https://discord.gg/museyou)
-
----
-
-## 🎉 감사의 말
-
-이 프로젝트는 다음을 사용하여 개발되었습니다:
-- [React](https://react.dev/)
-- [Vite](https://vitejs.dev/)
-- [Supabase](https://supabase.com/)
-- [shadcn/ui](https://ui.shadcn.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
-
-그리고 오픈소스 커뮤니티의 모든 기여자분들께 감사드립니다.
-
----
-
-**Made with ❤️ by MuseYou Team**
-
-**⭐ 이 프로젝트가 마음에 드신다면 Star를 눌러주세요!**
+**Made with ❤️ by MuseYou Team**  
+프로젝트가 도움이 되셨다면 ⭐️ 를 눌러주세요!

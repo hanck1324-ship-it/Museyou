@@ -5,7 +5,7 @@ import { Input } from "../../components/ui/forms/input";
 import { Textarea } from "../../components/ui/forms/textarea";
 import { Card, CardContent, CardHeader } from "../../components/ui/card";
 import { addBoardPost, BoardPost } from "../data";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 export default function BoardNewPage() {
   const navigate = useNavigate();
