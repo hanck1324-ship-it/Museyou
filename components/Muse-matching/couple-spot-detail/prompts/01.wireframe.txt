@@ -1,0 +1,87 @@
+# Couple Spot Detail - 와이어프레임
+
+## 컴포넌트 개요
+커플 데이트 장소의 상세 정보를 표시하는 Dialog 컴포넌트
+
+## 레이아웃 구조
+
+```
+CoupleSpotDetail (Dialog)
+├── Dialog Header
+│   ├── Title + Couple Badge
+│   └── Description (district · category · atmosphere)
+│
+└── Dialog Content
+    ├── Image Section (h-64)
+    ├── Badges & Rating
+    ├── Couple Discount Box (optional)
+    │
+    ├── Tabs
+    │   ├── TabsList (4개 탭)
+    │   │   ├── 상세정보
+    │   │   ├── 데이트 코스
+    │   │   ├── 주변 맛집
+    │   │   └── 팁 & 후기
+    │   │
+    │   ├── TabsContent (상세정보)
+    │   │   ├── 소개
+    │   │   ├── 추천 날짜/날씨 Box
+    │   │   ├── 분위기/가격대
+    │   │   ├── 공연 여부 (optional)
+    │   │   ├── 위치 정보
+    │   │   ├── 근처 명소 (optional)
+    │   │   ├── 특별한 혜택 (optional)
+    │   │   └── 태그
+    │   │
+    │   ├── TabsContent (데이트 코스)
+    │   │   └── 코스 아이템들 (1-3단계)
+    │   │
+    │   ├── TabsContent (주변 맛집)
+    │   │   ├── 헤더 (제목 + 더보기 버튼)
+    │   │   └── 맛집 리스트 (또는 Empty State)
+    │   │
+    │   └── TabsContent (팁 & 후기)
+    │       ├── 데이트 팁
+    │       └── 커플들의 한줄평
+    │
+    └── Action Buttons
+        ├── Map Buttons (카카오맵/네이버맵)
+        └── Bookmark Button
+```
+
+## 반응형 디자인
+
+### 모바일 (< 640px)
+- Dialog: `w-[95vw]` (뷰포트 너비의 95%)
+- 최대 높이: `max-h-[90vh]`
+- 패딩: 기본 패딩
+
+### 데스크톱 (≥ 640px)
+- Dialog: `max-w-2xl` (672px)
+- 최대 높이: `max-h-[90vh]`
+- 더 넓은 여백
+
+## 상태 정의
+
+### Dialog 상태
+- `open: boolean` - 다이얼로그 열림/닫힘
+- `spot: CoupleSpot | null` - 선택된 스팟
+
+### Tab 상태
+- `defaultValue: "info"` - 기본 탭
+- Tab 전환 시 해당 콘텐츠 표시
+
+## 인터랙션
+
+### Tab 전환
+- 탭 클릭 시 해당 콘텐츠 표시
+- 부드러운 전환 애니메이션
+
+### Map 버튼
+- 카카오맵: Kakao Map 링크 열기
+- 네이버맵: Naver Map 링크 열기
+- 새 창으로 열기 (`target="_blank"`)
+
+### Bookmark 버튼
+- 클릭 시 찜하기 토글
+- 로그인 필요 (추후 구현)

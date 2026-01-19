@@ -1,0 +1,261 @@
+# Performance Map - 기능 명세
+
+## Props 인터페이스
+
+```typescript
+interface Venue {
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+}
+
+interface PerformanceMapProps {
+  venue?: Venue | null;
+  className?: string;
+}
+```
+
+## 현재 구현 상태 ✅
+
+### 1. Kakao Map 통합
+- Kakao Map SDK 로드 확인
+- Map 생성 및 초기화
+- 마커 표시
+- 인포윈도우 표시
+
+### 2. 상태 관리
+- 로딩 상태: `isLoading`
+- 에러 상태: `error`
+- Map 인스턴스: `mapInstanceRef`
+
+### 3. Fallback 처리
+- Venue 없을 때: Fallback UI
+- SDK 로드 실패: 에러 메시지
+- Map 초기화 실패: 에러 처리
+
+## 개선이 필요한 기능 🔧
+
+### 1. 다크모드 지원 ⭐
+**현재:** 인포윈도우 스타일이 고정 (white 배경)  
+**필요한 기능:**
+```typescript
+useEffect(() => {
+  // 다크모드 감지
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  const isDarkMode = mediaQuery.matches;
+  
+  // 또는 next-themes 사용
+  const theme = document.documentElement.classList.contains('dark');
+  
+  const infowindowContent = `
+    <div style="
+      padding: 12px;
+      background: ${isDarkMode ? '#1f2937' : 'white'};
+      color: ${isDarkMode ? '#e5e7eb' : '#1f2937'};
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    ">
+      <h4 style="color: ${isDarkMode ? '#f3f4f6' : '#1f2937'};">
+        ${venue.name}
+      </h4>
+      <p style="color: ${isDarkMode ? '#9ca3af' : '#6b7280'};">
+        ${venue.address}
+      </p>
+    </div>
+  `;
+}, [venue, theme]);
+```
+
+### 2. 길찾기 버튼 ⭐
+**필요한 기능:**
+```typescript
+interface PerformanceMapProps {
+  venue?: Venue | null;
+  className?: string;
+  showNavigationButton?: boolean;  // 길찾기 버튼 표시 여부
+  onNavigate?: () => void;  // 길찾기 버튼 클릭 핸들러
+}
+
+// Map 하단에 길찾기 버튼 추가
+{showNavigationButton && (
+  <Button
+    className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10"
+    onClick={handleNavigate}
+  >
+    <Navigation className="size-4 mr-2" />
+    길찾기
+  </Button>
+)}
+```
+
+### 3. 커스텀 마커 이미지
+**필요한 기능:**
+```typescript
+interface PerformanceMapProps {
+  // ...
+  markerImage?: string;  // 커스텀 마커 이미지 URL
+  markerSize?: { width: number; height: number };
+}
+
+// 마커 생성 시
+const markerImage = new window.kakao.maps.MarkerImage(
+  markerImage || '/default-marker.png',
+  new window.kakao.maps.Size(markerSize?.width || 64, markerSize?.height || 64),
+  { offset: new window.kakao.maps.Point(32, 64) }
+);
+
+const marker = new window.kakao.maps.Marker({
+  position: markerPosition,
+  image: markerImage,
+});
+```
+
+### 4. 지도 레벨 조절
+**필요한 기능:**
+```typescript
+interface PerformanceMapProps {
+  // ...
+  zoomLevel?: number;  // 기본값: 3
+  showZoomControls?: boolean;  // 줌 컨트롤 표시 여부
+}
+
+const mapOption = {
+  center: new window.kakao.maps.LatLng(lat, lng),
+  level: zoomLevel || 3,
+  // 줌 컨트롤 추가
+  ...(showZoomControls && {
+    disableDoubleClickZoom: false,
+  }),
+};
+```
+
+### 5. 여러 마커 표시 (주변 장소)
+**필요한 기능:**
+```typescript
+interface PerformanceMapProps {
+  // ...
+  nearbyPlaces?: Array<{
+    name: string;
+    address: string;
+    lat: number;
+    lng: number;
+    type: 'restaurant' | 'parking' | 'subway';
+  }>;
+}
+
+// 주변 장소 마커 추가
+nearbyPlaces?.forEach(place => {
+  const placeMarker = new window.kakao.maps.Marker({
+    position: new window.kakao.maps.LatLng(place.lat, place.lng),
+    // 타입별 다른 마커 이미지 사용
+  });
+  placeMarker.setMap(map);
+});
+```
+
+### 6. 클러스터링 (많은 마커일 때)
+**필요한 기능:**
+- 주변 장소가 많을 때 클러스터링 적용
+- 카카오 맵 마커 클러스터링 라이브러리 사용
+
+## API 연동 계획
+
+### 주소 → 좌표 변환 (Geocoding)
+```typescript
+// 주소만 있고 좌표가 없을 때
+async function geocodeAddress(address: string) {
+  if (USE_MOCK_MODE) {
+    // Mock 좌표 반환
+    return { lat: 37.5665, lng: 126.9780 };
+  }
+  
+  // Kakao Geocoding API 사용
+  const response = await fetch(
+    `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(address)}`,
+    {
+      headers: {
+        Authorization: `KakaoAK ${KAKAO_API_KEY}`,
+      },
+    }
+  );
+  
+  const data = await response.json();
+  if (data.documents.length > 0) {
+    return {
+      lat: parseFloat(data.documents[0].y),
+      lng: parseFloat(data.documents[0].x),
+    };
+  }
+  
+  throw new Error('주소를 찾을 수 없습니다.');
+}
+```
+
+## 테스트 계획
+
+### 단위 테스트
+- Props 전달 테스트
+- Venue 없을 때 Fallback UI 테스트
+- 에러 상태 처리 테스트
+
+### 통합 테스트
+- Kakao Map SDK 로드 확인
+- Map 초기화 테스트
+- 마커 및 인포윈도우 표시 테스트
+
+### E2E 테스트
+- Map 로드 → 마커 표시 플로우
+- 길찾기 버튼 클릭 → 외부 앱/웹 열기
+
+## 성능 최적화
+
+### 메모이제이션
+```typescript
+export const PerformanceMap = React.memo(
+  PerformanceMapComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.venue?.lat === nextProps.venue?.lat &&
+      prevProps.venue?.lng === nextProps.venue?.lng
+    );
+  }
+);
+```
+
+### 지도 인스턴스 관리
+- 컴포넌트 언마운트 시 Map 인스턴스 정리
+- 중복 초기화 방지
+
+## 접근성 (a11y)
+
+### ARIA 레이블
+```tsx
+<div
+  ref={mapRef}
+  role="img"
+  aria-label={`${venue.name} 위치 지도`}
+  aria-describedby="map-description"
+/>
+<div id="map-description" className="sr-only">
+  {venue.name}은(는) {venue.address}에 위치합니다.
+</div>
+```
+
+## 환경 설정
+
+### Kakao Map SDK 로드
+- `index.html`에 스크립트 추가
+- 또는 동적 로드 (`useEffect` 내)
+
+```html
+<script
+  type="text/javascript"
+  src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_APP_KEY&autoload=false"
+></script>
+```
+
+### 환경 변수
+```env
+VITE_KAKAO_MAP_API_KEY=your_kakao_map_api_key
+```

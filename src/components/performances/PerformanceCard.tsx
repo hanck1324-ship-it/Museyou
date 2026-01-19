@@ -1,10 +1,11 @@
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { MapPin, Calendar, Star, Clock, Heart, Share2 } from "lucide-react";
+import { MapPin, Calendar, Star, Clock, Heart, Share2, ShoppingCart } from "lucide-react";
 import { ImageWithFallback } from "../common/figma/ImageWithFallback";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useCartStore } from "../../store/useCartStore";
 
 export interface Performance {
   id: string;
@@ -43,6 +44,7 @@ export function PerformanceCard({
 }: PerformanceCardProps) {
   const [localIsLiked, setLocalIsLiked] = useState(isLiked);
   const [isLiking, setIsLiking] = useState(false);
+  const { addItem, isInCart, setIsOpen } = useCartStore();
 
   // isLiked prop이 변경되면 로컬 상태 업데이트
   useEffect(() => {
@@ -111,6 +113,12 @@ export function PerformanceCard({
         }
       }
     }
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 방지
+    addItem(performance);
+    setIsOpen(true); // 장바구니 열기
   };
 
   return (
@@ -194,6 +202,19 @@ export function PerformanceCard({
         >
           상세정보
         </Button>
+        <Button
+          variant={isInCart(performance.id) ? "default" : "outline"}
+          size="icon"
+          className={`size-8 sm:size-10 transition-all ${
+            isInCart(performance.id)
+              ? 'bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-500'
+              : 'border-2 border-emerald-300 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 hover:border-emerald-400'
+          }`}
+          onClick={handleAddToCart}
+          title={isInCart(performance.id) ? '장바구니에 추가됨' : '장바구니에 추가'}
+        >
+          <ShoppingCart className={`size-3 sm:size-4 ${isInCart(performance.id) ? 'text-white' : 'text-emerald-500'}`} />
+        </Button>
         {onDateProposal && (
           <Button
             variant="outline"
@@ -207,4 +228,4 @@ export function PerformanceCard({
       </CardFooter>
     </Card>
   );
-}
+}  

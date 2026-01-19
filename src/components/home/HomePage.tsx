@@ -42,7 +42,7 @@ export function HomePage({ onStart }: HomePageProps) {
       title: "FUN",
       titleColor: "text-blue-600",
       description: "즐겁고 매력으로 가득 찬 매력 도시 서울",
-      detailDescription: "청년들의 데이트를 더욱 즐겁게 만들어드립니다",
+      detailDescription: "문화 공동구매로 더욱 즐겁게 만들어드립니다",
       emoji: "✨",
     },
   ];
@@ -57,13 +57,13 @@ export function HomePage({ onStart }: HomePageProps) {
     {
       icon: Users,
       title: "문화 파트너 매칭",
-      description: "공연을 함께 즐길 이상형을 찾고 특별한 데이트를 시작하세요",
+      description: "공연을 함께 즐길 파트너를 찾고 문화 공동구매에 참여하세요",
       gradient: "from-pink-500 to-rose-500",
     },
     {
       icon: Theater,
-      title: "커플 데이트 추천",
-      description: "로맨틱한 공연부터 야경 명소까지, 완벽한 데이트 코스 제안",
+      title: "문화 공동구매",
+      description: "공연 관람을 함께할 사람들과 함께하는 문화 공동구매",
       gradient: "from-purple-500 to-indigo-500",
     },
   ];
@@ -106,7 +106,7 @@ export function HomePage({ onStart }: HomePageProps) {
             <p className="text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto">
               당신의 뮤즈를 찾아, 문화예술과 함께하는
               <br />
-              특별한 데이트 플랫폼
+              문화 공동구매 플랫폼
             </p>
           </motion.div>
 
@@ -287,7 +287,7 @@ export function HomePage({ onStart }: HomePageProps) {
                 onClick={onStart}
                 className="bg-gradient-to-r from-emerald-500 via-purple-500 to-pink-500 hover:from-emerald-600 hover:via-purple-600 hover:to-pink-600 shadow-xl hover:shadow-2xl transition-all duration-300 px-10 py-6 group"
               >
-                문화예술 데이트 시작하기
+                문화 공동구매 시작하기
                 <ArrowRight className="ml-2 size-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>

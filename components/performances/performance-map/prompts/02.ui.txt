@@ -1,0 +1,107 @@
+# Performance Map - UI 디자인
+
+## 컨테이너 스타일
+
+### 기본 컨테이너
+- Position: `relative`
+- 높이: `h-40 sm:h-48` (160px / 192px)
+- 최소 높이: `min-height: 160px`
+- 둥글기: `rounded-lg`
+- Overflow: `overflow-hidden`
+
+### 다크모드
+- 배경: `dark:bg-gray-800`
+- 테두리: `dark:border-gray-700`
+
+## 로딩 오버레이
+
+### 스타일
+- Position: `absolute inset-0`
+- Z-index: `z-10`
+- 배경: `bg-muted`
+- 둥글기: `rounded-lg`
+- Flexbox: `flex items-center justify-center`
+
+### 로딩 아이콘
+- 아이콘: `Loader2` (lucide-react)
+- 크기: `size-6`
+- 색상: `text-muted-foreground`
+- 애니메이션: `animate-spin`
+
+### 로딩 텍스트
+- 크기: `text-xs sm:text-sm`
+- 색상: `text-muted-foreground`
+- 마진: `mb-2`
+
+## 에러 상태 UI
+
+### 컨테이너
+- 배경: `bg-muted`
+- 높이: `h-40 sm:h-48`
+- 둥글기: `rounded-lg`
+- Flexbox: `flex items-center justify-center`
+
+### 아이콘
+- 아이콘: `MapPin` (lucide-react)
+- 크기: `size-8`
+- 색상: `text-muted-foreground`
+- 마진: `mb-2 mx-auto`
+
+### 에러 메시지
+- 크기: `text-xs sm:text-sm`
+- 색상: `text-muted-foreground`
+- 정렬: `text-center`
+
+## Map 컨테이너
+
+### 기본 스타일
+- 높이: `h-40 sm:h-48`
+- 둥글기: `rounded-lg`
+- Overflow: `overflow-hidden`
+
+### Kakao Map 스타일
+- 너비: 100%
+- 높이: 100%
+- 둥글기: 부모 컨테이너와 동일
+
+## 인포윈도우 스타일 (카카오 맵 내부)
+
+### HTML 컨텐츠 스타일
+```css
+padding: 12px;
+min-width: 150px;
+background: white;
+border-radius: 8px;
+box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+```
+
+### 제목
+```css
+margin: 0 0 4px 0;
+font-weight: 600;
+font-size: 14px;
+color: #1f2937;
+```
+
+### 주소
+```css
+margin: 0;
+font-size: 12px;
+color: #6b7280;
+line-height: 1.4;
+```
+
+## 다크모드 대응
+
+### 인포윈도우 (다크모드)
+- 배경: `dark:bg-gray-800`
+- 텍스트: `dark:text-gray-200`
+
+**참고:** 카카오 맵 인포윈도우는 HTML 문자열로 생성되므로, 다크모드를 감지하여 동적으로 스타일 변경 필요
+
+```javascript
+const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const backgroundColor = isDarkMode ? '#1f2937' : 'white';
+const textColor = isDarkMode ? '#e5e7eb' : '#1f2937';
+```

@@ -1,0 +1,39 @@
+# Image With Fallback - UI 디자인
+
+## 색상 팔레트
+
+### Fallback Container
+- 배경: `bg-gray-100`
+- 다크모드: `dark:bg-gray-800`
+
+### Fallback Image
+- SVG base64 인코딩
+- Opacity: 0.3 (기본)
+- Stroke: #000 (검은색)
+
+## 타이포그래피
+
+### Fallback Container
+- 중앙 정렬: `text-center`
+- 수직 정렬: `align-middle`
+
+## 간격
+
+### Fallback Container
+- Flexbox: `flex items-center justify-center`
+- 전체 너비/높이: `w-full h-full`
+
+## 아이콘
+
+### Fallback SVG
+- 크기: 88x88px
+- Stroke: 검은색
+- Opacity: 0.3
+
+## 다크모드
+
+### 배경
+- Container: `dark:bg-gray-800`
+
+### SVG Stroke
+- 다크모드: `dark:stroke-gray-400`

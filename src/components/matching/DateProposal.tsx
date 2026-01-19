@@ -23,7 +23,7 @@ export function DateProposal({ performance, open, onOpenChange }: DateProposalPr
       alert("메시지를 입력해주세요!");
       return;
     }
-    alert("데이트 제안이 공유되었습니다! 관심있는 분들이 연락할 수 있습니다.");
+    alert("문화 공동구매 참여가 완료되었습니다! 관심있는 분들이 연락할 수 있습니다.");
     setMessage("");
     onOpenChange(false);
   };
@@ -32,9 +32,9 @@ export function DateProposal({ performance, open, onOpenChange }: DateProposalPr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>데이트 제안하기</DialogTitle>
+          <DialogTitle>문화 공동구매 참여하기</DialogTitle>
           <DialogDescription>
-            이 공연을 함께 볼 파트너를 찾아보세요
+            이 공연의 문화 공동구매에 참여해보세요
           </DialogDescription>
         </DialogHeader>
 
@@ -63,9 +63,9 @@ export function DateProposal({ performance, open, onOpenChange }: DateProposalPr
           </div>
 
           <div className="space-y-2">
-            <Label>제안 메시지</Label>
+            <Label>참여 메시지</Label>
             <Textarea
-              placeholder="예) 이 뮤지컬 오랫동안 보고 싶었어요! 함께 보실 분 찾습니다. 공연 전후로 식사도 함께 하면 좋겠어요 😊"
+              placeholder="예) 이 뮤지컬 오랫동안 보고 싶었어요! 문화 공동구매에 참여하고 싶습니다. 함께 관람하실 분들을 찾고 있어요 😊"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={4}
@@ -88,7 +88,7 @@ export function DateProposal({ performance, open, onOpenChange }: DateProposalPr
               취소
             </Button>
             <Button className="flex-1 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600" onClick={handleSubmit}>
-              제안 공유하기
+              공동구매 참여하기
             </Button>
           </div>
         </div>

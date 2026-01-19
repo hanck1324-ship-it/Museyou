@@ -1,0 +1,59 @@
+# Event Card - 와이어프레임
+
+## 컴포넌트 개요
+서울 문화예술 이벤트를 표시하는 카드 컴포넌트
+
+## 레이아웃 구조
+
+```
+EventCard
+├── Container (group, cursor-pointer)
+│   ├── Image Section (aspect-video)
+│   │   ├── Image (object-cover, hover:scale-105)
+│   │   └── Gradient Overlay (hover 시 표시)
+│   │
+│   └── Content Section (p-4, space-y-3)
+│       ├── Title (line-clamp-2, hover:text-[#FF4D73])
+│       ├── Date & Location (text-xs, flex-1)
+│       └── Traffic Info
+│           ├── Traffic Indicator (circle, color-coded)
+│           └── Traffic Label
+```
+
+## 반응형 디자인
+
+### 모바일/데스크톱
+- 이미지 비율: `aspect-video` (16:9)
+- 패딩: `p-4` (16px)
+
+## 상태 정의
+
+### 기본 상태
+- 카드: 정적 배치
+- 이미지: 기본 크기
+- 오버레이: opacity-0
+
+### Hover 상태
+- 카드: shadow 증가
+- 이미지: scale-105 (105% 확대)
+- 오버레이: opacity-100
+- 제목: 텍스트 색상 변경 (seoul-love)
+
+## 인터랙션
+
+### 카드 클릭
+- `onClick` 콜백 호출
+- 상세보기 또는 다른 액션
+
+### Hover
+- 카드 그림자 증가
+- 이미지 확대
+- 오버레이 표시
+- 제목 색상 변경
+
+## 교통 정보 표시
+
+### Traffic Levels
+- `high`: 빨간색 (#E74C3C) - "교통 혼잡"
+- `mid`: 노란색 (#F1C40F) - "교통 보통"
+- `low`: 초록색 (#2ECC71) - "교통 여유"

@@ -5,7 +5,7 @@ import { Input } from "./components/ui/forms/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/forms/select";
 import { Button } from "./components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./components/ui/sheet";
-import { Search, Music, Theater, Palette, Heart, LogIn, LogOut, UserCircle, SlidersHorizontal, X } from "lucide-react";
+import { Search, Music, Theater, Palette, Heart, LogIn, LogOut, UserCircle, SlidersHorizontal, X, Users } from "lucide-react";
 import { ThemeToggle } from "./components/common/ThemeToggle";
 import { PerformanceCard, Performance } from "./components/performances/PerformanceCard";
 import { PerformanceDetail } from "./components/performances/PerformanceDetail";
@@ -14,6 +14,9 @@ import { MatchingCard, UserMatch } from "./components/matching/MatchingCard";
 import { UserProfile } from "./components/matching/UserProfile";
 import { AuthDialog } from "./components/auth/AuthDialog";
 import { HomePage } from "./components/home/HomePage";
+import { CartButton } from "./components/common/CartButton";
+import { CartSheet } from "./components/common/CartSheet";
+import { GroupPurchaseList } from "./components/group-purchases/GroupPurchaseList";
 import { toast } from "sonner";
 import { handleError, ErrorType } from "./lib/utils/errorHandler";
 import {
@@ -51,7 +54,34 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [likedPerformances, setLikedPerformances] = useState<Set<string>>(new Set());
 
-  const districts = ["all", "강남구", "강북구", "종로구", "중구", "용산구", "서초구", "마포구", "송파구", "성북구", "영등포구"];
+  const districts = [
+    "all",
+    "강남구",
+    "강동구",
+    "강북구",
+    "강서구",
+    "관악구",
+    "광진구",
+    "구로구",
+    "금천구",
+    "노원구",
+    "도봉구",
+    "동대문구",
+    "동작구",
+    "마포구",
+    "서대문구",
+    "서초구",
+    "성동구",
+    "성북구",
+    "송파구",
+    "양천구",
+    "영등포구",
+    "용산구",
+    "은평구",
+    "종로구",
+    "중구",
+    "중랑구"
+  ];
   const categories = ["all", "클래식", "연극", "뮤지컬", "무용", "전통예술", "전시"];
   const priceRanges = [
     { value: "all", label: "전체 가격" },
@@ -414,6 +444,7 @@ export default function App() {
             {/* Auth buttons */}
             <div className="flex items-center gap-2 shrink-0">
               <ThemeToggle />
+              <CartButton />
               <Button
                 variant="outline"
                 size="sm"
@@ -467,13 +498,20 @@ export default function App() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-4 lg:py-6">
         <Tabs defaultValue="performances" className="space-y-4 lg:space-y-6">
-          <TabsList className="grid w-full grid-cols-3 h-auto backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 border border-purple-100 dark:border-gray-700 shadow-md p-1">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 border border-purple-100 dark:border-gray-700 shadow-md p-1">
             <TabsTrigger
               value="performances"
               className="flex-col sm:flex-row gap-1 sm:gap-2 py-2 sm:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
             >
               <Music className="size-4" />
               <span className="text-xs sm:text-sm">공연·전시</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="group-purchases"
+              className="flex-col sm:flex-row gap-1 sm:gap-2 py-2 sm:py-2.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
+            >
+              <Users className="size-4" />
+              <span className="text-xs sm:text-sm">공동구매</span>
             </TabsTrigger>
             <TabsTrigger
               value="matching"
@@ -698,6 +736,11 @@ export default function App() {
             </div>
           </TabsContent>
 
+          {/* Group Purchases Tab */}
+          <TabsContent value="group-purchases" className="space-y-4">
+            <GroupPurchaseList />
+          </TabsContent>
+
           {/* Promotions Tab */}
           <TabsContent value="promotions" className="space-y-4">
             <div className="backdrop-blur-sm bg-white/60 dark:bg-gray-800/60 border border-purple-100 dark:border-purple-900/50 rounded-xl p-4 lg:p-6 shadow-lg">
@@ -742,6 +785,9 @@ export default function App() {
           onMessage={handleMessage}
         />
       )}
+
+      {/* Cart Sheet */}
+      <CartSheet />
 
     </div>
   );

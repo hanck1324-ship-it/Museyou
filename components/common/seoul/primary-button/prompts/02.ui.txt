@@ -1,0 +1,72 @@
+# Primary Button (Seoul) - UI 디자인
+
+## 색상 팔레트
+
+### Seoul Vibes Colors
+```css
+--seoul-love: #FF4D73
+--seoul-inspire: #FFC83D
+```
+
+### Background Gradient
+- 기본: `from-[#FF4D73] to-[#FFC83D]`
+- Hover: `hover:from-[#FF3D63] hover:to-[#FFB82D]`
+
+### Shimmer Effect
+- 배경: `bg-gradient-to-r from-transparent via-white/20 to-transparent`
+
+## 타이포그래피
+
+### Button Text
+- 색상: `text-white`
+- Weight: 600 (font-semibold)
+- 크기: Size prop에 따라 동적
+
+### Size Classes
+- `sm`: `px-4 py-2 text-sm` (14px)
+- `md`: `px-6 py-3 text-base` (16px)
+- `lg`: `px-8 py-4 text-lg` (18px)
+
+## 간격
+
+### Padding
+- Small: `px-4 py-2` (16px 8px)
+- Medium: `px-6 py-3` (24px 12px)
+- Large: `px-8 py-4` (32px 16px)
+
+### Border Radius
+- `var(--radius-medium)` (12px)
+
+## 그림자
+
+### 기본
+- `shadow-[0_4px_12px_rgba(0,0,0,0.08)]`
+
+### Hover
+- `hover:shadow-[0_6px_20px_rgba(255,77,115,0.3)]`
+
+## 애니메이션
+
+### Transition
+- 기본: `transition-all duration-300`
+- Shimmer: `transition-transform duration-1000`
+
+### Transform
+- Shimmer 초기: `-translate-x-full` (왼쪽 밖)
+- Shimmer Hover: `translate-x-full` (오른쪽으로)
+- Active: `active:scale-95` (95% 축소)
+
+### Shimmer 애니메이션
+- 그라데이션: `bg-gradient-to-r from-transparent via-white/20 to-transparent`
+- Hover 시: 왼쪽에서 오른쪽으로 이동
+
+## 다크모드
+
+### 배경
+- Gradient 유지 (다크모드에서도 동일)
+
+### 텍스트
+- `text-white` 유지
+
+### 그림자
+- 다크모드: 그림자 약간 조정 가능

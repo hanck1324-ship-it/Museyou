@@ -1,0 +1,157 @@
+# Couple Spot Detail - UI 디자인
+
+## 색상 팔레트
+
+### Primary (Emerald/Purple/Pink)
+```css
+--emerald-500: #10b981
+--purple-500: #a855f7
+--purple-600: #9333ea
+--pink-400: #f472b6
+--pink-500: #ec4899
+```
+
+### Background
+- Discount Box: `bg-gradient-to-r from-red-50 to-pink-50`
+- Date/Weather Box: `bg-gradient-to-r from-purple-50 to-pink-50`
+- Tip Box: `bg-gradient-to-r from-yellow-50 to-orange-50`
+- Info Box: `bg-gradient-to-r from-purple-50 to-pink-50`
+
+### 다크모드
+- Discount Box: `dark:from-red-950/20 dark:to-pink-950/20`
+- Date/Weather Box: `dark:from-purple-950/20 dark:to-pink-950/20`
+- Tip Box: `dark:from-yellow-950/20 dark:to-orange-950/20`
+
+## 타이포그래피
+
+### Dialog Title
+- 크기: `text-base sm:text-lg lg:text-xl`
+- Weight: 600 (font-semibold)
+
+### Dialog Description
+- 크기: `text-sm`
+- Color: `text-muted-foreground`
+
+### 섹션 제목
+- 크기: `text-sm sm:text-base`
+- Weight: 600 (font-semibold)
+
+### 본문 텍스트
+- 크기: `text-xs sm:text-sm`
+- Color: `text-muted-foreground`
+
+## 간격
+
+### Dialog Content
+- 패딩: 기본 Dialog 패딩
+- 섹션 간격: `space-y-4`
+
+### Tabs
+- TabsList: `grid grid-cols-4`
+- TabsContent: `space-y-4 pt-4`
+
+### Info Section
+- 내부 간격: `space-y-3`
+
+### Course Items
+- 각 코스 아이템: `space-y-3`
+- 아이템 내부: `gap-3`
+
+## 아이콘
+
+### 크기
+- 일반 아이콘: `size-3 sm:size-4`
+- 버튼 아이콘: `size-4`
+
+### 색상
+- Heart: `fill-pink-400 text-pink-400`
+- MapPin: `text-purple-600`
+- Calendar, Cloud: `text-purple-600`
+- Clock: `text-muted-foreground`
+- Music: `text-muted-foreground`
+- UtensilsCrossed: 기본 색상
+
+## Badge 스타일
+
+### Couple Badge (Header)
+- 배경: `bg-gradient-to-r from-emerald-500 via-purple-500 to-pink-400`
+- 텍스트: `text-white`
+- Border: `border-0`
+
+### Category/Atmosphere Badge
+- Variant: `outline`, `secondary`
+
+## Box 스타일
+
+### Discount Box
+- 배경: `bg-gradient-to-r from-red-50 to-pink-50`
+- 다크모드: `dark:from-red-950/20 dark:to-pink-950/20`
+- 패딩: `p-3`
+- 둥글기: `rounded-lg`
+- 테두리: `border border-red-200 dark:border-red-800`
+
+### Date/Weather Box
+- 배경: `bg-gradient-to-r from-purple-50 to-pink-50`
+- 다크모드: `dark:from-purple-950/20 dark:to-pink-950/20`
+- 패딩: `p-3`
+- 둥글기: `rounded-lg`
+- 테두리: `border border-purple-200 dark:border-purple-800`
+
+### Course Item Box
+- 배경: `bg-muted`
+- 패딩: `p-3`
+- 둥글기: `rounded-lg`
+
+### Tip Box
+- 배경: `bg-muted`
+- 패딩: `p-3`
+- 둥글기: `rounded-lg`
+
+### Restaurant Item
+- 배경: `bg-muted`
+- 패딩: `p-3`
+- 둥글기: `rounded-lg`
+- Hover: `hover:bg-muted/80`
+- 커서: `cursor-pointer`
+
+## Button 스타일
+
+### Map Buttons
+- 카카오맵: `bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800 hover:bg-yellow-100`
+- 네이버맵: `bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800 hover:bg-green-100`
+- Variant: `outline`
+
+### Bookmark Button
+- 배경: `bg-gradient-to-r from-emerald-500 via-purple-500 to-pink-400`
+- Hover: `hover:opacity-90`
+- 텍스트: `text-white`
+- 전체 너비: `w-full`
+
+### 더보기 버튼 (맛집)
+- Variant: `outline`
+- Size: `sm`
+
+## Course Number Badge
+
+### 스타일
+- 배경: `bg-gradient-to-r from-emerald-500 to-green-400` (1단계)
+- 배경: `bg-gradient-to-r from-purple-500 to-purple-400` (2단계)
+- 배경: `bg-gradient-to-r from-pink-500 to-pink-400` (3단계)
+- 텍스트: `text-white`
+- 크기: `size-6`
+- 둥글기: `rounded-full`
+
+## 다크모드
+
+### 배경
+- Info Box: `dark:bg-gray-800`
+- Course/Tip Box: `dark:bg-gray-800`
+
+### 테두리
+- Discount Box: `dark:border-red-800`
+- Date/Weather Box: `dark:border-purple-800`
+- Tip Box: `dark:border-yellow-800`
+
+### 텍스트
+- 기본 텍스트: `dark:text-gray-200`
+- Muted 텍스트: `dark:text-gray-400`

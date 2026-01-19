@@ -1,0 +1,100 @@
+# Review Section - UI 디자인
+
+## 색상 팔레트
+
+### Rating Stars
+- 선택: `fill-yellow-400 text-yellow-400`
+- 미선택: `text-gray-300`
+
+### Improvement Box
+- 배경: `bg-muted`
+- 텍스트: 기본 텍스트 색상
+
+### Helpful Button
+- 기본: `text-muted-foreground`
+- Hover: `hover:text-foreground`
+
+## 타이포그래피
+
+### 섹션 제목
+- 크기: `text-base` (기본) 또는 `text-lg`
+- Weight: 600 (font-semibold)
+
+### 리뷰 작성 폼
+- Label: `text-sm`
+- Input/Textarea: `text-sm`
+
+### 리뷰 내용
+- 작성자: `text-sm`
+- 날짜: `text-xs text-muted-foreground`
+- 리뷰 텍스트: `text-sm`
+- 개선사항 라벨: `text-xs text-muted-foreground`
+- 개선사항 내용: `text-sm`
+
+## 간격
+
+### 섹션 간격
+- 리뷰 폼: `space-y-4`
+- 리뷰 목록: `space-y-4`
+
+### 내부 간격
+- Star Rating: `gap-1`
+- Form Fields: `space-y-2`
+- Review Items: `space-y-2 pb-4`
+
+## Avatar
+
+### 크기
+- `size-10` (40px)
+
+### Fallback
+- 작성자 이름 첫 글자
+
+## Separator
+
+- `Separator` 컴포넌트 사용
+- 섹션 구분
+
+## Button 스타일
+
+### Submit Button
+- 전체 너비: `w-full`
+- 기본 버튼 스타일
+
+### Star Button
+- 배경: transparent
+- Padding: 기본
+- 커서: pointer
+
+### Helpful Button
+- 텍스트 버튼 스타일
+- 아이콘 + 텍스트
+- 아이콘 크기: `size-3`
+
+## Improvement Box 스타일
+
+### 컨테이너
+- 배경: `bg-muted`
+- 패딩: `p-2`
+- 둥글기: `rounded`
+
+### 내용
+- 라벨: "💡 개선사항"
+- 텍스트: 기본 스타일
+
+## 다크모드
+
+### 배경
+- Improvement Box: `dark:bg-gray-800`
+
+### 텍스트
+- 기본 텍스트: `dark:text-gray-200`
+- Muted 텍스트: `dark:text-gray-400`
+
+## 애니메이션
+
+### Star Hover
+- `transition-colors`
+
+### Button Hover
+- `transition-colors`

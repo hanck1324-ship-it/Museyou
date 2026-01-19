@@ -1,0 +1,66 @@
+# Date Proposal - 와이어프레임
+
+## 컴포넌트 개요
+공연을 함께 볼 파트너를 찾기 위한 데이트 제안 다이얼로그
+
+## 레이아웃 구조
+
+```
+DateProposal (Dialog)
+├── Dialog Header
+│   ├── Title ("데이트 제안하기")
+│   └── Description ("이 공연을 함께 볼 파트너를 찾아보세요")
+│
+└── Dialog Content
+    ├── Performance Info Card
+    │   ├── Image (h-20 w-20)
+    │   └── Info Section
+    │       ├── Title (line-clamp-2)
+    │       └── Meta Info
+    │           ├── Date (Calendar icon)
+    │           └── Venue (MapPin icon)
+    │
+    ├── Message Form
+    │   ├── Label ("제안 메시지")
+    │   ├── Textarea (rows=4)
+    │   └── Helper Text
+    │
+    ├── Warning/Info Box
+    │   └── Safety Message
+    │
+    └── Action Buttons
+        ├── Cancel Button
+        └── Submit Button
+```
+
+## 반응형 디자인
+
+### 모바일 (< 640px)
+- Dialog: `w-[95vw]` (뷰포트 너비의 95%)
+- 최대 너비: `max-w-lg`
+- 패딩: 기본 패딩
+
+### 데스크톱 (≥ 640px)
+- Dialog: `max-w-lg` (512px)
+- 더 넓은 여백
+
+## 상태 정의
+
+### Form 상태
+- `message: string` - 작성 중인 제안 메시지
+- `isSubmitting: boolean` - 제출 중 상태
+
+### Dialog 상태
+- `open: boolean` - 다이얼로그 열림/닫힘
+- `performance: Performance | null` - 선택된 공연
+
+## 인터랙션
+
+### Form Submit
+- 메시지 필수 입력 검증
+- 제출 시 API 호출
+- 성공 시 다이얼로그 닫기
+
+### Cancel
+- 다이얼로그 닫기
+- 입력 내용 초기화 (선택사항)

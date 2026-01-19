@@ -1,0 +1,261 @@
+# Couple Spot Card - 기능 명세
+
+## Props 인터페이스
+
+```typescript
+export interface CoupleSpot {
+  id: string;
+  title: string;
+  category: string;
+  location: string;
+  district: string;
+  atmosphere: string;
+  image: string;
+  rating: number;
+  reviewCount: number;
+  description: string;
+  priceRange: string;
+  tags: string[];
+  coupleDiscount?: string;
+  recommendedDate?: string;
+  weather?: {
+    condition: string;
+    temperature: string;
+    icon: string;
+  };
+  performanceAvailable?: boolean;
+  performanceInfo?: string;
+  nearbyAttractions?: string[];
+  specialFeatures?: string[];
+  address?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  nearbyRestaurants?: {
+    name: string;
+    category: string;
+    distance: string;
+    rating: number;
+  }[];
+}
+
+interface CoupleSpotCardProps {
+  spot: CoupleSpot;
+  onViewDetails: (spot: CoupleSpot) => void;
+  onBookmark?: (spotId: string) => void;  // 추후 추가
+  isBookmarked?: boolean;  // 추후 추가
+}
+```
+
+## 현재 구현 상태 ✅
+
+### 1. 카드 표시
+- 커플 추천 장소 정보 표시
+- 이미지, 제목, 평점, 분위기 표시
+- 추천 날짜 및 날씨 정보 표시 (optional)
+- 위치, 카테고리, 가격대 표시
+- 태그 표시
+
+### 2. 애니메이션
+- Background gradient 펄스
+- Couple badge 플로팅
+- Heart icon 펄스
+- Hover 시 카드 상승 및 이미지 확대
+
+### 3. 상세보기 연동
+- "자세히 보기" 버튼 클릭 시 상세 다이얼로그 열기
+- `onViewDetails(spot)` 호출
+
+## 개선이 필요한 기능 🔧
+
+### 1. 찜하기/북마크 기능 ⭐
+**현재:** 미구현  
+**필요한 기능:**
+```typescript
+interface CoupleSpotCardProps {
+  // ...
+  isBookmarked?: boolean;
+  onBookmark?: (spotId: string) => void;
+  isLoggedIn?: boolean;
+}
+
+// 찜하기 버튼 추가 (이미지 위 우측 상단)
+<Button
+  variant="ghost"
+  size="icon"
+  className={`absolute top-2 right-2 size-8 rounded-full backdrop-blur-sm ${
+    isBookmarked
+      ? 'bg-red-500/90 hover:bg-red-600/90 text-white'
+      : 'bg-white/90 hover:bg-white text-gray-700 hover:text-red-500'
+  }`}
+  onClick={(e) => {
+    e.stopPropagation();
+    onBookmark?.(spot.id);
+  }}
+>
+  <Heart className={isBookmarked ? 'fill-current' : ''} />
+</Button>
+```
+
+### 2. 공유 기능 ⭐
+**필요한 기능:**
+```typescript
+const handleShare = async () => {
+  const shareData = {
+    title: spot.title,
+    text: `${spot.title} - 커플 추천 데이트 장소`,
+    url: `${window.location.origin}/couple-spot/${spot.id}`,
+  };
+
+  if (navigator.share && navigator.canShare(shareData)) {
+    await navigator.share(shareData);
+  } else {
+    await navigator.clipboard.writeText(shareData.url);
+    toast.success('링크가 복사되었습니다!');
+  }
+};
+```
+
+### 3. 이미지 갤러리
+**필요한 기능:**
+- 여러 이미지 지원
+- Carousel 형태로 이미지 슬라이더
+```typescript
+interface CoupleSpot {
+  // ...
+  images?: string[];  // 여러 이미지 지원
+  image: string;      // 대표 이미지
+}
+```
+
+### 4. 날씨 API 연동
+**필요한 기능:**
+- 추천 날짜의 실제 날씨 정보 표시
+- 날씨 API 연동 (OpenWeatherMap 등)
+```typescript
+async function getWeatherInfo(date: string, lat: number, lng: number) {
+  // 날씨 API 호출
+  const response = await fetch(
+    `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${WEATHER_API_KEY}&units=metric&lang=kr`
+  );
+  const data = await response.json();
+  return {
+    condition: data.weather[0].description,
+    temperature: `${Math.round(data.main.temp)}°C`,
+    icon: getWeatherIcon(data.weather[0].main),
+  };
+}
+```
+
+## API 연동 계획
+
+### Supabase 테이블 설계
+```sql
+CREATE TABLE couple_spots (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  category TEXT,
+  location TEXT NOT NULL,
+  district TEXT,
+  atmosphere TEXT,
+  image TEXT,
+  images TEXT[],  -- 여러 이미지 지원
+  rating NUMERIC(3, 2),
+  review_count INTEGER DEFAULT 0,
+  description TEXT,
+  price_range TEXT,
+  tags TEXT[],
+  couple_discount TEXT,
+  recommended_date DATE,
+  performance_available BOOLEAN DEFAULT false,
+  performance_info TEXT,
+  nearby_attractions TEXT[],
+  special_features TEXT[],
+  address TEXT,
+  lat NUMERIC(10, 8),
+  lng NUMERIC(11, 8),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE couple_spot_bookmarks (
+  user_id UUID REFERENCES users(id),
+  spot_id UUID REFERENCES couple_spots(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (user_id, spot_id)
+);
+
+CREATE TABLE couple_spot_nearby_restaurants (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  spot_id UUID REFERENCES couple_spots(id),
+  name TEXT NOT NULL,
+  category TEXT,
+  distance TEXT,
+  rating NUMERIC(3, 2),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### API 엔드포인트
+- `GET /couple-spots` - 커플 스팟 목록
+- `GET /couple-spots/:id` - 커플 스팟 상세
+- `POST /couple-spots/:id/bookmark` - 찜하기 토글
+- `GET /couple-spots/recommended` - 추천 커플 스팟
+- `GET /couple-spots/nearby` - 주변 커플 스팟
+
+## 테스트 계획
+
+### 단위 테스트
+- Props 전달 테스트
+- 조건부 렌더링 테스트 (discount, recommendedDate, weather)
+- 이미지 로드 실패 시 Fallback 테스트
+
+### 통합 테스트
+- 찜하기 기능 테스트
+- 공유 기능 테스트
+- 상세보기 연동 테스트
+
+### E2E 테스트
+- 카드 클릭 → 상세보기 플로우
+- 찜하기 버튼 클릭 → 북마크 추가 플로우
+
+## 접근성 (a11y)
+
+### ARIA 레이블
+```tsx
+<Card
+  role="article"
+  aria-label={`${spot.title} - 커플 추천 데이트 장소`}
+>
+  {/* ... */}
+</Card>
+
+<Button
+  aria-label={`${spot.title} 상세보기`}
+  onClick={() => onViewDetails(spot)}
+>
+  {/* ... */}
+</Button>
+```
+
+### 키보드 네비게이션
+- Tab 키로 버튼에 접근 가능
+- Enter/Space로 버튼 활성화
+
+## 성능 최적화
+
+### 이미지 최적화
+- WebP 포맷 지원
+- Lazy loading (Intersection Observer)
+- Responsive images (srcset)
+
+### 메모이제이션
+```typescript
+export const CoupleSpotCard = React.memo(
+  CoupleSpotCardComponent,
+  (prevProps, nextProps) => {
+    return prevProps.spot.id === nextProps.spot.id &&
+           prevProps.isBookmarked === nextProps.isBookmarked;
+  }
+);
+```

@@ -1,0 +1,166 @@
+# Auth Dialog - UI 디자인
+
+## 색상 팔레트
+
+### Primary (Emerald/Purple/Pink)
+```css
+--emerald-500: #10b981
+--purple-500: #a855f7
+--pink-500: #ec4899
+```
+
+### Dialog Background
+- Light: `bg-white`
+- Dark: `dark:bg-gray-900`
+
+### Border
+- Light: `border-gray-200`
+- Dark: `dark:border-gray-700`
+
+## 타이포그래피
+
+### Dialog Title
+- 크기: `text-lg` (기본) 또는 `text-xl`
+- Weight: 600 (font-semibold)
+
+### Dialog Description
+- 크기: `text-sm`
+- Color: `text-muted-foreground`
+
+### Form Label
+- 크기: `text-sm`
+- Weight: 500 (font-medium)
+
+### Input/Textarea
+- 크기: `text-sm`
+- Color: 기본 텍스트 색상
+
+### Helper Text
+- 크기: `text-xs`
+- Color: `text-muted-foreground`
+
+## 간격
+
+### Dialog Content
+- 최대 너비: `max-w-md` (448px)
+- 최대 높이: `max-h-[90vh]`
+- 패딩: 기본 Dialog 패딩
+- Overflow: `overflow-y-auto`
+
+### Tabs
+- TabsList: `grid grid-cols-2`
+- TabsContent: `space-y-4`
+
+### Form Section
+- 내부 간격: `space-y-4`
+- 필드 간격: `space-y-2`
+
+## Tabs 스타일
+
+### TabsList
+- Grid: `grid-cols-2` (2열 균등)
+- 아이콘 + 텍스트: `flex items-center`
+- 아이콘 크기: `size-4`
+- 아이콘 마진: `mr-2`
+
+## Input 스타일
+
+### 기본 Input
+- 너비: 전체 너비
+- 높이: 기본 Input 높이
+- Border: 기본 Input border
+- Placeholder: `text-muted-foreground`
+
+### Disabled Input
+- 배경: `bg-muted`
+- 커서: `cursor-not-allowed`
+
+## Button 스타일
+
+### Submit Button
+- 전체 너비: `w-full`
+- 기본 버튼 스타일
+- 로딩 상태: 텍스트 변경
+
+## Badge 스타일 (관심 장르)
+
+### 기본 Badge
+- Variant: `secondary` 또는 `outline`
+- 클릭 가능: `cursor-pointer`
+- Transition: `transition-colors`
+
+### 선택된 Badge
+- 배경: Primary 색상 (purple/pink)
+- 텍스트: `text-white`
+
+## Select 스타일
+
+### 기본 Select
+- 너비: 전체 너비 또는 지정 너비
+- Border: 기본 Select border
+
+## Switch 스타일
+
+### 기본 Switch
+- 기본 Switch 컴포넌트 스타일
+
+## Signup Type 선택
+
+### Grid
+- `grid grid-cols-2 gap-3`
+
+### Button 스타일
+- 선택됨: Primary 배경
+- 미선택: Outline 스타일
+- Transition: `transition-all`
+
+## 반응형 디자인
+
+### 모바일 (< 640px)
+- Dialog: `w-[95vw]` (뷰포트 너비의 95%)
+- 패딩: 기본 패딩
+
+### 데스크톱 (≥ 640px)
+- Dialog: `max-w-md` (448px)
+- 더 넓은 여백
+
+## 다크모드
+
+### 배경
+- Dialog: `dark:bg-gray-900`
+- Input: `dark:bg-gray-800`
+- Muted 배경: `dark:bg-gray-800`
+
+### 테두리
+- Dialog: `dark:border-gray-700`
+- Input: `dark:border-gray-700`
+
+### 텍스트
+- 기본 텍스트: `dark:text-gray-200`
+- Muted 텍스트: `dark:text-gray-400`
+- Label: `dark:text-gray-300`
+
+## 애니메이션
+
+### Dialog
+- 기본 Dialog 애니메이션 사용 (fade + scale)
+
+### Tab 전환
+- 부드러운 fade 전환
+
+### Button 클릭
+- Ripple effect (shadcn/ui 기본)
+
+### Badge 선택
+- `transition-colors`
+- 선택 시 배경색 변경
+
+## 에러 상태
+
+### Error Message
+- Toast로 표시
+- Color: `text-red-500` 또는 `text-destructive`
+
+### Input Error
+- Border: `border-red-500` 또는 `border-destructive`
+- Focus: `ring-red-500` 또는 `ring-destructive`

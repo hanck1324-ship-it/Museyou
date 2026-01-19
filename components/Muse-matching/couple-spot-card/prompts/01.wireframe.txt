@@ -1,0 +1,82 @@
+# Couple Spot Card - 와이어프레임
+
+## 컴포넌트 개요
+커플을 위한 문화예술 데이트 장소를 표시하는 카드 컴포넌트
+
+## 레이아웃 구조
+
+```
+CoupleSpotCard
+├── Card Container
+│   ├── Background Gradient Overlay
+│   │
+│   ├── Image Section (h-40 sm:h-48)
+│   │   ├── Image (object-cover, hover:scale-110)
+│   │   ├── Gradient Overlay (hover 시 표시)
+│   │   ├── Couple Badge (absolute top-right, Users icon)
+│   │   └── Discount Badge (optional, absolute top-left)
+│   │
+│   ├── Header Section
+│   │   ├── Title (line-clamp-2)
+│   │   ├── Rating (Heart icon)
+│   │   └── Atmosphere Text
+│   │
+│   └── Content Section
+│       ├── Description (line-clamp-2)
+│       ├── Recommended Date Box (optional)
+│       │   ├── Calendar icon + Date
+│       │   └── Weather icon + Weather info
+│       ├── Location (MapPin icon)
+│       ├── Category & Price
+│       └── Tags
+│
+└── Footer Section
+    └── View Details Button (Heart icon, gradient)
+```
+
+## 반응형 디자인
+
+### 모바일 (< 640px)
+- 이미지 높이: 40 (h-40)
+- 패딩: 12px (p-3)
+- 텍스트 크기: text-xs, text-sm
+- 아이콘 크기: size-3, size-3.5
+
+### 데스크톱 (≥ 640px)
+- 이미지 높이: 48 (h-48)
+- 패딩: 24px (p-6)
+- 텍스트 크기: text-sm, text-lg
+- 아이콘 크기: size-4
+
+## 상태 정의
+
+### 기본 상태
+- 카드: 정적 배치
+- 이미지: 기본 크기
+- 오버레이: opacity-0
+- 배경 그라데이션: 기본
+
+### Hover 상태
+- 카드: translate-y-1 (위로 이동), shadow-2xl
+- 이미지: scale-110 (확대)
+- 오버레이: opacity-100
+- 제목: 텍스트 색상 변경 (purple-600)
+
+## 인터랙션
+
+### 카드 클릭
+- 상세보기 다이얼로그 열기
+- `onViewDetails(spot)` 호출
+
+### 버튼 클릭
+- "자세히 보기" 버튼 클릭
+- 상세보기 다이얼로그 열기
+
+## 애니메이션
+
+### Background Gradient
+- `animate-pulse-glow` (부드러운 그라데이션 펄스)
+- `animate-float` (Couple Badge 플로팅)
+
+### Heart Icon
+- `animate-pulse` (평점 아이콘)

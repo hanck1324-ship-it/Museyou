@@ -1,0 +1,69 @@
+# Error Boundary - 와이어프레임
+
+## 컴포넌트 개요
+React 에러를 잡아서 Fallback UI를 표시하는 Error Boundary 컴포넌트
+
+## 레이아웃 구조
+
+```
+ErrorBoundary (when hasError)
+└── Error Fallback UI
+    ├── Container (min-h-screen, center)
+    │   └── Card
+    │       ├── Card Header
+    │       │   ├── Alert Icon (rounded-full, red-100)
+    │       │   └── Title ("오류가 발생했습니다")
+    │       │
+    │       └── Card Content
+    │           ├── Error Message Box (bg-red-50)
+    │           │   ├── Error Message
+    │           │   └── Error Details (optional, dev only)
+    │           │       ├── Summary ("상세 정보 보기")
+    │           │       └── Stack Trace (pre, scrollable)
+    │           │
+    │           ├── Action Buttons
+    │           │   ├── "다시 시도" Button
+    │           │   └── "홈으로" Button
+    │           │
+    │           └── Helper Text
+```
+
+## 상태 정의
+
+### 기본 상태
+- `hasError: false`
+- `error: null`
+- `errorInfo: null`
+
+### 에러 상태
+- `hasError: true`
+- `error: Error`
+- `errorInfo: ErrorInfo`
+
+## 반응형 디자인
+
+### 모바일 (< 640px)
+- Card: 전체 너비
+- 버튼: 세로 배치 (`flex-col`)
+- 패딩: `p-4`
+
+### 데스크톱 (≥ 640px)
+- Card: 최대 너비 `max-w-md`
+- 버튼: 가로 배치 (`flex-row`)
+- 패딩: 기본 패딩
+
+## 인터랙션
+
+### "다시 시도" 버튼
+- 에러 상태 초기화
+- `hasError: false`
+- 컴포넌트 재렌더링 시도
+
+### "홈으로" 버튼
+- `window.location.href = '/'`
+- 홈으로 이동
+
+### Error Details
+- 개발 환경에서만 표시
+- 클릭 시 Stack trace 표시
+- `<details>` 요소 사용

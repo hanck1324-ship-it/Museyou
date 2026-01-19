@@ -1,0 +1,132 @@
+# Error Boundary - UI 디자인
+
+## 색상 팔레트
+
+### Error Colors
+```css
+--red-50: #fef2f2
+--red-100: #fee2e2
+--red-600: #dc2626
+--red-700: #b91c1c
+--red-800: #991b1b
+```
+
+### Background
+- Container: `bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50`
+- 다크모드: `dark:from-gray-900 dark:via-gray-800 dark:to-gray-900`
+
+### Card
+- 배경: `bg-white`
+- 다크모드: `dark:bg-gray-800`
+
+### Error Message Box
+- 배경: `bg-red-50`
+- 다크모드: `dark:bg-red-950/20`
+- 테두리: 없음
+
+## 타이포그래피
+
+### Title
+- 크기: `text-xl`
+- Weight: 600 (font-semibold)
+- 중앙 정렬
+
+### Error Message
+- 크기: `text-sm`
+- Color: `text-red-800`
+- Weight: 500 (font-medium)
+
+### Error Details Summary
+- 크기: `text-xs`
+- Color: `text-red-600`
+- Hover: `hover:text-red-700`
+- 커서: `cursor-pointer`
+
+### Stack Trace
+- 크기: `text-xs`
+- Color: `text-red-700`
+- Font: monospace
+- 배경: `bg-red-100`
+- 패딩: `p-2`
+- 둥글기: `rounded`
+- Overflow: `overflow-auto`
+- 최대 높이: `max-h-40`
+
+### Helper Text
+- 크기: `text-xs`
+- Color: `text-muted-foreground`
+- 중앙 정렬
+
+## 간격
+
+### Container
+- 최소 높이: `min-h-screen`
+- Flexbox: `flex items-center justify-center`
+- 패딩: `p-4`
+
+### Card
+- 최대 너비: `max-w-md`
+- 전체 너비: `w-full`
+
+### Card Header
+- 중앙 정렬: `text-center`
+- 아이콘 마진: `mb-4`
+
+### Card Content
+- 내부 간격: `space-y-4`
+
+### Error Message Box
+- 패딩: `p-4`
+- 둥글기: `rounded-lg`
+
+### Action Buttons
+- 간격: `gap-2`
+- 반응형: `flex-col sm:flex-row`
+
+## 아이콘
+
+### Alert Icon
+- 아이콘: `AlertTriangle`
+- 컨테이너: `h-12 w-12`
+- 배경: `bg-red-100`
+- 아이콘 크기: `h-6 w-6`
+- 아이콘 색상: `text-red-600`
+- 둥글기: `rounded-full`
+
+### Button Icons
+- RefreshCw: `h-4 w-4`
+- Home: `h-4 w-4`
+- 마진: `mr-2`
+
+## Button 스타일
+
+### "다시 시도" Button
+- Variant: `default`
+- 너비: `flex-1`
+
+### "홈으로" Button
+- Variant: `outline`
+- 너비: `flex-1`
+
+## 다크모드
+
+### 배경
+- Container: `dark:from-gray-900 dark:via-gray-800 dark:to-gray-900`
+- Card: `dark:bg-gray-800`
+- Error Box: `dark:bg-red-950/20`
+
+### 텍스트
+- 기본 텍스트: `dark:text-gray-200`
+- Error Message: `dark:text-red-300`
+- Helper Text: `dark:text-gray-400`
+
+### 테두리
+- Error Box: `dark:border-red-800`
+
+## 애니메이션
+
+### Card
+- 기본 애니메이션 없음 (즉시 표시)
+
+### Button Hover
+- 기본 Button hover 효과

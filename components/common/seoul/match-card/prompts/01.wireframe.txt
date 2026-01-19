@@ -1,0 +1,49 @@
+# Match Card (Seoul) - 와이어프레임
+
+## 컴포넌트 개요
+서울 문화예술 매칭을 위한 간단한 매칭 카드 컴포넌트
+
+## 레이아웃 구조
+
+```
+SeoulMatchCard
+├── Container (flex, items-center, gap-4, p-4)
+│   ├── Avatar (w-16 h-16, shrink-0)
+│   │   ├── AvatarImage
+│   │   └── AvatarFallback (첫 글자)
+│   │
+│   ├── Info Section (flex-1, min-w-0)
+│   │   ├── Name & Age (truncate)
+│   │   └── Tags (truncate, space-separated)
+│   │
+│   └── Request Button (shrink-0)
+│       └── PrimaryButton ("요청")
+```
+
+## 반응형 디자인
+
+### 모바일/데스크톱
+- Flexbox: 가로 배치
+- Avatar 크기: `w-16 h-16` (64px)
+- 패딩: `p-4` (16px)
+
+## 상태 정의
+
+### 기본 상태
+- 카드: 정적 배치
+- 버튼: 기본 상태
+
+### Hover 상태
+- 카드: shadow 증가
+
+### Active 상태
+- 버튼: `active:scale-95`
+
+## 인터랙션
+
+### 카드 Hover
+- Shadow 증가: `hover:shadow-[0_6px_16px_rgba(0,0,0,0.1)]`
+
+### Request Button 클릭
+- `onRequest` 콜백 호출
+- 매칭 요청 또는 액션
