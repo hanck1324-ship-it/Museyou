@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
-import { Calendar, MapPin, Clock, Percent, Users, User, X } from "lucide-react";
+import { Calendar, MapPin, Clock, Percent, Users, User, X, Share2 } from "lucide-react";
 import { GroupPurchase } from "../../lib/types/groupPurchase";
 import { ImageWithFallback } from "../common/figma/ImageWithFallback";
 import { GroupPurchaseProgress } from "./GroupPurchaseProgress";
@@ -16,6 +16,7 @@ import { STORAGE_KEYS } from "../../lib/api/mockData";
 import { GroupPurchaseEdit } from "./GroupPurchaseEdit";
 import { Edit, Trash2 } from "lucide-react";
 import { useGroupPurchaseRealtime } from "../../lib/hooks/useGroupPurchaseRealtime";
+import { shareContent, shareToFacebook, shareToTwitter } from "../../lib/utils/share";
 
 // 로컬 스토리지 헬퍼
 function getFromStorage<T>(key: string, defaultValue: T): T {
@@ -112,6 +113,29 @@ export function GroupPurchaseDetail({
     return new Intl.NumberFormat('ko-KR').format(price) + '원';
   };
 
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/group-purchases/${groupPurchase.id}`;
+    await shareContent({
+      title: `${groupPurchase.performance.title} 공동구매`,
+      text: `${groupPurchase.discountRate}% 할인! ${groupPurchase.currentParticipants}/${groupPurchase.targetParticipants}명 참여 중`,
+      url: shareUrl,
+    });
+  };
+
+  const handleShareToFacebook = () => {
+    const shareUrl = `${window.location.origin}/group-purchases/${groupPurchase.id}`;
+    shareToFacebook(shareUrl);
+  };
+
+  const handleShareToTwitter = () => {
+    const shareUrl = `${window.location.origin}/group-purchases/${groupPurchase.id}`;
+    shareToTwitter({
+      title: `${groupPurchase.performance.title} 공동구매`,
+      text: `${groupPurchase.discountRate}% 할인! ${groupPurchase.currentParticipants}/${groupPurchase.targetParticipants}명 참여 중`,
+      url: shareUrl,
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -125,27 +149,38 @@ export function GroupPurchaseDetail({
                 <Badge variant="outline">{groupPurchase.performance.district}</Badge>
               </div>
             </div>
-            {isCreator && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setEditOpen(true)}
-                  className="size-8"
-                >
-                  <Edit className="size-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setDeleteDialogOpen(true)}
-                  className="size-8 text-red-500 hover:text-red-600 hover:bg-red-50"
-                  disabled={groupPurchase.currentParticipants > 0}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleShare}
+                className="size-8"
+                title="공유하기"
+              >
+                <Share2 className="size-4" />
+              </Button>
+              {isCreator && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setEditOpen(true)}
+                    className="size-8"
+                  >
+                    <Edit className="size-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setDeleteDialogOpen(true)}
+                    className="size-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                    disabled={groupPurchase.currentParticipants > 0}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </DialogHeader>
 

@@ -1,10 +1,12 @@
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { Button } from "../ui/button";
-import { Calendar, Users, Percent, MapPin } from "lucide-react";
+import { Calendar, Users, Percent, MapPin, Share2 } from "lucide-react";
 import { ImageWithFallback } from "../common/figma/ImageWithFallback";
 import { GroupPurchase } from "../../lib/types/groupPurchase";
 import { GroupPurchaseProgress } from "./GroupPurchaseProgress";
 import { GroupPurchaseStatus } from "./GroupPurchaseStatus";
+import { shareContent } from "../../lib/utils/share";
+import { memo, useCallback } from "react";
 // 날짜 포맷팅 헬퍼 함수
 const formatDate = (date: Date): string => {
   const year = date.getFullYear();
@@ -21,7 +23,7 @@ interface GroupPurchaseCardProps {
   onJoin?: (id: string) => void;
 }
 
-export function GroupPurchaseCard({ 
+export const GroupPurchaseCard = memo(function GroupPurchaseCard({ 
   groupPurchase, 
   onViewDetail,
   onJoin 
@@ -34,6 +36,16 @@ export function GroupPurchaseCard({
     return new Intl.NumberFormat('ko-KR').format(price) + '원';
   };
 
+  const handleShare = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const shareUrl = `${window.location.origin}/group-purchases/${groupPurchase.id}`;
+    await shareContent({
+      title: `${groupPurchase.performance.title} 공동구매`,
+      text: `${groupPurchase.discountRate}% 할인! ${groupPurchase.currentParticipants}/${groupPurchase.targetParticipants}명 참여 중`,
+      url: shareUrl,
+    });
+  }, [groupPurchase.id, groupPurchase.performance.title, groupPurchase.discountRate, groupPurchase.currentParticipants, groupPurchase.targetParticipants]);
+
   return (
     <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 backdrop-blur-sm bg-white/90 dark:bg-gray-800/90 border-2 hover:border-purple-200 dark:border-gray-700 dark:hover:border-purple-700">
       <div className="relative h-40 sm:h-48 overflow-hidden">
@@ -41,6 +53,7 @@ export function GroupPurchaseCard({
           src={groupPurchase.performance.image}
           alt={groupPurchase.performance.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
@@ -112,6 +125,15 @@ export function GroupPurchaseCard({
         >
           상세보기
         </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-8 sm:size-10 border-2 border-blue-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 hover:border-blue-400 transition-all"
+          onClick={handleShare}
+          title="공유하기"
+        >
+          <Share2 className="size-3 sm:size-4 text-blue-500" />
+        </Button>
         {canJoin && onJoin && (
           <Button
             variant="outline"
@@ -125,4 +147,4 @@ export function GroupPurchaseCard({
       </CardFooter>
     </Card>
   );
-}
+});
