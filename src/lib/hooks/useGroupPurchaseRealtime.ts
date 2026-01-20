@@ -2,6 +2,12 @@ import { useEffect, useRef } from 'react';
 import { projectId, publicAnonKey } from '../supabase/config';
 import { createClient } from '@supabase/supabase-js';
 import { useGroupPurchaseStore } from '../../store/useGroupPurchaseStore';
+import { 
+  notifyDeadlineNear, 
+  notifyTargetReached, 
+  notifyNewParticipant,
+  notifyParticipantCancelled 
+} from '../utils/notifications';
 
 // 모킹 모드 활성화 (백엔드 연결 시 false로 변경)
 const USE_MOCK_MODE = true;

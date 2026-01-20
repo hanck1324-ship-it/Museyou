@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { GroupPurchaseStatus as StatusType } from "../../lib/types/groupPurchase";
 import { MyGroupPurchases } from "./MyGroupPurchases";
 import { useGroupPurchaseListRealtime } from "../../lib/hooks/useGroupPurchaseRealtime";
+import { GroupPurchaseStats } from "./GroupPurchaseStats";
 
 interface GroupPurchaseListProps {
   onCreateClick?: () => void; // deprecated, 내부에서 처리
@@ -183,6 +184,9 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
+          {/* 통계 */}
+          <GroupPurchaseStats groupPurchases={groupPurchases} />
+          
           {/* 필터 및 검색 */}
           <div className="space-y-4">
         {/* 검색바 */}
