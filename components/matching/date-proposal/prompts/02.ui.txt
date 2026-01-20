@@ -1,0 +1,116 @@
+# Date Proposal - UI 디자인
+
+## 색상 팔레트
+
+### Primary (Pink/Purple)
+```css
+--pink-50: #fdf2f8
+--pink-500: #ec4899
+--pink-600: #db2777
+--purple-500: #a855f7
+--purple-600: #9333ea
+```
+
+### Warning Box
+- 배경: `bg-pink-50 dark:bg-pink-950/20`
+- 테두리: `border-pink-200 dark:border-pink-800`
+
+## 타이포그래피
+
+### Dialog Title
+- 크기: `text-lg` (기본)
+- Weight: 600 (font-semibold)
+
+### Dialog Description
+- 크기: `text-sm`
+- Color: `text-muted-foreground`
+
+### Performance Info
+- 제목: `text-sm`
+- 메타 정보: `text-xs text-muted-foreground`
+
+### Form Label
+- 크기: `text-sm`
+- Weight: 500 (font-medium)
+
+### Helper Text
+- 크기: `text-xs`
+- Color: `text-muted-foreground`
+
+### Warning Box Text
+- 크기: `text-xs`
+- Color: `text-muted-foreground`
+
+## 간격
+
+### Dialog Content
+- 패딩: 기본 Dialog 패딩
+- 섹션 간격: `space-y-4`
+
+### Performance Info Card
+- 배경: `bg-muted`
+- 패딩: `p-3`
+- 둥글기: `rounded-lg`
+- 내부 간격: `gap-3`
+
+### Form Section
+- 내부 간격: `space-y-2`
+
+### Warning Box
+- 패딩: `p-3`
+- 둥글기: `rounded-lg`
+- 테두리: `border`
+
+## 아이콘
+
+### 크기
+- 메타 정보: `size-3` (12px)
+- Warning Box: `size-3` (12px)
+- 색상: `text-pink-500`
+
+## Button 스타일
+
+### Cancel Button
+- Variant: `outline`
+- 너비: `flex-1`
+
+### Submit Button
+- 배경: `bg-gradient-to-r from-pink-500 to-purple-500`
+- Hover: `hover:from-pink-600 hover:to-purple-600`
+- 텍스트: `text-white`
+- 너비: `flex-1`
+
+## Textarea 스타일
+
+### 기본
+- 높이: `rows={4}`
+- Placeholder: 안내 텍스트
+
+## Image 스타일
+
+### Performance Image
+- 크기: `h-20 w-20` (80px)
+- 둥글기: `rounded`
+- Overflow: `overflow-hidden`
+- Object fit: `object-cover`
+
+## 다크모드
+
+### 배경
+- Warning Box: `dark:bg-pink-950/20`
+- Performance Info Card: `dark:bg-gray-800`
+
+### 테두리
+- Warning Box: `dark:border-pink-800`
+
+### 텍스트
+- 기본 텍스트: `dark:text-gray-200`
+- Muted 텍스트: `dark:text-gray-400`
+
+## 애니메이션
+
+### Dialog
+- 기본 Dialog 애니메이션 사용
+
+### Button Hover
+- `transition-all`

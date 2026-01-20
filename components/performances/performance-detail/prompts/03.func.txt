@@ -1,10 +1,306 @@
-# 기능 명세
+# Performance Detail - 기능 명세
 
-## 주요 기능
-(여기에 주요 기능 설명)
+## Props 인터페이스
 
-## API 연동
-(여기에 API 설명)
+```typescript
+interface PerformanceDetailProps {
+  performance: Performance | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onBook?: (performance: Performance) => void;  // 추후 추가
+  onShare?: (performance: Performance) => void;  // 추후 추가
+}
+```
 
-## 상태 관리
-(여기에 상태 관리 설명)
+## 현재 구현 상태 ✅
+
+### 1. Dialog 표시
+- Dialog 컴포넌트로 상세 정보 표시
+- 공연 이미지, 정보, 리뷰 표시
+
+### 2. Tab 구조
+- 공연정보 탭: 설명, 주최, 관람료, 날짜/시간/장소
+- 장소/경로 탭: 공연장 정보, 지도, 길찾기, 교통편
+- 리뷰 탭: ReviewSection 컴포넌트
+
+### 3. 지도 통합
+- PerformanceMap 컴포넌트 사용
+- Kakao Map으로 공연장 위치 표시
+- 길찾기 버튼 (카카오맵 링크)
+
+### 4. 리뷰 섹션
+- ReviewSection 컴포넌트 통합
+- 리뷰 작성 및 표시
+
+## 개선이 필요한 기능 🔧
+
+### 1. 예매 버튼 연동 ⭐
+**현재:** 미구현  
+**필요한 기능:**
+```typescript
+interface PerformanceDetailProps {
+  // ...
+  onBook?: (performance: Performance) => void;
+}
+
+// 예매 버튼 추가
+<Button
+  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600"
+  onClick={() => {
+    if (performance.bookingUrl) {
+      window.open(performance.bookingUrl, '_blank');
+    } else {
+      onBook?.(performance);
+    }
+  }}
+>
+  <Ticket className="size-4 mr-2" />
+  예매하기
+</Button>
+```
+
+### 2. 공유 기능 ⭐
+**필요한 기능:**
+```typescript
+interface PerformanceDetailProps {
+  // ...
+  onShare?: (performance: Performance) => void;
+}
+
+const handleShare = async () => {
+  const shareData = {
+    title: performance.title,
+    text: `${performance.title} - ${performance.category} 공연`,
+    url: `${window.location.origin}/performance/${performance.id}`,
+  };
+
+  if (navigator.share && navigator.canShare(shareData)) {
+    await navigator.share(shareData);
+  } else {
+    // 클립보드 복사 fallback
+    await navigator.clipboard.writeText(shareData.url);
+    toast.success('링크가 복사되었습니다!');
+  }
+};
+
+// 공유 버튼 추가 (Dialog Header)
+<Button
+  variant="ghost"
+  size="icon"
+  onClick={handleShare}
+>
+  <Share2 className="size-4" />
+</Button>
+```
+
+### 3. 좋아요 기능 ⭐
+**필요한 기능:**
+```typescript
+interface PerformanceDetailProps {
+  // ...
+  isLiked?: boolean;
+  onToggleLike?: (performanceId: string) => void;
+  isLoggedIn?: boolean;
+}
+
+// 좋아요 버튼 추가 (Dialog Header)
+<Button
+  variant="ghost"
+  size="icon"
+  onClick={() => onToggleLike?.(performance.id)}
+  className={isLiked ? 'text-red-500' : ''}
+>
+  <Heart className={isLiked ? 'fill-current' : ''} />
+</Button>
+```
+
+### 4. 이미지 갤러리 ⭐
+**필요한 기능:**
+```typescript
+interface Performance {
+  // ...
+  images?: string[];  // 여러 이미지 지원
+  image: string;      // 대표 이미지
+}
+
+// Carousel로 이미지 슬라이더 추가
+<Carousel className="h-64">
+  {performance.images?.map((img, idx) => (
+    <CarouselItem key={idx}>
+      <ImageWithFallback src={img} alt={`${performance.title} ${idx + 1}`} />
+    </CarouselItem>
+  )) || (
+    <CarouselItem>
+      <ImageWithFallback src={performance.image} alt={performance.title} />
+    </CarouselItem>
+  )}
+</Carousel>
+```
+
+### 5. 관련 공연 추천
+**필요한 기능:**
+```typescript
+// Tab 추가: "관련 공연"
+<TabsContent value="related" className="space-y-4">
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    {relatedPerformances.map((related) => (
+      <PerformanceCard
+        key={related.id}
+        performance={related}
+        onViewDetails={handleViewDetails}
+      />
+    ))}
+  </div>
+</TabsContent>
+```
+
+### 6. 타임라인 표시 (공연 일정)
+**필요한 기능:**
+```typescript
+interface Performance {
+  // ...
+  schedule?: Array<{
+    date: string;
+    time: string;
+    availability: 'available' | 'sold-out' | 'limited';
+  }>;
+}
+
+// 타임라인 표시
+<div className="space-y-2">
+  <h4>공연 일정</h4>
+  {performance.schedule?.map((schedule, idx) => (
+    <div key={idx} className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+      <Calendar className="size-4" />
+      <div className="flex-1">
+        <p className="text-sm">{schedule.date} {schedule.time}</p>
+      </div>
+      <Badge variant={
+        schedule.availability === 'available' ? 'default' :
+        schedule.availability === 'sold-out' ? 'destructive' : 'secondary'
+      }>
+        {schedule.availability === 'available' ? '예매 가능' :
+         schedule.availability === 'sold-out' ? '매진' : '좌석 부족'}
+      </Badge>
+    </div>
+  ))}
+</div>
+```
+
+## API 연동 계획
+
+### Supabase 테이블 설계 (참고)
+```sql
+CREATE TABLE performances (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  category TEXT,
+  venue TEXT,
+  district TEXT,
+  date TEXT,
+  time TEXT,
+  price TEXT,
+  image TEXT,
+  images TEXT[],  -- 여러 이미지 지원
+  rating NUMERIC(3, 2),
+  review_count INTEGER DEFAULT 0,
+  description TEXT,
+  organizer TEXT,
+  booking_url TEXT,  -- 예매 링크
+  lat NUMERIC(10, 8),
+  lng NUMERIC(11, 8),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE performance_schedules (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  performance_id UUID REFERENCES performances(id),
+  date DATE NOT NULL,
+  time TIME NOT NULL,
+  availability TEXT DEFAULT 'available',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE related_performances (
+  performance_id UUID REFERENCES performances(id),
+  related_id UUID REFERENCES performances(id),
+  similarity_score NUMERIC(3, 2),
+  PRIMARY KEY (performance_id, related_id)
+);
+```
+
+### API 엔드포인트
+- `GET /performances/:id` - 공연 상세 정보
+- `GET /performances/:id/schedule` - 공연 일정
+- `GET /performances/:id/related` - 관련 공연 목록
+- `POST /performances/:id/share` - 공유 카운트 증가
+
+## 테스트 계획
+
+### 단위 테스트
+- Props 전달 테스트
+- Tab 전환 테스트
+- 지도 표시 테스트
+
+### 통합 테스트
+- 좋아요 기능 테스트
+- 공유 기능 테스트
+- 예매 버튼 클릭 테스트
+
+### E2E 테스트
+- 상세보기 → 예매 플로우
+- 상세보기 → 공유 플로우
+- 상세보기 → 관련 공연 보기 플로우
+
+## 접근성 (a11y)
+
+### ARIA 레이블
+```tsx
+<Dialog
+  aria-labelledby="performance-detail-title"
+  aria-describedby="performance-detail-description"
+>
+  <DialogTitle id="performance-detail-title">
+    {performance.title}
+  </DialogTitle>
+</Dialog>
+
+<Button
+  aria-label="예매하기"
+  onClick={handleBook}
+>
+  <Ticket />
+  예매하기
+</Button>
+```
+
+### 키보드 네비게이션
+- Tab으로 Tab 전환
+- Enter/Space로 버튼 활성화
+- Escape로 Dialog 닫기
+
+## 성능 최적화
+
+### 메모이제이션
+```typescript
+export const PerformanceDetail = React.memo(
+  PerformanceDetailComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.performance?.id === nextProps.performance?.id &&
+      prevProps.open === nextProps.open
+    );
+  }
+);
+```
+
+### 이미지 최적화
+- 이미지 갤러리 Lazy loading
+- WebP 포맷 지원
+- Responsive images
+
+## 다크모드 지원
+
+### 현재 상태
+- 기본 다크모드 클래스 적용됨
+- 추가 개선 필요: 인포윈도우, 지도 스타일

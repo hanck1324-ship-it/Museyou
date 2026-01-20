@@ -1,0 +1,404 @@
+# Auth Dialog - 기능 명세
+
+## Props 인터페이스
+
+```typescript
+interface AuthDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onAuthSuccess: (user: any) => void;
+}
+```
+
+## 현재 구현 상태 ✅
+
+### 1. 로그인 기능
+- 이메일/비밀번호 입력
+- Form 제출 처리
+- API 호출 (authApi.login)
+- 성공 시 프로필 로드 및 자동 로그인
+- 에러 처리 (Toast)
+
+### 2. 회원가입 기능
+- 일반 회원 가입
+  - 이메일, 비밀번호, 이름 (필수)
+  - 나이, 성별 (필수)
+  - 지역, 자기소개, 관심사, 만남 스타일 (선택)
+- 예술종사자 가입
+  - 예술 분야, 소속 기관 (필수)
+  - 인증 방법 (이메일/서류)
+  - 기관 이메일 또는 증빙서류 (필수)
+- 휴대폰 인증 (필수)
+  - 인증번호 발송 (Mock)
+  - 인증번호 확인 (Mock)
+- Form 제출 처리
+- API 호출 (authApi.signup)
+- 성공 시 자동 로그인
+- 에러 처리 (Toast)
+
+### 3. Tab 전환
+- 로그인/회원가입 탭 전환
+- 상태 초기화 (필요 시)
+
+### 4. 유효성 검사
+- 필수 필드 검증
+- 이메일 형식 검증
+- 비밀번호 최소 길이 검증 (추후 강화)
+- 폼 제출 전 검증
+
+## 개선이 필요한 기능 🔧
+
+### 1. 비밀번호 재설정 ⭐
+**현재:** 미구현  
+**필요한 기능:**
+```typescript
+// 로그인 탭에 "비밀번호 찾기" 링크 추가
+<div className="text-right">
+  <Button
+    variant="link"
+    className="text-xs text-muted-foreground"
+    onClick={() => setShowResetPassword(true)}
+  >
+    비밀번호를 잊으셨나요?
+  </Button>
+</div>
+
+// 비밀번호 재설정 Dialog 또는 섹션
+const handleResetPassword = async (email: string) => {
+  if (!email) {
+    toast.error('이메일을 입력해주세요.');
+    return;
+  }
+
+  try {
+    await authApi.resetPassword(email);
+    toast.success('비밀번호 재설정 이메일을 보냈습니다.');
+  } catch (error) {
+    handleError(error);
+  }
+};
+```
+
+### 2. 소셜 로그인 ⭐
+**필요한 기능:**
+```typescript
+// 소셜 로그인 버튼 추가
+<div className="space-y-2">
+  <Button
+    variant="outline"
+    className="w-full"
+    onClick={handleKakaoLogin}
+  >
+    <img src="/kakao-icon.svg" alt="Kakao" className="size-5 mr-2" />
+    카카오로 로그인
+  </Button>
+  <Button
+    variant="outline"
+    className="w-full"
+    onClick={handleGoogleLogin}
+  >
+    <img src="/google-icon.svg" alt="Google" className="size-5 mr-2" />
+    구글로 로그인
+  </Button>
+</div>
+
+// Supabase OAuth 연동
+const handleKakaoLogin = async () => {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'kakao',
+    options: {
+      redirectTo: `${window.location.origin}/auth/callback`,
+    },
+  });
+  if (error) {
+    toast.error('카카오 로그인에 실패했습니다.');
+  }
+};
+
+const handleGoogleLogin = async () => {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${window.location.origin}/auth/callback`,
+    },
+  });
+  if (error) {
+    toast.error('구글 로그인에 실패했습니다.');
+  }
+};
+```
+
+### 3. 이메일 인증 ⭐
+**필요한 기능:**
+```typescript
+// 회원가입 후 이메일 인증 안내
+const handleSignup = async () => {
+  // ... 회원가입 로직
+  
+  // 이메일 인증 메일 발송
+  await authApi.sendVerificationEmail(signupEmail);
+  
+  toast.success('회원가입 성공! 인증 이메일을 확인해주세요.');
+};
+
+// 이메일 인증 확인 Dialog
+const handleVerifyEmail = async (token: string) => {
+  try {
+    await authApi.verifyEmail(token);
+    toast.success('이메일 인증이 완료되었습니다!');
+    onAuthSuccess(user);
+  } catch (error) {
+    handleError(error);
+  }
+};
+```
+
+### 4. 비밀번호 보기/숨기기 ⭐
+**필요한 기능:**
+```typescript
+const [showPassword, setShowPassword] = useState(false);
+
+<Input
+  type={showPassword ? 'text' : 'password'}
+  // ...
+/>
+<Button
+  variant="ghost"
+  size="icon"
+  onClick={() => setShowPassword(!showPassword)}
+>
+  {showPassword ? <EyeOff /> : <Eye />}
+</Button>
+```
+
+### 5. 비밀번호 강도 표시
+**필요한 기능:**
+```typescript
+const [passwordStrength, setPasswordStrength] = useState(0);
+
+const checkPasswordStrength = (password: string) => {
+  let strength = 0;
+  if (password.length >= 8) strength++;
+  if (/[A-Z]/.test(password)) strength++;
+  if (/[a-z]/.test(password)) strength++;
+  if (/[0-9]/.test(password)) strength++;
+  if (/[^A-Za-z0-9]/.test(password)) strength++;
+  return strength;
+};
+
+// 비밀번호 입력 시
+onChange={(e) => {
+  setSignupPassword(e.target.value);
+  setPasswordStrength(checkPasswordStrength(e.target.value));
+}}
+
+// 강도 표시
+<div className="flex gap-1">
+  {[1, 2, 3, 4, 5].map((level) => (
+    <div
+      key={level}
+      className={`h-1 flex-1 rounded ${
+        level <= passwordStrength
+          ? 'bg-emerald-500'
+          : 'bg-gray-200'
+      }`}
+    />
+  ))}
+</div>
+```
+
+### 6. 프로필 사진 업로드 ⭐
+**필요한 기능:**
+```typescript
+const [profileImage, setProfileImage] = useState<File | null>(null);
+
+const handleImageUpload = async (file: File) => {
+  // 이미지 크기 제한 (5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    toast.error('이미지 크기는 5MB 이하여야 합니다.');
+    return;
+  }
+
+  // 이미지 미리보기
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    setProfileImagePreview(e.target?.result as string);
+  };
+  reader.readAsDataURL(file);
+  
+  setProfileImage(file);
+};
+
+// Supabase Storage에 업로드 (회원가입 시)
+if (profileImage) {
+  const fileExt = profileImage.name.split('.').pop();
+  const fileName = `${userId}.${fileExt}`;
+  const filePath = `avatars/${fileName}`;
+
+  const { error } = await supabase.storage
+    .from('avatars')
+    .upload(filePath, profileImage);
+
+  if (!error) {
+    // 프로필에 이미지 URL 저장
+    const { data } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+    
+    signupData.avatarUrl = data.publicUrl;
+  }
+}
+```
+
+### 7. React Hook Form + Zod 통합 ⭐
+**필요한 기능:**
+```typescript
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+// 로그인 스키마
+const loginSchema = z.object({
+  email: z.string().email('올바른 이메일을 입력해주세요.'),
+  password: z.string().min(1, '비밀번호를 입력해주세요.'),
+});
+
+// 회원가입 스키마
+const signupSchema = z.object({
+  email: z.string().email('올바른 이메일을 입력해주세요.'),
+  password: z.string().min(6, '비밀번호는 최소 6자여야 합니다.'),
+  name: z.string().min(1, '이름을 입력해주세요.'),
+  age: z.number().min(18).max(100),
+  gender: z.enum(['남성', '여성']),
+  // ...
+});
+
+const {
+  register,
+  handleSubmit,
+  formState: { errors },
+} = useForm({
+  resolver: zodResolver(signupSchema),
+});
+```
+
+### 8. 회원가입 단계별 진행
+**필요한 기능:**
+```typescript
+// Step 1: 기본 정보
+// Step 2: 프로필 정보
+// Step 3: 관심사 선택
+// Step 4: 인증 (휴대폰/예술가)
+// Step 5: 완료
+
+const [signupStep, setSignupStep] = useState(1);
+
+const nextStep = () => {
+  // 현재 단계 유효성 검사
+  if (validateCurrentStep()) {
+    setSignupStep(signupStep + 1);
+  }
+};
+
+const prevStep = () => {
+  setSignupStep(signupStep - 1);
+};
+```
+
+## API 연동 계획
+
+### Supabase Auth
+- `signInWithPassword` - 이메일/비밀번호 로그인
+- `signUp` - 회원가입
+- `signInWithOAuth` - 소셜 로그인 (카카오, 구글)
+- `resetPasswordForEmail` - 비밀번호 재설정
+- `verifyOtp` - 이메일 인증 확인
+- `updateUser` - 프로필 업데이트
+
+### API 엔드포인트 (참고)
+- `POST /auth/login` - 로그인
+- `POST /auth/signup` - 회원가입
+- `POST /auth/reset-password` - 비밀번호 재설정
+- `POST /auth/verify-email` - 이메일 인증
+- `POST /auth/verify-phone` - 휴대폰 인증
+- `POST /auth/oauth/kakao` - 카카오 로그인
+- `POST /auth/oauth/google` - 구글 로그인
+
+## 테스트 계획
+
+### 단위 테스트
+- Form 유효성 검사 테스트
+- 상태 관리 테스트
+- Tab 전환 테스트
+
+### 통합 테스트
+- 로그인 API 호출 테스트
+- 회원가입 API 호출 테스트
+- 소셜 로그인 테스트
+- 비밀번호 재설정 테스트
+
+### E2E 테스트
+- 로그인 전체 플로우
+- 회원가입 전체 플로우
+- 소셜 로그인 플로우
+- 비밀번호 재설정 플로우
+
+## 접근성 (a11y)
+
+### ARIA 레이블
+```tsx
+<Dialog
+  aria-labelledby="auth-dialog-title"
+  aria-describedby="auth-dialog-description"
+>
+  <DialogTitle id="auth-dialog-title">서울 문화예술 로그인</DialogTitle>
+  <DialogDescription id="auth-dialog-description">
+    문화 데이트 매칭과 커플 추천을 이용하려면 로그인하세요
+  </DialogDescription>
+</Dialog>
+
+<Input
+  id="login-email"
+  aria-label="이메일"
+  aria-required="true"
+  aria-invalid={!!errors.email}
+  aria-describedby={errors.email ? 'email-error' : undefined}
+/>
+```
+
+### 키보드 네비게이션
+- Tab으로 필드 이동
+- Enter로 Form 제출
+- Escape로 Dialog 닫기
+
+## 보안 고려사항
+
+### 비밀번호 보안
+- 비밀번호는 평문으로 전송하지 않음
+- Supabase Auth가 자동 해싱 처리
+- 클라이언트에서 비밀번호 검증 (최소 길이 등)
+
+### 이메일 인증
+- 회원가입 후 이메일 인증 권장
+- 인증되지 않은 사용자 제한 기능
+
+### 휴대폰 인증
+- SMS 인증 API 연동 (Twilio, CoolSMS 등)
+- 인증번호 5분 만료
+- 재시도 제한 (5회)
+
+## 성능 최적화
+
+### 메모이제이션
+```typescript
+export const AuthDialog = React.memo(
+  AuthDialogComponent,
+  (prevProps, nextProps) => {
+    return prevProps.open === nextProps.open;
+  }
+);
+```
+
+### 폼 상태 관리
+- React Hook Form 사용 시 자동 최적화
+- 필요한 필드만 리렌더링

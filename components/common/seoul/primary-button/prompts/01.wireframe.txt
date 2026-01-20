@@ -1,0 +1,39 @@
+# Primary Button (Seoul) - 와이어프레임
+
+## 컴포넌트 개요
+서울 문화예술 앱의 기본 Primary Button 컴포넌트
+
+## 레이아웃 구조
+
+```
+PrimaryButton
+├── Button Container (relative, overflow-hidden)
+│   ├── Button Text (relative, z-10)
+│   └── Shimmer Effect (absolute, hover 시 애니메이션)
+```
+
+## 상태 정의
+
+### 기본 상태
+- 버튼: 기본 스타일
+- Shimmer: `-translate-x-full` (왼쪽 밖)
+
+### Hover 상태
+- Shimmer: `translate-x-full` (오른쪽으로 이동)
+
+### Active 상태
+- 버튼: `scale-95` (95% 축소)
+
+### Disabled 상태
+- Opacity: `opacity-50`
+- 커서: `cursor-not-allowed`
+
+## 인터랙션
+
+### Button Click
+- `onClick` 콜백 호출
+- Active 상태 애니메이션
+
+### Hover
+- Shimmer 효과 애니메이션
+- 그림자 증가

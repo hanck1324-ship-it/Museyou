@@ -1,0 +1,230 @@
+# Event Card - 기능 명세
+
+## Props 인터페이스
+
+```typescript
+interface EventCardProps {
+  image: string;
+  title: string;
+  date: string;
+  location: string;
+  traffic: "high" | "mid" | "low";
+  className?: string;
+  onClick?: () => void;
+  onViewDetails?: () => void;  // 추후 추가
+}
+```
+
+## 현재 구현 상태 ✅
+
+### 1. 이벤트 정보 표시
+- 이미지 표시 (ImageWithFallback 사용)
+- 제목, 날짜, 위치 표시
+- 교통 정보 표시 (색상 코딩)
+
+### 2. 인터랙션
+- Hover 시 이미지 확대 및 오버레이
+- 클릭 시 `onClick` 콜백 호출
+
+### 3. 교통 정보
+- Traffic level에 따른 색상 및 라벨 표시
+- 시각적 인디케이터 (원형 점)
+
+## 개선이 필요한 기능 🔧
+
+### 1. 상세보기 기능 ⭐
+**필요한 기능:**
+```typescript
+interface EventCardProps {
+  // ...
+  eventId?: string;
+  onViewDetails?: (eventId: string) => void;
+}
+
+// 클릭 핸들러
+const handleClick = () => {
+  if (onViewDetails && eventId) {
+    onViewDetails(eventId);
+  } else {
+    onClick?.();
+  }
+};
+```
+
+### 2. 좋아요/북마크 기능
+**필요한 기능:**
+```typescript
+interface EventCardProps {
+  // ...
+  isBookmarked?: boolean;
+  onToggleBookmark?: (eventId: string) => void;
+  isLoggedIn?: boolean;
+}
+
+// 좋아요 버튼 추가 (이미지 위 우측 상단)
+<Button
+  variant="ghost"
+  size="icon"
+  className="absolute top-2 right-2 size-8 rounded-full backdrop-blur-sm"
+  onClick={(e) => {
+    e.stopPropagation();
+    onToggleBookmark?.(event.id);
+  }}
+>
+  <Heart className={isBookmarked ? 'fill-current' : ''} />
+</Button>
+```
+
+### 3. 공유 기능
+**필요한 기능:**
+```typescript
+const handleShare = async () => {
+  const shareData = {
+    title: title,
+    text: `${title} - ${location}`,
+    url: `${window.location.origin}/event/${eventId}`,
+  };
+
+  if (navigator.share && navigator.canShare(shareData)) {
+    await navigator.share(shareData);
+  } else {
+    await navigator.clipboard.writeText(shareData.url);
+    toast.success('링크가 복사되었습니다!');
+  }
+};
+```
+
+### 4. 실시간 교통 정보
+**필요한 기능:**
+```typescript
+// API에서 실시간 교통 정보 가져오기
+useEffect(() => {
+  const fetchTrafficInfo = async () => {
+    try {
+      const data = await api.getTrafficInfo(location);
+      setTraffic(data.level); // 'high' | 'mid' | 'low'
+    } catch (error) {
+      // 에러 처리
+    }
+  };
+
+  fetchTrafficInfo();
+  // 주기적으로 업데이트 (5분마다)
+  const interval = setInterval(fetchTrafficInfo, 5 * 60 * 1000);
+  return () => clearInterval(interval);
+}, [location]);
+```
+
+### 5. 카테고리/태그 표시
+**필요한 기능:**
+```typescript
+interface EventCardProps {
+  // ...
+  category?: string;
+  tags?: string[];
+}
+
+// 카테고리 Badge 추가 (이미지 위)
+<Badge className="absolute top-2 left-2">
+  {category}
+</Badge>
+
+// 태그 표시 (Content Section)
+{tags && tags.length > 0 && (
+  <div className="flex gap-1 flex-wrap">
+    {tags.map((tag, idx) => (
+      <Badge key={idx} variant="secondary" className="text-xs">
+        {tag}
+      </Badge>
+    ))}
+  </div>
+)}
+```
+
+## API 연동 계획
+
+### Supabase 테이블 설계
+```sql
+CREATE TABLE events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  image TEXT,
+  date TEXT NOT NULL,
+  location TEXT NOT NULL,
+  traffic_level TEXT DEFAULT 'mid', -- 'high' | 'mid' | 'low'
+  category TEXT,
+  tags TEXT[],
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE event_traffic_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  event_id UUID REFERENCES events(id),
+  location TEXT NOT NULL,
+  traffic_level TEXT NOT NULL,
+  recorded_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### API 엔드포인트
+- `GET /events` - 이벤트 목록
+- `GET /events/:id` - 이벤트 상세
+- `GET /events/:id/traffic` - 실시간 교통 정보
+- `POST /events/:id/bookmark` - 찜하기 토글
+
+## 테스트 계획
+
+### 단위 테스트
+- Props 전달 테스트
+- Traffic level 색상 테스트
+- 클릭 핸들러 테스트
+
+### 통합 테스트
+- 이미지 로드 실패 시 Fallback 테스트
+- Hover 인터랙션 테스트
+
+### E2E 테스트
+- 카드 클릭 → 상세보기 플로우
+- 찜하기 기능 플로우
+
+## 접근성 (a11y)
+
+### ARIA 레이블
+```tsx
+<div
+  role="article"
+  aria-label={`${title} - ${date} - ${location}`}
+  onClick={handleClick}
+  tabIndex={0}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      handleClick();
+    }
+  }}
+>
+  {/* ... */}
+</div>
+```
+
+### 키보드 네비게이션
+- Tab으로 카드 접근 가능
+- Enter/Space로 클릭 활성화
+
+## 성능 최적화
+
+### 메모이제이션
+```typescript
+export const EventCard = React.memo(
+  EventCardComponent,
+  (prevProps, nextProps) => {
+    return prevProps.eventId === nextProps.eventId &&
+           prevProps.traffic === nextProps.traffic;
+  }
+);
+```
+
+### 이미지 최적화
+- ImageWithFallback 사용
+- Lazy loading
+- WebP 포맷 지원

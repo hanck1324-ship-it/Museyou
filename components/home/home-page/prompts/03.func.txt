@@ -1,0 +1,275 @@
+# Home Page - 기능 명세
+
+## Props 인터페이스
+
+```typescript
+interface HomePageProps {
+  onStart: () => void;
+}
+```
+
+## 현재 구현 상태 ✅
+
+### 1. 랜딩 페이지 표시
+- Hero 섹션: Logo, Subtitle, CTA 버튼
+- Mission 섹션: 3개 미션 카드 (LOVE, INSPIRE, FUN)
+- Features 섹션: 3개 주요 기능 카드
+- Stats 섹션: 통계 정보 + CTA 버튼
+- Footer: Copyright
+
+### 2. 애니메이션
+- Framer Motion 사용
+- 섹션별 순차 애니메이션
+- Hover 인터랙션
+
+### 3. 반응형 디자인
+- 모바일/데스크톱 레이아웃
+- Grid 반응형 (1열 → 3열/4열)
+
+## 개선이 필요한 기능 🔧
+
+### 1. 통계 데이터 API 연동 ⭐
+**현재:** 하드코딩된 값  
+**필요한 기능:**
+```typescript
+interface HomePageProps {
+  onStart: () => void;
+  stats?: {
+    activePerformances: number;
+    activeMembers: number;
+    districts: number;
+    averageRating: number;
+  };
+}
+
+const [stats, setStats] = useState({
+  activePerformances: 0,
+  activeMembers: 0,
+  districts: 25,
+  averageRating: 0,
+});
+
+useEffect(() => {
+  // API에서 통계 데이터 로드
+  loadStats();
+}, []);
+
+const loadStats = async () => {
+  try {
+    const data = await api.getStats();
+    setStats(data);
+  } catch (error) {
+    // 에러 처리
+  }
+};
+```
+
+### 2. 스크롤 애니메이션 ⭐
+**필요한 기능:**
+```typescript
+import { useInView } from 'framer-motion';
+import { useRef } from 'react';
+
+const ref = useRef(null);
+const isInView = useInView(ref, { once: true, amount: 0.3 });
+
+<motion.div
+  ref={ref}
+  initial={{ opacity: 0, y: 30 }}
+  animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+  transition={{ duration: 0.6 }}
+>
+  {/* 섹션 내용 */}
+</motion.div>
+```
+
+### 3. 뉴스레터 구독 ⭐
+**필요한 기능:**
+```typescript
+const [email, setEmail] = useState('');
+const [isSubscribing, setIsSubscribing] = useState(false);
+
+const handleSubscribe = async () => {
+  if (!email || !email.includes('@')) {
+    toast.error('올바른 이메일을 입력해주세요.');
+    return;
+  }
+
+  setIsSubscribing(true);
+  try {
+    await api.subscribeNewsletter(email);
+    toast.success('구독이 완료되었습니다!');
+    setEmail('');
+  } catch (error) {
+    handleError(error);
+  } finally {
+    setIsSubscribing(false);
+  }
+};
+
+// Footer에 뉴스레터 구독 추가
+<div className="space-y-2">
+  <Label>뉴스레터 구독</Label>
+  <div className="flex gap-2">
+    <Input
+      type="email"
+      placeholder="이메일을 입력하세요"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+    />
+    <Button onClick={handleSubscribe} disabled={isSubscribing}>
+      구독
+    </Button>
+  </div>
+</div>
+```
+
+### 4. 소셜 미디어 링크
+**필요한 기능:**
+```typescript
+// Footer에 소셜 미디어 링크 추가
+<div className="flex gap-4 justify-center">
+  <a href="#" aria-label="Instagram">
+    <Instagram className="size-5 text-muted-foreground hover:text-foreground" />
+  </a>
+  <a href="#" aria-label="Facebook">
+    <Facebook className="size-5 text-muted-foreground hover:text-foreground" />
+  </a>
+  <a href="#" aria-label="Twitter">
+    <Twitter className="size-5 text-muted-foreground hover:text-foreground" />
+  </a>
+</div>
+```
+
+### 5. 다국어 지원 (선택)
+**필요한 기능:**
+```typescript
+interface HomePageProps {
+  onStart: () => void;
+  locale?: 'ko' | 'en';
+}
+
+const translations = {
+  ko: {
+    heroSubtitle: '당신의 뮤즈를 찾아, 문화예술과 함께하는 특별한 데이트 플랫폼',
+    // ...
+  },
+  en: {
+    heroSubtitle: 'Find your muse and enjoy special dates with culture and arts',
+    // ...
+  },
+};
+```
+
+### 6. 성능 최적화
+**필요한 기능:**
+- 이미지 Lazy loading
+- 애니메이션 최적화 (will-change)
+- 코드 스플리팅
+
+## API 연동 계획
+
+### Supabase 함수 또는 API 엔드포인트
+```typescript
+// lib/api/stats.ts
+export const statsApi = {
+  async getStats() {
+    if (USE_MOCK_MODE) {
+      return {
+        activePerformances: 100,
+        activeMembers: 1000,
+        districts: 25,
+        averageRating: 4.8,
+      };
+    }
+    return await apiCall('/stats');
+  },
+
+  async subscribeNewsletter(email: string) {
+    if (USE_MOCK_MODE) {
+      // Mock: LocalStorage에 저장
+      const subscribers = getFromStorage<string[]>(STORAGE_KEYS.NEWSLETTER, []);
+      if (!subscribers.includes(email)) {
+        subscribers.push(email);
+        setToStorage(STORAGE_KEYS.NEWSLETTER, subscribers);
+      }
+      return { success: true };
+    }
+    return await apiCall('/newsletter/subscribe', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+};
+```
+
+## 테스트 계획
+
+### 단위 테스트
+- Props 전달 테스트
+- onStart 콜백 호출 테스트
+
+### 통합 테스트
+- 통계 데이터 로드 테스트
+- 뉴스레터 구독 테스트
+
+### E2E 테스트
+- 랜딩 페이지 → 메인 앱 전환 플로우
+- 뉴스레터 구독 플로우
+
+## 접근성 (a11y)
+
+### ARIA 레이블
+```tsx
+<Button
+  aria-label="앱 시작하기"
+  onClick={onStart}
+>
+  지금 시작하기
+</Button>
+
+<section aria-labelledby="mission-heading">
+  <h2 id="mission-heading">우리의 미션</h2>
+  {/* ... */}
+</section>
+```
+
+### 키보드 네비게이션
+- Tab으로 버튼 이동
+- Enter/Space로 버튼 활성화
+
+## 성능 최적화
+
+### 이미지 최적화
+- Logo 이미지 최적화
+- WebP 포맷 지원
+
+### 애니메이션 최적화
+```typescript
+// will-change 사용
+<motion.div
+  style={{ willChange: 'transform, opacity' }}
+  // ...
+/>
+```
+
+### 코드 스플리팅
+```typescript
+// HomePage를 lazy load
+const HomePage = lazy(() => import('./components/home/HomePage'));
+
+<Suspense fallback={<Loading />}>
+  <HomePage onStart={handleStart} />
+</Suspense>
+```
+
+## SEO 최적화 (추후 SSR/SSG 시)
+
+### Meta Tags
+```html
+<title>Muse You - 문화예술 데이트 플랫폼</title>
+<meta name="description" content="문화예술을 함께 즐기고 파트너를 찾는 특별한 데이트 플랫폼" />
+<meta property="og:title" content="Muse You" />
+<meta property="og:description" content="문화예술 데이트 플랫폼" />
+<meta property="og:image" content="/og-image.png" />
+```

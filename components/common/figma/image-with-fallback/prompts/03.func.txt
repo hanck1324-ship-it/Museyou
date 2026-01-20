@@ -1,0 +1,243 @@
+# Image With Fallback - 기능 명세
+
+## Props 인터페이스
+
+```typescript
+interface ImageWithFallbackProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+  src?: string;
+  alt?: string;
+  className?: string;
+  style?: React.CSSProperties;
+  // ... 기타 img 속성들
+}
+```
+
+## 현재 구현 상태 ✅
+
+### 1. 이미지 로드
+- 원본 이미지 표시 (`src` prop)
+- 표준 `<img>` 요소 사용
+
+### 2. Fallback 처리
+- `onError` 핸들러로 에러 감지
+- `didError` 상태로 Fallback UI 표시
+- Base64 인코딩된 SVG Fallback 이미지 사용
+
+### 3. Props 전달
+- 모든 img 속성 전달 (`...rest`)
+- `data-original-url`에 원본 URL 저장
+
+## 개선이 필요한 기능 🔧
+
+### 1. 커스텀 Fallback 이미지 ⭐
+**현재:** 고정된 SVG Fallback  
+**필요한 기능:**
+```typescript
+interface ImageWithFallbackProps {
+  // ...
+  fallbackSrc?: string;  // 커스텀 Fallback 이미지 URL
+  fallbackComponent?: ReactNode;  // 커스텀 Fallback 컴포넌트
+}
+
+return didError ? (
+  fallbackComponent || (
+    <div className={className} style={style}>
+      {fallbackSrc ? (
+        <img src={fallbackSrc} alt={alt || 'Fallback image'} {...rest} />
+      ) : (
+        // 기본 Fallback SVG
+      )}
+    </div>
+  )
+) : (
+  <img src={src} alt={alt} className={className} style={style} {...rest} onError={handleError} />
+);
+```
+
+### 2. 로딩 상태 표시 ⭐
+**필요한 기능:**
+```typescript
+const [isLoading, setIsLoading] = useState(true);
+
+useEffect(() => {
+  if (src) {
+    setIsLoading(true);
+    const img = new Image();
+    img.onload = () => setIsLoading(false);
+    img.onerror = () => {
+      setIsLoading(false);
+      setDidError(true);
+    };
+    img.src = src;
+  }
+}, [src]);
+
+return (
+  <div className={className} style={style}>
+    {isLoading && (
+      <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+        <Loader2 className="size-6 animate-spin text-gray-400" />
+      </div>
+    )}
+    {/* 이미지 */}
+  </div>
+);
+```
+
+### 3. Lazy Loading ⭐
+**필요한 기능:**
+```typescript
+import { useEffect, useRef } from 'react';
+
+const imgRef = useRef<HTMLImageElement>(null);
+const [shouldLoad, setShouldLoad] = useState(false);
+
+useEffect(() => {
+  if (!imgRef.current) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        setShouldLoad(true);
+        observer.disconnect();
+      }
+    },
+    { rootMargin: '50px' }
+  );
+
+  observer.observe(imgRef.current);
+  return () => observer.disconnect();
+}, []);
+
+<img
+  ref={imgRef}
+  src={shouldLoad ? src : undefined}
+  data-src={src}
+  loading="lazy"
+  // ...
+/>
+```
+
+### 4. 이미지 최적화 (WebP, Responsive)
+**필요한 기능:**
+```typescript
+interface ImageWithFallbackProps {
+  // ...
+  srcSet?: string;  // Responsive images
+  sizes?: string;
+  format?: 'webp' | 'jpg' | 'png';  // 포맷 자동 변환 (서버 측)
+}
+
+<picture>
+  <source srcSet={webpSrc} type="image/webp" />
+  <source srcSet={src} type="image/jpeg" />
+  <img src={src} alt={alt} {...rest} onError={handleError} />
+</picture>
+```
+
+### 5. 재시도 기능
+**필요한 기능:**
+```typescript
+const [retryCount, setRetryCount] = useState(0);
+const MAX_RETRIES = 3;
+
+const handleError = () => {
+  if (retryCount < MAX_RETRIES) {
+    setRetryCount(retryCount + 1);
+    // 재시도 (일정 시간 후)
+    setTimeout(() => {
+      setDidError(false);
+    }, 1000 * retryCount);
+  } else {
+    setDidError(true);
+  }
+};
+```
+
+### 6. 이미지 플레이스홀더 (Blur-up)
+**필요한 기능:**
+```typescript
+interface ImageWithFallbackProps {
+  // ...
+  placeholder?: string;  // Blur 이미지 URL (base64 또는 저해상도 이미지)
+}
+
+const [imageLoaded, setImageLoaded] = useState(false);
+
+return (
+  <div className={className} style={style} {...rest}>
+    {placeholder && !imageLoaded && (
+      <img
+        src={placeholder}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover blur-sm"
+        aria-hidden="true"
+      />
+    )}
+    <img
+      src={src}
+      alt={alt}
+      onLoad={() => setImageLoaded(true)}
+      onError={handleError}
+      className={imageLoaded ? 'opacity-100' : 'opacity-0'}
+      style={{ transition: 'opacity 0.3s' }}
+    />
+  </div>
+);
+```
+
+## 성능 최적화
+
+### 메모이제이션
+```typescript
+export const ImageWithFallback = React.memo(
+  ImageWithFallbackComponent,
+  (prevProps, nextProps) => {
+    return prevProps.src === nextProps.src;
+  }
+);
+```
+
+### 이미지 최적화
+- WebP 포맷 지원
+- Responsive images (srcset)
+- Lazy loading (Intersection Observer)
+- 이미지 압축
+
+## 테스트 계획
+
+### 단위 테스트
+- Props 전달 테스트
+- 이미지 로드 성공 테스트
+- 이미지 로드 실패 테스트
+- Fallback 표시 테스트
+
+### 통합 테스트
+- Lazy loading 테스트
+- 재시도 기능 테스트
+
+### E2E 테스트
+- 실제 이미지 로드 플로우
+- Fallback 이미지 표시 플로우
+
+## 접근성 (a11y)
+
+### ARIA 레이블
+```tsx
+<img
+  alt={alt || '이미지'}
+  role="img"
+  aria-label={alt}
+  // ...
+/>
+```
+
+### Fallback
+```tsx
+<div
+  role="img"
+  aria-label={alt || '이미지를 불러올 수 없습니다'}
+>
+  {/* Fallback content */}
+</div>
+```

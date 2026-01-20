@@ -1,0 +1,242 @@
+# Date Proposal - 기능 명세
+
+## Props 인터페이스
+
+```typescript
+interface DateProposalProps {
+  performance: Performance | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit?: (proposal: DateProposalData) => void;  // 추후 추가
+}
+
+interface DateProposalData {
+  performanceId: string;
+  message: string;
+  proposedDate?: string;  // 추후 추가
+  meetingPlace?: string;  // 추후 추가
+}
+```
+
+## 현재 구현 상태 ✅
+
+### 1. Dialog 표시
+- Dialog 컴포넌트 사용
+- 공연 정보 표시
+- 제안 메시지 입력 폼
+
+### 2. Form 처리
+- 메시지 입력 검증
+- 제출 시 alert 표시 (실제 저장 X)
+
+### 3. 안전 안내
+- 안전한 만남 안내 메시지 표시
+
+## 개선이 필요한 기능 🔧
+
+### 1. API 연동 ⭐
+**현재:** alert 표시만  
+**필요한 기능:**
+```typescript
+// lib/api/dateProposals.ts
+export const dateProposalApi = {
+  async create(proposalData: {
+    performanceId: string;
+    message: string;
+    proposedDate?: string;
+    meetingPlace?: string;
+  }) {
+    if (USE_MOCK_MODE) {
+      const currentUser = getFromStorage(STORAGE_KEYS.CURRENT_USER, null);
+      if (!currentUser) {
+        throw new Error('로그인이 필요합니다.');
+      }
+
+      const proposals = getFromStorage<DateProposal[]>(STORAGE_KEYS.DATE_PROPOSALS, []);
+      const newProposal = {
+        id: `proposal_${Date.now()}`,
+        ...proposalData,
+        userId: currentUser.id,
+        userName: currentUser.name,
+        createdAt: new Date().toISOString(),
+        responses: [],
+      };
+      
+      proposals.push(newProposal);
+      setToStorage(STORAGE_KEYS.DATE_PROPOSALS, proposals);
+      return { proposal: newProposal };
+    }
+
+    return await apiCall('/date-proposals', {
+      method: 'POST',
+      body: JSON.stringify(proposalData),
+    }, true);
+  },
+
+  async getByPerformanceId(performanceId: string) {
+    if (USE_MOCK_MODE) {
+      const proposals = getFromStorage<DateProposal[]>(STORAGE_KEYS.DATE_PROPOSALS, []);
+      return { proposals: proposals.filter(p => p.performanceId === performanceId) };
+    }
+    return await apiCall(`/date-proposals/performance/${performanceId}`);
+  },
+};
+```
+
+### 2. 제안 날짜 선택 ⭐
+**필요한 기능:**
+```typescript
+interface DateProposalProps {
+  // ...
+  proposedDate?: string;
+  onDateChange?: (date: string) => void;
+}
+
+// 날짜 선택 컴포넌트 추가
+<div className="space-y-2">
+  <Label>제안 날짜</Label>
+  <Calendar
+    mode="single"
+    selected={proposedDate ? new Date(proposedDate) : undefined}
+    onSelect={(date) => onDateChange?.(date?.toISOString() || '')}
+  />
+</div>
+```
+
+### 3. 만남 장소 제안 ⭐
+**필요한 기능:**
+```typescript
+interface DateProposalProps {
+  // ...
+  meetingPlace?: string;
+  onMeetingPlaceChange?: (place: string) => void;
+}
+
+// 만남 장소 입력 추가
+<div className="space-y-2">
+  <Label>만남 장소 제안 (선택)</Label>
+  <Input
+    placeholder="예) 공연장 앞 매점"
+    value={meetingPlace}
+    onChange={(e) => onMeetingPlaceChange?.(e.target.value)}
+  />
+</div>
+```
+
+### 4. 응답 목록 표시
+**필요한 기능:**
+- 제안에 대한 응답 목록 표시
+- 응답 버튼 클릭 → 채팅 또는 메시지 전송
+
+### 5. 제안 수정/삭제
+**필요한 기능:**
+- 본인이 작성한 제안만 수정/삭제 가능
+- 수정 버튼 → 폼에 기존 내용 로드
+- 삭제 버튼 → 확인 다이얼로그
+
+### 6. 알림 기능
+**필요한 기능:**
+- 제안에 응답이 올 때 알림
+- 공연 일정 전 리마인더 알림
+
+## API 연동 계획
+
+### Supabase 테이블 설계
+```sql
+CREATE TABLE date_proposals (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id),
+  performance_id UUID REFERENCES performances(id),
+  message TEXT NOT NULL,
+  proposed_date DATE,
+  meeting_place TEXT,
+  status TEXT DEFAULT 'active', -- active, accepted, cancelled
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE date_proposal_responses (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  proposal_id UUID REFERENCES date_proposals(id),
+  user_id UUID REFERENCES users(id),
+  message TEXT NOT NULL,
+  status TEXT DEFAULT 'pending', -- pending, accepted, declined
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### API 엔드포인트
+- `POST /date-proposals` - 제안 작성
+- `GET /date-proposals/performance/:performanceId` - 공연별 제안 목록
+- `GET /date-proposals/me` - 내가 작성한 제안 목록
+- `PUT /date-proposals/:id` - 제안 수정
+- `DELETE /date-proposals/:id` - 제안 삭제
+- `POST /date-proposals/:id/responses` - 응답 작성
+- `PUT /date-proposals/:id/responses/:responseId` - 응답 상태 변경
+
+## 테스트 계획
+
+### 단위 테스트
+- Props 전달 테스트
+- Form 유효성 검사 테스트
+- 메시지 입력 테스트
+
+### 통합 테스트
+- API 호출 테스트
+- 제안 작성 → 저장 플로우
+- 날짜 선택 테스트
+
+### E2E 테스트
+- 제안 작성 전체 플로우
+- 제안 수정/삭제 플로우
+
+## 접근성 (a11y)
+
+### ARIA 레이블
+```tsx
+<Dialog
+  aria-labelledby="date-proposal-title"
+  aria-describedby="date-proposal-description"
+>
+  <DialogTitle id="date-proposal-title">데이트 제안하기</DialogTitle>
+  <DialogDescription id="date-proposal-description">
+    이 공연을 함께 볼 파트너를 찾아보세요
+  </DialogDescription>
+</Dialog>
+
+<Textarea
+  aria-label="제안 메시지"
+  aria-describedby="message-helper"
+/>
+```
+
+### 키보드 네비게이션
+- Tab으로 입력 필드 이동
+- Enter/Space로 버튼 활성화
+- Escape로 다이얼로그 닫기
+
+## 보안 고려사항
+
+### 입력 검증
+- 메시지 길이 제한 (최대 500자)
+- 금지 단어 필터링
+- XSS 방지
+
+### 권한 확인
+- 로그인 필수
+- 본인 제안만 수정/삭제 가능
+
+## 성능 최적화
+
+### 메모이제이션
+```typescript
+const DateProposal = React.memo(
+  DateProposalComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.performance?.id === nextProps.performance?.id &&
+      prevProps.open === nextProps.open
+    );
+  }
+);
+```

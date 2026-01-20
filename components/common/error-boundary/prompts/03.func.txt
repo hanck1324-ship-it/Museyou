@@ -1,0 +1,288 @@
+# Error Boundary - 기능 명세
+
+## Props 인터페이스
+
+```typescript
+interface Props {
+  children: ReactNode;
+  fallback?: ReactNode;  // 커스텀 Fallback UI
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;  // 에러 콜백
+}
+
+interface State {
+  hasError: boolean;
+  error: Error | null;
+  errorInfo: ErrorInfo | null;
+}
+```
+
+## 현재 구현 상태 ✅
+
+### 1. 에러 감지
+- `getDerivedStateFromError`로 에러 상태 설정
+- `componentDidCatch`로 에러 정보 수집
+
+### 2. Fallback UI
+- 기본 Fallback UI 표시
+- 커스텀 Fallback 지원 (`fallback` prop)
+
+### 3. 에러 정보 표시
+- 에러 메시지 표시
+- 개발 환경에서 Stack trace 표시
+- `ErrorInfo.componentStack` 표시
+
+### 4. 액션 버튼
+- "다시 시도" 버튼: 에러 상태 초기화
+- "홈으로" 버튼: 홈으로 이동
+
+### 5. 에러 콜백
+- `onError` prop으로 커스텀 핸들러 호출
+
+## 개선이 필요한 기능 🔧
+
+### 1. 에러 리포팅 서비스 연동 ⭐
+**현재:** TODO 주석만  
+**필요한 기능:**
+```typescript
+// Sentry 연동
+import * as Sentry from '@sentry/react';
+
+componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  // ... 기존 코드
+
+  // Sentry에 에러 전송
+  if (import.meta.env.PROD) {
+    Sentry.captureException(error, {
+      contexts: {
+        react: {
+          componentStack: errorInfo.componentStack,
+        },
+      },
+    });
+  }
+}
+
+// LogRocket 연동 (선택)
+if (import.meta.env.PROD && window.LogRocket) {
+  window.LogRocket.captureException(error, {
+    extra: {
+      componentStack: errorInfo.componentStack,
+    },
+  });
+}
+```
+
+### 2. 에러 분류 및 사용자 친화적 메시지 ⭐
+**필요한 기능:**
+```typescript
+const getErrorMessage = (error: Error): string => {
+  // 네트워크 에러
+  if (error.message.includes('network') || error.message.includes('fetch')) {
+    return '네트워크 연결을 확인해주세요.';
+  }
+
+  // 인증 에러
+  if (error.message.includes('auth') || error.message.includes('login')) {
+    return '로그인이 필요합니다. 다시 로그인해주세요.';
+  }
+
+  // 권한 에러
+  if (error.message.includes('permission') || error.message.includes('forbidden')) {
+    return '접근 권한이 없습니다.';
+  }
+
+  // 기본 에러 메시지
+  return error.message || '예상치 못한 오류가 발생했습니다.';
+};
+
+// Fallback UI에서 사용
+<p className="text-sm text-red-800 font-medium mb-2">
+  {getErrorMessage(this.state.error!)}
+</p>
+```
+
+### 3. 에러 복구 전략 ⭐
+**필요한 기능:**
+```typescript
+interface Props {
+  // ...
+  recoveryStrategy?: 'retry' | 'reload' | 'fallback';
+  maxRetries?: number;
+}
+
+const [retryCount, setRetryCount] = useState(0);
+
+handleReset = () => {
+  if (retryCount < (maxRetries || 3)) {
+    setRetryCount(retryCount + 1);
+    this.setState({
+      hasError: false,
+      error: null,
+      errorInfo: null,
+    });
+  } else {
+    // 재시도 횟수 초과 시 페이지 새로고침
+    window.location.reload();
+  }
+};
+```
+
+### 4. 에러 발생 위치 추적 ⭐
+**필요한 기능:**
+```typescript
+const getErrorLocation = (errorInfo: ErrorInfo): string => {
+  const stack = errorInfo.componentStack;
+  const match = stack.match(/at\s+(.+?)\s+\((.+?):(\d+):(\d+)\)/);
+  
+  if (match) {
+    return `${match[1]} (${match[2]}:${match[3]})`;
+  }
+  
+  return '알 수 없는 위치';
+};
+
+// Error Message Box에 표시
+<div className="text-xs text-red-600 mt-2">
+  발생 위치: {getErrorLocation(this.state.errorInfo!)}
+</div>
+```
+
+### 5. 부분적 에러 복구
+**필요한 기능:**
+```typescript
+// 특정 컴포넌트만 에러 복구
+interface Props {
+  // ...
+  onErrorFallback?: (error: Error) => ReactNode;
+}
+
+// 사용 예시
+<ErrorBoundary
+  onErrorFallback={(error) => {
+    if (error.message.includes('PerformanceCard')) {
+      return <PerformanceCardSkeleton />;
+    }
+    return null;
+  }}
+>
+  <PerformanceCard />
+</ErrorBoundary>
+```
+
+### 6. 에러 로깅 강화
+**필요한 기능:**
+```typescript
+componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  // ... 기존 코드
+
+  // 로컬 스토리지에 에러 저장 (최근 10개)
+  const errorLogs = getFromStorage<Array<{
+    error: string;
+    stack: string;
+    componentStack: string;
+    timestamp: string;
+  }>>(STORAGE_KEYS.ERROR_LOGS, []);
+
+  errorLogs.unshift({
+    error: error.message,
+    stack: error.stack || '',
+    componentStack: errorInfo.componentStack,
+    timestamp: new Date().toISOString(),
+  });
+
+  // 최근 10개만 유지
+  if (errorLogs.length > 10) {
+    errorLogs.pop();
+  }
+
+  setToStorage(STORAGE_KEYS.ERROR_LOGS, errorLogs);
+}
+```
+
+## API 연동 계획
+
+### 에러 리포팅 서비스
+- **Sentry**: 프로덕션 에러 추적
+- **LogRocket**: 세션 재생 및 에러 추적
+- **Firebase Crashlytics**: 크래시 리포팅
+
+### 에러 로깅 API (선택)
+```typescript
+// lib/api/errors.ts
+export const errorApi = {
+  async logError(error: {
+    message: string;
+    stack?: string;
+    componentStack?: string;
+    userAgent?: string;
+    url?: string;
+  }) {
+    if (USE_MOCK_MODE) {
+      // Mock: LocalStorage에 저장
+      return { success: true };
+    }
+
+    return await apiCall('/errors/log', {
+      method: 'POST',
+      body: JSON.stringify(error),
+    });
+  },
+};
+```
+
+## 테스트 계획
+
+### 단위 테스트
+- Props 전달 테스트
+- 에러 상태 설정 테스트
+- Fallback UI 렌더링 테스트
+
+### 통합 테스트
+- 에러 발생 시 Fallback UI 표시 테스트
+- "다시 시도" 버튼 동작 테스트
+- "홈으로" 버튼 동작 테스트
+
+### E2E 테스트
+- 실제 에러 발생 시나리오 테스트
+- 에러 복구 플로우 테스트
+
+## 접근성 (a11y)
+
+### ARIA 레이블
+```tsx
+<div
+  role="alert"
+  aria-live="assertive"
+  aria-label="에러가 발생했습니다"
+>
+  {/* Error UI */}
+</div>
+
+<Button
+  aria-label="에러 상태 초기화 및 다시 시도"
+  onClick={this.handleReset}
+>
+  <RefreshCw />
+  다시 시도
+</Button>
+```
+
+### 키보드 네비게이션
+- Tab으로 버튼 이동
+- Enter/Space로 버튼 활성화
+
+## 보안 고려사항
+
+### 에러 정보 노출
+- 프로덕션에서는 민감한 정보 노출 최소화
+- Stack trace는 개발 환경에서만 표시
+- 사용자에게는 일반적인 에러 메시지만 표시
+
+## 성능 최적화
+
+### 메모이제이션
+- Error Boundary는 Class Component이므로 불필요
+
+### 에러 리포팅 최적화
+- Throttling: 같은 에러는 일정 시간 내 한 번만 리포트
+- Sampling: 일부 에러만 리포팅 (과도한 트래픽 방지)

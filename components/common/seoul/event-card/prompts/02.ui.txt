@@ -1,0 +1,113 @@
+# Event Card - UI 디자인
+
+## 색상 팔레트
+
+### Seoul Vibes Colors
+```css
+--seoul-love: #FF4D73
+--seoul-inspire: #FFC83D
+--seoul-fun: #0085FF
+--text-primary: #1A1A1A
+--text-secondary: #555555
+--bg-white: #FFFFFF
+--bg-sub: #F8F9FA
+```
+
+### Traffic Colors
+```css
+--traffic-high: #E74C3C (빨간색)
+--traffic-mid: #F1C40F (노란색)
+--traffic-low: #2ECC71 (초록색)
+```
+
+### Background
+- Card: `bg-white`
+- Hover: 그림자 증가
+
+### Border
+- 둥글기: `var(--radius-large)` (16px)
+- 그림자: `var(--shadow-soft)` (0 4px 12px rgba(0, 0, 0, 0.08))
+
+## 타이포그래피
+
+### Title
+- 크기: `text-xl` (20px)
+- Weight: 600 (font-semibold)
+- Line clamp: 2줄
+- Color: `var(--text-primary)`
+- Hover: `group-hover:text-[#FF4D73]` (seoul-love)
+
+### Date & Location
+- 크기: `text-xs` (12px)
+- Color: `var(--text-secondary)`
+- Flex: `flex-1`
+
+### Traffic Label
+- 크기: `text-xs` (12px)
+- Color: `var(--text-secondary)`
+
+## 간격
+
+### Container
+- 패딩: `p-4` (16px)
+- 내부 간격: `space-y-3` (12px)
+
+### Image Container
+- 비율: `aspect-video` (16:9)
+- Overflow: `overflow-hidden`
+
+### Content Section
+- 패딩: `p-4`
+- 간격: `space-y-3`
+- Flex: `flex-1 flex flex-col`
+
+### Traffic Info
+- Flexbox: `flex items-center gap-2`
+
+## 아이콘/Indicator
+
+### Traffic Indicator
+- 크기: `w-3 h-3` (12px)
+- 형태: `rounded-full`
+- 색상: Traffic level에 따라 동적
+
+## 이미지 스타일
+
+### Image
+- 너비/높이: `w-full h-full`
+- Object fit: `object-cover`
+- Hover: `group-hover:scale-105`
+- Transition: `transition-transform duration-300`
+
+### Gradient Overlay
+- 위치: `absolute inset-0`
+- 배경: `bg-gradient-to-t from-black/20 to-transparent`
+- Hover: `group-hover:opacity-100`
+- Transition: `transition-opacity duration-300`
+
+## 애니메이션
+
+### Transition
+- 기본: `transition-all duration-300`
+- 이미지 확대: `transition-transform duration-300`
+- 오버레이: `transition-opacity duration-300`
+- 제목 색상: `transition-colors`
+
+### Transform
+- 이미지 Hover: `group-hover:scale-105` (105% 확대)
+
+### Shadow
+- 기본: `var(--shadow-soft)`
+- Hover: `hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)]`
+
+## 다크모드
+
+### 배경
+- Card: `dark:bg-gray-800`
+
+### 텍스트
+- Title: `dark:text-gray-100`
+- Date/Location/Traffic: `dark:text-gray-400`
+
+### 테두리
+- 둥글기 유지

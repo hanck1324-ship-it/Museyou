@@ -180,7 +180,10 @@ export const STORAGE_KEYS = {
   CURRENT_USER: 'muse_you_current_user',
   PERFORMANCE_LIKES: 'muse_you_performance_likes',
   USER_LIKES: 'muse_you_user_likes',
-  MATCHES: 'muse_you_matches'
+  MATCHES: 'muse_you_matches',
+  GROUP_PURCHASES: 'muse_you_group_purchases',
+  GROUP_PURCHASE_PARTICIPANTS: 'muse_you_group_purchase_participants',
+  PERFORMANCES: 'muse_you_performances'
 };
 
 // 초기 사용자 데이터 (테스트용)

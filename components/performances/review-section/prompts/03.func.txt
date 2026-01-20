@@ -1,0 +1,277 @@
+# Review Section - 기능 명세
+
+## Props 인터페이스
+
+```typescript
+interface Review {
+  id: string;
+  author: string;
+  rating: number;
+  date: string;
+  content: string;
+  improvements?: string;
+  helpful: number;
+  userId?: string;  // 작성자 ID (추후 추가)
+  avatar?: string;  // 작성자 아바타 (추후 추가)
+}
+
+interface ReviewSectionProps {
+  performanceId: string;
+  onReviewSubmit?: (review: Review) => void;  // 리뷰 제출 콜백
+  showForm?: boolean;  // 리뷰 작성 폼 표시 여부 (기본: true)
+}
+```
+
+## 현재 구현 상태 ✅
+
+### 1. 리뷰 표시
+- 리뷰 목록 렌더링
+- Avatar, 작성자, 날짜, 평점 표시
+- 리뷰 내용 및 개선사항 표시
+- "도움됨" 버튼 표시
+
+### 2. 리뷰 작성 폼
+- 평점 선택 (1-5점)
+- 리뷰 텍스트 입력
+- 개선사항 입력 (선택)
+- 제출 버튼
+
+### 3. Mock 데이터
+- 하드코딩된 리뷰 2개
+- Form 제출 시 alert 표시 (실제 저장 X)
+
+## 개선이 필요한 기능 🔧
+
+### 1. API 연동 ⭐
+**현재:** Mock 데이터 및 alert  
+**필요한 기능:**
+```typescript
+// lib/api/reviews.ts
+export const reviewApi = {
+  async getByPerformanceId(performanceId: string) {
+    if (USE_MOCK_MODE) {
+      const reviews = getFromStorage<Review[]>(STORAGE_KEYS.REVIEWS, []);
+      return { reviews: reviews.filter(r => r.performanceId === performanceId) };
+    }
+    return await apiCall(`/reviews/${performanceId}`);
+  },
+
+  async create(reviewData: {
+    performanceId: string;
+    rating: number;
+    content: string;
+    improvements?: string;
+  }) {
+    if (USE_MOCK_MODE) {
+      const currentUser = getFromStorage(STORAGE_KEYS.CURRENT_USER, null);
+      if (!currentUser) {
+        throw new Error('로그인이 필요합니다.');
+      }
+
+      const reviews = getFromStorage<Review[]>(STORAGE_KEYS.REVIEWS, []);
+      const newReview = {
+        id: `review_${Date.now()}`,
+        ...reviewData,
+        author: currentUser.name,
+        userId: currentUser.id,
+        date: new Date().toISOString(),
+        helpful: 0,
+      };
+      
+      reviews.push(newReview);
+      setToStorage(STORAGE_KEYS.REVIEWS, reviews);
+      return { review: newReview };
+    }
+
+    return await apiCall('/reviews', {
+      method: 'POST',
+      body: JSON.stringify(reviewData),
+    }, true);
+  },
+};
+```
+
+### 2. "도움됨" 기능 ⭐
+**필요한 기능:**
+```typescript
+interface ReviewSectionProps {
+  performanceId: string;
+  onHelpful?: (reviewId: string) => void;
+  isLoggedIn?: boolean;
+}
+
+const handleHelpful = async (reviewId: string) => {
+  if (!isLoggedIn) {
+    toast.error('로그인이 필요합니다.');
+    return;
+  }
+
+  try {
+    await reviewApi.toggleHelpful(reviewId);
+    // 리뷰 목록 업데이트
+    setReviews(prev => prev.map(r => 
+      r.id === reviewId 
+        ? { ...r, helpful: r.helpful + 1, isHelpful: true }
+        : r
+    ));
+  } catch (error) {
+    handleError(error);
+  }
+};
+```
+
+### 3. 리뷰 수정/삭제
+**필요한 기능:**
+- 본인이 작성한 리뷰만 수정/삭제 가능
+- 수정 버튼 클릭 → 폼에 기존 내용 로드
+- 삭제 버튼 클릭 → 확인 다이얼로그
+
+### 4. 리뷰 정렬/필터링
+**필요한 기능:**
+```typescript
+// 정렬 옵션
+type SortOption = 'recent' | 'helpful' | 'rating-high' | 'rating-low';
+
+const [sortOption, setSortOption] = useState<SortOption>('recent');
+
+const sortedReviews = useMemo(() => {
+  const sorted = [...reviews];
+  switch (sortOption) {
+    case 'recent':
+      return sorted.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    case 'helpful':
+      return sorted.sort((a, b) => b.helpful - a.helpful);
+    case 'rating-high':
+      return sorted.sort((a, b) => b.rating - a.rating);
+    case 'rating-low':
+      return sorted.sort((a, b) => a.rating - b.rating);
+    default:
+      return sorted;
+  }
+}, [reviews, sortOption]);
+```
+
+### 5. 리뷰 이미지 업로드
+**필요한 기능:**
+- 리뷰에 사진 첨부 (최대 3장)
+- Supabase Storage에 이미지 업로드
+- 이미지 갤러리 표시
+
+### 6. 리뷰 신고 기능
+**필요한 기능:**
+- 부적절한 리뷰 신고
+- 신고 버튼 (더보기 메뉴)
+
+### 7. 평균 평점 표시
+**필요한 기능:**
+```typescript
+const averageRating = useMemo(() => {
+  if (reviews.length === 0) return 0;
+  const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+  return (sum / reviews.length).toFixed(1);
+}, [reviews]);
+```
+
+## API 연동 계획
+
+### Supabase 테이블 설계
+```sql
+CREATE TABLE reviews (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  performance_id UUID REFERENCES performances(id),
+  user_id UUID REFERENCES users(id),
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  content TEXT NOT NULL,
+  improvements TEXT,
+  helpful_count INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE review_helpful (
+  user_id UUID REFERENCES users(id),
+  review_id UUID REFERENCES reviews(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (user_id, review_id)
+);
+
+CREATE TABLE review_images (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  review_id UUID REFERENCES reviews(id),
+  image_url TEXT NOT NULL,
+  order_index INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### API 엔드포인트
+- `GET /reviews/:performanceId` - 리뷰 목록 조회
+- `POST /reviews` - 리뷰 작성
+- `PUT /reviews/:id` - 리뷰 수정
+- `DELETE /reviews/:id` - 리뷰 삭제
+- `POST /reviews/:id/helpful` - 도움됨 토글
+- `POST /reviews/:id/report` - 리뷰 신고
+
+## 테스트 계획
+
+### 단위 테스트
+- 평점 선택 테스트
+- 폼 유효성 검사 테스트
+- 리뷰 목록 렌더링 테스트
+
+### 통합 테스트
+- API 호출 테스트
+- 리뷰 작성 → 목록 업데이트 플로우
+- 도움됨 기능 테스트
+
+### E2E 테스트
+- 리뷰 작성 전체 플로우
+- 리뷰 수정/삭제 플로우
+
+## 접근성 (a11y)
+
+### ARIA 레이블
+```tsx
+<button
+  aria-label={`${star}점 평가`}
+  onClick={() => setRating(star)}
+>
+  <Star />
+</button>
+
+<Textarea
+  aria-label="리뷰 내용"
+  placeholder="공연에 대한 후기를 남겨주세요"
+/>
+```
+
+### 키보드 네비게이션
+- Tab으로 평점 버튼 이동
+- Enter/Space로 버튼 활성화
+
+## 성능 최적화
+
+### 가상화 (많은 리뷰일 때)
+```typescript
+import { useVirtualizer } from '@tanstack/react-virtual';
+
+// 리뷰가 50개 이상일 때 가상화 적용
+const parentRef = useRef<HTMLDivElement>(null);
+const virtualizer = useVirtualizer({
+  count: reviews.length,
+  getScrollElement: () => parentRef.current,
+  estimateSize: () => 200,
+  overscan: 5,
+});
+```
+
+### 메모이제이션
+```typescript
+const ReviewItem = React.memo(({ review }: { review: Review }) => {
+  // ...
+});
+
+const StarRating = React.memo(({ rating, onSelect }: StarRatingProps) => {
+  // ...
+});
+```

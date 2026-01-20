@@ -1,0 +1,213 @@
+# Match Card (Seoul) - 기능 명세
+
+## Props 인터페이스
+
+```typescript
+interface MatchCardProps {
+  avatar: string;
+  name: string;
+  age: string;
+  tags: string[];
+  onRequest?: () => void;
+  className?: string;
+  userId?: string;  // 추후 추가
+  isRequested?: boolean;  // 추후 추가
+  onViewProfile?: () => void;  // 추후 추가
+}
+```
+
+## 현재 구현 상태 ✅
+
+### 1. 매칭 정보 표시
+- Avatar 표시 (Avatar 컴포넌트 사용)
+- 이름, 나이 표시
+- 태그 표시 (공백으로 구분)
+
+### 2. 요청 버튼
+- PrimaryButton 사용
+- 클릭 시 `onRequest` 콜백 호출
+
+### 3. 인터랙션
+- Hover 시 shadow 증가
+
+## 개선이 필요한 기능 🔧
+
+### 1. 프로필 보기 기능 ⭐
+**필요한 기능:**
+```typescript
+interface MatchCardProps {
+  // ...
+  onViewProfile?: () => void;
+}
+
+// 카드 클릭 시 프로필 보기
+<div
+  className="flex items-center gap-4 p-4 cursor-pointer"
+  onClick={onViewProfile}
+>
+  {/* ... */}
+</div>
+```
+
+### 2. 요청 상태 관리 ⭐
+**필요한 기능:**
+```typescript
+interface MatchCardProps {
+  // ...
+  isRequested?: boolean;
+  isPending?: boolean;
+  onCancelRequest?: () => void;
+}
+
+// 버튼 상태에 따른 텍스트 변경
+<PrimaryButton
+  onClick={isRequested ? onCancelRequest : onRequest}
+  disabled={isPending}
+>
+  {isPending ? '요청 중...' : isRequested ? '요청됨' : '요청'}
+</PrimaryButton>
+```
+
+### 3. 매칭 스코어 표시
+**필요한 기능:**
+```typescript
+interface MatchCardProps {
+  // ...
+  matchScore?: number;
+}
+
+// 매칭 스코어 Badge 추가
+{matchScore && (
+  <Badge className="absolute top-2 right-2 bg-gradient-to-r from-pink-500 to-purple-500">
+    {matchScore}% 매칭
+  </Badge>
+)}
+```
+
+### 4. 상태 아이콘
+**필요한 기능:**
+```typescript
+import { CheckCircle, Clock } from 'lucide-react';
+
+// 요청 상태 아이콘
+{isRequested && (
+  <CheckCircle className="size-4 text-green-500" />
+)}
+{isPending && (
+  <Clock className="size-4 text-yellow-500 animate-spin" />
+)}
+```
+
+### 5. 더 많은 정보 표시
+**필요한 기능:**
+```typescript
+interface MatchCardProps {
+  // ...
+  bio?: string;  // 짧은 소개
+  interests?: string[];  // 관심사 (태그와 별도)
+  location?: string;  // 위치
+}
+
+// Bio 표시 (line-clamp-2)
+{bio && (
+  <p className="text-xs text-muted-foreground line-clamp-2">
+    {bio}
+  </p>
+)}
+
+// 위치 표시
+{location && (
+  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+    <MapPin className="size-3" />
+    <span>{location}</span>
+  </div>
+)}
+```
+
+## API 연동 계획
+
+### Supabase 테이블 설계
+```sql
+CREATE TABLE match_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  from_user_id UUID REFERENCES users(id),
+  to_user_id UUID REFERENCES users(id),
+  status TEXT DEFAULT 'pending', -- 'pending' | 'accepted' | 'declined'
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (from_user_id, to_user_id)
+);
+
+CREATE TABLE user_match_scores (
+  user_id UUID REFERENCES users(id),
+  target_user_id UUID REFERENCES users(id),
+  score NUMERIC(5, 2), -- 0-100
+  factors JSONB, -- 매칭 점수 계산 요인
+  calculated_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (user_id, target_user_id)
+);
+```
+
+### API 엔드포인트
+- `POST /matches/request` - 매칭 요청
+- `GET /matches/requests` - 내 요청 목록
+- `PUT /matches/requests/:id/cancel` - 요청 취소
+- `GET /matches/scores/:userId` - 매칭 스코어
+
+## 테스트 계획
+
+### 단위 테스트
+- Props 전달 테스트
+- Avatar 표시 테스트
+- 버튼 상태 테스트
+
+### 통합 테스트
+- 요청 기능 테스트
+- 프로필 보기 테스트
+
+### E2E 테스트
+- 매칭 요청 전체 플로우
+- 요청 취소 플로우
+
+## 접근성 (a11y)
+
+### ARIA 레이블
+```tsx
+<div
+  role="article"
+  aria-label={`${name}, ${age} - ${tags.join(', ')}`}
+  onClick={onViewProfile}
+  tabIndex={0}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      onViewProfile?.();
+    }
+  }}
+>
+  {/* ... */}
+</div>
+
+<button
+  aria-label={`${name}에게 매칭 요청하기`}
+  onClick={onRequest}
+>
+  요청
+</button>
+```
+
+### 키보드 네비게이션
+- Tab으로 카드 및 버튼 접근
+- Enter/Space로 활성화
+
+## 성능 최적화
+
+### 메모이제이션
+```typescript
+export const SeoulMatchCard = React.memo(
+  SeoulMatchCardComponent,
+  (prevProps, nextProps) => {
+    return prevProps.userId === nextProps.userId &&
+           prevProps.isRequested === nextProps.isRequested;
+  }
+);
+```

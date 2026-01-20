@@ -1,0 +1,33 @@
+# Image With Fallback - 와이어프레임
+
+## 컴포넌트 개요
+이미지 로드 실패 시 Fallback 이미지를 표시하는 컴포넌트
+
+## 레이아웃 구조
+
+```
+ImageWithFallback
+├── Success State
+│   └── <img> (src, alt, className, style, onError)
+│
+└── Error State
+    └── <div> (bg-gray-100, center)
+        └── <img> (fallback SVG, data-original-url)
+```
+
+## 상태 정의
+
+### 기본 상태
+- `didError: false`
+- 원본 이미지 표시
+
+### 에러 상태
+- `didError: true`
+- Fallback 이미지 표시
+
+## 인터랙션
+
+### 이미지 로드 실패
+- `onError` 이벤트 발생
+- `didError: true`로 상태 변경
+- Fallback 이미지 표시

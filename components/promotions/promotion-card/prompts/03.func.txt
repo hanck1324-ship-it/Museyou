@@ -1,0 +1,239 @@
+# Promotion Card - 기능 명세
+
+## Props 인터페이스
+
+```typescript
+export interface Promotion {
+  id: string;
+  title: string;
+  district: string;
+  category: string;
+  date: string;
+  image: string;
+  description: string;
+  organizer: string;
+  link?: string;  // 선택사항: 외부 링크
+}
+
+interface PromotionCardProps {
+  promotion: Promotion;
+  onViewDetails?: (promotion: Promotion) => void;  // 추후 추가 가능
+}
+```
+
+## 현재 구현 상태 ✅
+
+### 1. 카드 표시
+- 프로모션 제목, 카테고리, 지역 표시
+- 이미지 표시 (ImageWithFallback 사용)
+- 설명, 주최, 날짜 정보 표시
+
+### 2. 외부 링크
+- `promotion.link`가 있을 때만 버튼 표시
+- 새 창으로 열기 (`target="_blank"`)
+- `rel="noopener noreferrer"` 보안 속성 포함
+
+### 3. 이미지 처리
+- ImageWithFallback 컴포넌트로 로드 실패 처리
+- Hover 시 확대 애니메이션
+
+## 개선이 필요한 기능 🔧
+
+### 1. 상세보기 기능 ⭐
+**현재:** 미구현  
+**필요한 기능:**
+```typescript
+interface PromotionCardProps {
+  promotion: Promotion;
+  onViewDetails?: (promotion: Promotion) => void;
+}
+
+// 사용 예시
+<PromotionCard
+  promotion={promotion}
+  onViewDetails={(promo) => {
+    // Dialog 또는 상세 페이지로 이동
+    setSelectedPromotion(promo);
+    setDetailOpen(true);
+  }}
+/>
+```
+
+**Supabase 연동:**
+```typescript
+// lib/api/promotions.ts
+export async function getPromotionById(id: string) {
+  if (USE_MOCK_MODE) {
+    const promotion = mockPromotions.find(p => p.id === id);
+    return { promotion };
+  }
+  return await apiCall(`/promotions/${id}`);
+}
+```
+
+### 2. 좋아요/북마크 기능 ⭐
+**필요한 기능:**
+```typescript
+interface PromotionCardProps {
+  promotion: Promotion;
+  isBookmarked?: boolean;
+  onToggleBookmark?: (promotionId: string) => void;
+  isLoggedIn?: boolean;
+}
+
+// 좋아요/북마크 버튼 추가 (이미지 위 우측 상단)
+<Button
+  variant="ghost"
+  size="icon"
+  className="absolute top-2 right-2 size-8 rounded-full backdrop-blur-sm"
+  onClick={handleToggleBookmark}
+>
+  <Bookmark className={isBookmarked ? 'fill-current' : ''} />
+</Button>
+```
+
+### 3. 공유 기능
+**필요한 기능:**
+```typescript
+const handleShare = async () => {
+  const shareData = {
+    title: promotion.title,
+    text: `${promotion.title} - ${promotion.district} 문화 프로그램`,
+    url: `${window.location.origin}/promotion/${promotion.id}`,
+  };
+
+  if (navigator.share && navigator.canShare(shareData)) {
+    await navigator.share(shareData);
+  } else {
+    // 클립보드 복사 fallback
+    await navigator.clipboard.writeText(shareData.url);
+    toast.success('링크가 복사되었습니다!');
+  }
+};
+```
+
+### 4. 이미지 갤러리
+**필요한 기능:**
+- 여러 이미지 지원
+- Carousel 형태로 이미지 슬라이더
+```typescript
+interface Promotion {
+  // ...
+  images?: string[];  // 여러 이미지 지원
+  image: string;      // 대표 이미지
+}
+```
+
+### 5. 필터링 연동
+**현재:** App.tsx에서 필터링  
+**개선:** 지역 필터와 자동 연동
+```typescript
+// App.tsx에서
+const filteredPromotions = promotions.filter((promo) => {
+  return selectedDistrict === "all" || promo.district === selectedDistrict;
+});
+```
+
+## API 연동 계획
+
+### Mock 모드
+```typescript
+// lib/api/api.ts
+export const promotionApi = {
+  async getAll() {
+    if (USE_MOCK_MODE) {
+      return { promotions: mockPromotions };
+    }
+    return await apiCall('/promotions');
+  },
+
+  async getById(id: string) {
+    if (USE_MOCK_MODE) {
+      const promotion = mockPromotions.find(p => p.id === id);
+      return { promotion };
+    }
+    return await apiCall(`/promotions/${id}`);
+  },
+
+  async toggleBookmark(promotionId: string) {
+    // 북마크 토글 로직
+  },
+};
+```
+
+### Supabase 테이블 설계 (참고)
+```sql
+CREATE TABLE promotions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  district TEXT NOT NULL,
+  category TEXT,
+  date TEXT,
+  image TEXT,
+  description TEXT,
+  organizer TEXT,
+  link TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE promotion_bookmarks (
+  user_id UUID REFERENCES users(id),
+  promotion_id UUID REFERENCES promotions(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (user_id, promotion_id)
+);
+```
+
+## 테스트 계획
+
+### 단위 테스트
+- Props 전달 테스트
+- 조건부 렌더링 테스트 (link 유무)
+- 이미지 로드 실패 시 Fallback 테스트
+
+### 통합 테스트
+- 필터링 연동 테스트
+- 좋아요/북마크 기능 테스트
+
+### E2E 테스트
+- 카드 클릭 → 상세보기 플로우
+- 외부 링크 버튼 클릭 → 새 창 열기
+
+## 접근성 (a11y)
+
+### ARIA 레이블
+```tsx
+<Card
+  role="article"
+  aria-label={`${promotion.title} - ${promotion.district}`}
+>
+  {/* ... */}
+</Card>
+
+<Button
+  aria-label={`${promotion.title} 외부 링크 열기`}
+>
+  {/* ... */}
+</Button>
+```
+
+### 키보드 네비게이션
+- Tab 키로 버튼에 접근 가능
+- Enter/Space로 버튼 활성화
+
+## 성능 최적화
+
+### 이미지 최적화
+- WebP 포맷 지원
+- Lazy loading (Intersection Observer)
+- Responsive images (srcset)
+
+### 메모이제이션
+```typescript
+export const PromotionCard = React.memo(
+  PromotionCardComponent,
+  (prevProps, nextProps) => {
+    return prevProps.promotion.id === nextProps.promotion.id;
+  }
+);
+```

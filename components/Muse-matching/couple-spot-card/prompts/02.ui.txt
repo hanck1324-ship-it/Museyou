@@ -1,0 +1,162 @@
+# Couple Spot Card - UI 디자인
+
+## 색상 팔레트
+
+### Primary (Emerald/Purple/Pink)
+```css
+--emerald-500: #10b981
+--emerald-600: #059669
+--purple-500: #a855f7
+--purple-600: #9333ea
+--pink-400: #f472b6
+--pink-500: #ec4899
+--pink-600: #db2777
+```
+
+### Background Gradient
+- 배경 그라데이션: `from-emerald-500/5 via-purple-500/5 to-pink-400/5`
+- Couple Badge: `from-emerald-500 via-purple-500 to-pink-400`
+- Discount Badge: `from-red-500 to-rose-500`
+
+### Card Background
+- Light: `bg-white/90`
+- Dark: `dark:bg-gray-800/90`
+
+### Border
+- 기본: `border-2 border-purple-200`
+- Hover: `hover:border-purple-300`
+
+## 타이포그래피
+
+### 제목
+- 모바일: `text-base` (16px)
+- 데스크톱: `text-lg` (18px)
+- Weight: 600 (font-semibold)
+- Line clamp: 2줄
+
+### Atmosphere
+- 크기: `text-xs` (12px)
+- Color: `text-muted-foreground`
+
+### 설명
+- 모바일: `text-xs` (12px)
+- 데스크톱: `text-sm` (14px)
+- Color: `text-muted-foreground`
+- Line clamp: 2줄
+
+## 간격
+
+### 카드 패딩
+- 모바일: `p-3` (12px)
+- 데스크톱: `p-6` (24px)
+
+### 내부 간격
+- Header: `pb-2 sm:pb-3` (8px / 12px)
+- Content: `space-y-1.5 sm:space-y-2` (6px / 8px)
+
+## 아이콘
+
+### 크기
+- 메타 정보: `size-3 sm:size-4` (12px / 16px)
+- Heart (평점): `size-3 sm:size-4` (12px / 16px)
+- Users (Couple Badge): `size-3` (12px)
+
+### 색상
+- Heart: `fill-pink-400 text-pink-400` (animate-pulse)
+- MapPin: `text-purple-500`
+- Calendar, Cloud: `text-purple-600`
+
+## Badge 스타일
+
+### Couple Badge (이미지 위)
+- 배경: `bg-gradient-to-r from-emerald-500 via-purple-500 to-pink-400`
+- 텍스트: `text-white`
+- 위치: `absolute top-2 sm:top-3 right-2 sm:right-3`
+- 그림자: `shadow-lg`
+- Backdrop blur: `backdrop-blur-sm`
+- 애니메이션: `animate-float`
+
+### Discount Badge (이미지 위, 선택)
+- 배경: `bg-gradient-to-r from-red-500 to-rose-500`
+- 텍스트: `text-white`
+- 위치: `absolute top-2 sm:top-3 left-2 sm:left-3`
+- 그림자: `shadow-lg`
+- Backdrop blur: `backdrop-blur-sm`
+
+### Category Badge
+- Variant: `outline`
+- Border: `border-purple-200`
+- 텍스트: `text-purple-700`
+- 크기: `text-xs`
+
+### Tags
+- Variant: `secondary`
+- 배경: `bg-gradient-to-r from-purple-100 to-pink-100`
+- 텍스트: `text-purple-700`
+- Border: `border-0`
+- 크기: `text-xs`
+
+## Recommended Date Box 스타일
+
+### 컨테이너
+- 배경: `bg-gradient-to-r from-purple-50 via-pink-50 to-rose-50`
+- 다크모드: `dark:from-purple-950/20 dark:to-pink-950/20`
+- 패딩: `p-2.5`
+- 둥글기: `rounded-lg`
+- 테두리: `border border-purple-100`
+- 그림자: `shadow-sm`
+
+### 내부 간격
+- `space-y-1`
+
+## Button 스타일
+
+### View Details Button
+- 배경: `bg-gradient-to-r from-emerald-500 via-purple-500 to-pink-400`
+- Hover: `hover:from-emerald-600 hover:via-purple-600 hover:to-pink-500`
+- 텍스트: `text-white`
+- 전체 너비: `w-full`
+- 그림자: `shadow-lg hover:shadow-xl`
+
+### Button 내부 효과
+- Overlay: `bg-white/20` (hover 시 translate-y-0)
+
+## 애니메이션
+
+### Background Gradient
+- `animate-pulse-glow` (커스텀 애니메이션)
+- 부드러운 그라데이션 펄스
+
+### Couple Badge
+- `animate-float` (커스텀 애니메이션)
+- 위아래 플로팅 효과
+
+### Heart Icon
+- `animate-pulse` (기본 Tailwind)
+- 평점 아이콘 펄스
+
+### Transition
+- 기본: `transition-all duration-300`
+- 이미지 확대: `transition-transform duration-500`
+- 오버레이: `transition-opacity duration-300`
+
+### Transform
+- 카드 Hover: `hover:-translate-y-1` (4px 위로)
+- 이미지 Hover: `group-hover:scale-110` (110% 확대)
+
+## 다크모드
+
+### 배경
+- Card: `dark:bg-gray-800/90`
+- Recommended Date Box: `dark:from-purple-950/20 dark:to-pink-950/20`
+
+### 테두리
+- Card: `dark:border-gray-700`
+- Recommended Date Box: `dark:border-purple-800`
+
+### 텍스트
+- 제목: `dark:text-gray-100`
+- 설명/메타: `dark:text-gray-400`
+
+### Badge
+- Category: `dark:border-purple-800 dark:text-purple-400`

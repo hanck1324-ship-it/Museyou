@@ -1,0 +1,86 @@
+# Home Page - 와이어프레임
+
+## 컴포넌트 개요
+앱 진입 시 표시되는 랜딩 페이지 컴포넌트
+
+## 레이아웃 구조
+
+```
+HomePage
+├── Animated Background (absolute, -z-10)
+│   ├── Pink Gradient Circle (top-left)
+│   ├── Purple Gradient Circle (top-right)
+│   ├── Emerald Gradient Circle (bottom-left)
+│   └── Blue Gradient Circle (bottom-right)
+│
+├── Hero Section
+│   ├── Logo (MuseYouLogo, large)
+│   ├── Subtitle
+│   └── CTA Button ("지금 시작하기")
+│
+├── Mission Cards Section
+│   ├── Section Title ("우리의 미션")
+│   └── Mission Cards Grid (3개)
+│       ├── LOVE Card
+│       ├── INSPIRE Card
+│       └── FUN Card
+│
+├── Features Section
+│   ├── Section Title ("주요 기능")
+│   └── Feature Cards Grid (3개)
+│       ├── 문화예술 공연 Card
+│       ├── 문화 파트너 매칭 Card
+│       └── 커플 데이트 추천 Card
+│
+├── Stats Section
+│   ├── Section Title ("Muse You와 함께하세요")
+│   ├── Stats Grid (4개)
+│   │   ├── 진행중인 공연
+│   │   ├── 활동 중인 회원
+│   │   ├── 서울 전 자치구
+│   │   └── 평균 만족도
+│   └── CTA Button ("문화예술 데이트 시작하기")
+│
+└── Footer
+    └── Copyright Text
+```
+
+## 반응형 디자인
+
+### 모바일 (< 640px)
+- 컨테이너 패딩: `px-4`
+- 섹션 패딩: `py-12`
+- 그리드: `grid-cols-1`
+- 텍스트 크기: 기본 크기
+
+### 데스크톱 (≥ 640px)
+- 컨테이너 패딩: `px-4`
+- 섹션 패딩: `py-20` (Hero), `py-16` (기타)
+- 그리드: `md:grid-cols-3` (Mission, Features), `md:grid-cols-4` (Stats)
+- 텍스트 크기: `lg:text-*`
+
+## 상태 정의
+
+### 애니메이션 상태
+- 각 섹션별 opacity, y, scale 초기값
+- Framer Motion 애니메이션 트리거
+
+### 인터랙션 상태
+- Hover 상태: 카드 상승, 확대, 그림자 증가
+
+## 인터랙션
+
+### CTA 버튼 클릭
+- `onStart()` 콜백 호출
+- 메인 앱으로 전환
+
+### Mission Card Hover
+- Scale: 1.05
+- Y: -8px
+- 그림자 증가
+- Glow 효과
+
+### Feature Card Hover
+- Y: -6px
+- 그림자 증가
+- 그라데이션 오버레이 표시

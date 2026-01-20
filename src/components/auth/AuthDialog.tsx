@@ -240,7 +240,7 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
         <DialogHeader>
           <DialogTitle>서울 문화예술 로그인</DialogTitle>
           <DialogDescription>
-            문화 데이트 매칭과 커플 추천을 이용하려면 로그인하세요
+            문화 공동구매와 파트너 매칭을 이용하려면 로그인하세요
           </DialogDescription>
         </DialogHeader>
 
@@ -305,7 +305,7 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
               >
                 <UserPlus className="size-6 mx-auto mb-2 text-purple-600" />
                 <div className="font-medium">일반 회원</div>
-                <p className="text-xs text-muted-foreground mt-1">문화 데이트 매칭</p>
+                <p className="text-xs text-muted-foreground mt-1">문화 공동구매</p>
               </button>
               <button
                 type="button"

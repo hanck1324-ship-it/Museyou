@@ -1,0 +1,83 @@
+# Match Card (Seoul) - UI 디자인
+
+## 색상 팔레트
+
+### Seoul Vibes Colors
+```css
+--seoul-love: #FF4D73
+--text-primary: #1A1A1A
+--text-secondary: #555555
+--bg-sub: #F8F9FA
+```
+
+### Avatar Fallback
+- 배경: `var(--seoul-love)` (#FF4D73)
+- 텍스트: `white`
+
+### Button
+- PrimaryButton 컴포넌트 사용
+- 그라데이션: `from-[#FF4D73] to-[#FFC83D]`
+
+## 타이포그래피
+
+### Name & Age
+- 크기: `text-base` (16px)
+- Weight: 600 (font-semibold)
+- Color: `var(--text-primary)`
+- Truncate: `truncate`
+
+### Tags
+- 크기: `text-xs` (12px)
+- Color: `var(--text-secondary)`
+- Truncate: `truncate`
+- 구분자: 공백 (`tags.join(" ")`)
+
+## 간격
+
+### Container
+- 패딩: `p-4` (16px)
+- 간격: `gap-4` (16px)
+
+### Info Section
+- 내부 간격: `space-y-1` (4px)
+- Flex: `flex-1 min-w-0`
+
+## Avatar
+
+### 크기
+- `w-16 h-16` (64px)
+- `shrink-0`
+
+### Fallback
+- 배경: `var(--seoul-love)`
+- 텍스트: `white`
+- 첫 글자 표시
+
+## Button 스타일
+
+### Request Button
+- PrimaryButton 컴포넌트 사용
+- Size: `sm`
+- `shrink-0`
+
+## 애니메이션
+
+### Transition
+- 기본: `transition-all duration-300`
+- Hover: shadow 증가
+
+### Shadow
+- 기본: 없음
+- Hover: `hover:shadow-[0_6px_16px_rgba(0,0,0,0.1)]`
+
+## 다크모드
+
+### 배경
+- Container: `dark:bg-gray-800`
+
+### 텍스트
+- Name: `dark:text-gray-100`
+- Tags: `dark:text-gray-400`
+
+### Avatar
+- Fallback 배경: `dark:bg-pink-600`

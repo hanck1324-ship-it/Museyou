@@ -1,0 +1,67 @@
+# Review Section - 와이어프레임
+
+## 컴포넌트 개요
+공연에 대한 리뷰를 작성하고 표시하는 섹션 컴포넌트
+
+## 레이아웃 구조
+
+```
+ReviewSection
+├── Review Form Section
+│   ├── Title ("리뷰 작성")
+│   ├── Rating Input
+│   │   └── Star Buttons (1-5)
+│   ├── Review Textarea
+│   ├── Improvement Textarea (optional)
+│   └── Submit Button
+│
+├── Separator
+│
+└── Reviews List Section
+    ├── Title ("리뷰 (N)")
+    └── Review Items
+        └── Review Card
+            ├── Avatar + Author Info
+            ├── Rating Stars
+            ├── Review Content
+            ├── Improvement Box (if exists)
+            └── Helpful Button
+```
+
+## 반응형 디자인
+
+### 모바일 (< 640px)
+- 패딩: 기본 패딩
+- 텍스트 크기: text-xs, text-sm
+- Textarea: 기본 높이
+
+### 데스크톱 (≥ 640px)
+- 더 넓은 레이아웃
+- 텍스트 크기: text-sm, text-base
+
+## 상태 정의
+
+### Form 상태
+- `newReview: string` - 작성 중인 리뷰 텍스트
+- `newImprovement: string` - 작성 중인 개선사항
+- `rating: number` - 선택한 평점 (1-5)
+
+### Reviews 상태
+- `reviews: Review[]` - 리뷰 목록
+
+## 인터랙션
+
+### Star Rating
+- 클릭 시 평점 설정
+- 1-5점 선택 가능
+- 선택된 별은 fill-yellow-400
+- 미선택 별은 text-gray-300
+
+### Form Submit
+- 리뷰 텍스트 필수
+- 개선사항은 선택
+- 제출 시 API 호출 및 목록 업데이트
+
+### Helpful Button
+- 클릭 시 "도움됨" 수 증가
+- 로그인 필요 (향후 구현)
