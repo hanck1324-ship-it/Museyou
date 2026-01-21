@@ -176,6 +176,7 @@ export const mockMatches = [
 
 // 로컬 스토리지 키
 export const STORAGE_KEYS = {
+  ORDERS: 'museyou_orders',
   USERS: 'muse_you_users',
   CURRENT_USER: 'muse_you_current_user',
   PERFORMANCE_LIKES: 'muse_you_performance_likes',

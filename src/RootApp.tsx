@@ -5,7 +5,7 @@ import { BoardsRouter } from "./boards/BoardsRouter";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import { setupNetworkMonitor } from "./lib/utils/errorHandler";
 import AuthCallbackPage from "./auth/callback/page";
-import AuthCallbackPage from "./auth/callback/page";
+import { OrderList } from "./components/payment/OrderList";
 
 export default function RootApp() {
   useEffect(() => {
@@ -17,6 +17,7 @@ export default function RootApp() {
     <ErrorBoundary>
       <Routes>
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
+        <Route path="/orders" element={<OrderList />} />
         <Route path="/boards/*" element={<BoardsRouter />} />
         <Route path="/*" element={<App />} />
         <Route path="*" element={<Navigate to="/" replace />} />
