@@ -26,6 +26,7 @@ import {
   promotionApi,
   getAccessToken,
 } from "./lib/api/api";
+import { getCurrentSession } from "./lib/utils/socialAuth";
 
 export default function App() {
   const navigate = useNavigate();
@@ -106,12 +107,25 @@ export default function App() {
 
   const initializeApp = async () => {
     try {
-      // Check for existing session
-      const session = await authApi.getSession();
+      // Check for existing session (일반 로그인 또는 소셜 로그인)
+      const session = await authApi.getSession() || await getCurrentSession();
       if (session) {
         setIsLoggedIn(true);
-        const profileData = await authApi.getProfile();
-        setCurrentUser(profileData.profile);
+        try {
+          const profileData = await authApi.getProfile();
+          setCurrentUser(profileData?.profile || {
+            id: session.user?.id || '',
+            email: session.user?.email || '',
+            name: session.user?.user_metadata?.name || session.user?.email?.split('@')[0] || '사용자',
+          });
+        } catch (error) {
+          // 프로필을 가져오지 못해도 세션이 있으면 사용자 정보 설정
+          setCurrentUser({
+            id: session.user?.id || '',
+            email: session.user?.email || '',
+            name: session.user?.user_metadata?.name || session.user?.email?.split('@')[0] || '사용자',
+          });
+        }
         
         // 좋아요한 공연 목록 로드
         await loadLikedPerformances();

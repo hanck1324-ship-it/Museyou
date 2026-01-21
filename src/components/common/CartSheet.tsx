@@ -6,9 +6,12 @@ import { ShoppingCart, Trash2, Plus, Minus, X } from "lucide-react";
 import { useCartStore } from "../../store/useCartStore";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { toast } from "sonner";
+import { CheckoutPage } from "../payment/CheckoutPage";
+import { useState } from "react";
 
 export function CartSheet() {
   const { items, isOpen, setIsOpen, removeItem, updateQuantity, clearCart, getTotalPrice, getItemCount } = useCartStore();
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ko-KR').format(price) + '원';
@@ -19,15 +22,20 @@ export function CartSheet() {
       toast.error('장바구니가 비어있습니다.');
       return;
     }
-    toast.info('결제 기능은 곧 출시됩니다! 💳');
-    // TODO: 결제 페이지로 이동
+    setIsOpen(false);
+    setCheckoutOpen(true);
+  };
+
+  const handlePaymentSuccess = (orderId: string) => {
+    toast.success(`주문이 완료되었습니다! (주문번호: ${orderId})`);
+    setCheckoutOpen(false);
   };
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto dark:bg-gray-900 dark:border-gray-700">
         <SheetHeader>
-          <SheetTitle className="flex items-center gap-2">
+          <SheetTitle className="flex items-center gap-2 dark:text-gray-100">
             <ShoppingCart className="size-5" />
             장바구니
             {getItemCount() > 0 && (
@@ -36,7 +44,7 @@ export function CartSheet() {
               </Badge>
             )}
           </SheetTitle>
-          <SheetDescription>
+          <SheetDescription className="dark:text-gray-400">
             선택한 공연을 확인하고 결제하세요
           </SheetDescription>
         </SheetHeader>
@@ -44,9 +52,9 @@ export function CartSheet() {
         <div className="mt-6 space-y-4">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <ShoppingCart className="size-16 text-muted-foreground mb-4 opacity-50" />
-              <p className="text-muted-foreground mb-2">장바구니가 비어있습니다</p>
-              <p className="text-sm text-muted-foreground">공연을 추가해보세요!</p>
+              <ShoppingCart className="size-16 text-muted-foreground dark:text-gray-500 mb-4 opacity-50" />
+              <p className="text-muted-foreground dark:text-gray-400 mb-2">장바구니가 비어있습니다</p>
+              <p className="text-sm text-muted-foreground dark:text-gray-400">공연을 추가해보세요!</p>
             </div>
           ) : (
             <>
@@ -70,7 +78,7 @@ export function CartSheet() {
                           <h4 className="font-semibold text-sm sm:text-base line-clamp-2 dark:text-gray-100">
                             {item.title}
                           </h4>
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-xs text-muted-foreground dark:text-gray-400 mt-1">
                             {item.venue} · {item.date}
                           </p>
                         </div>
@@ -124,7 +132,7 @@ export function CartSheet() {
                             }
                           </p>
                           {item.quantity > 1 && (
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground dark:text-gray-400">
                               개당 {item.price}
                             </p>
                           )}
@@ -139,7 +147,7 @@ export function CartSheet() {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">총 상품 수</span>
+                  <span className="text-muted-foreground dark:text-gray-400">총 상품 수</span>
                   <span className="font-medium dark:text-gray-200">{getItemCount()}개</span>
                 </div>
                 <div className="flex items-center justify-between text-lg font-bold">
@@ -176,6 +184,12 @@ export function CartSheet() {
           )}
         </SheetFooter>
       </SheetContent>
+
+      <CheckoutPage
+        open={checkoutOpen}
+        onOpenChange={setCheckoutOpen}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
     </Sheet>
   );
 }
