@@ -78,11 +78,23 @@ export async function handleOAuthCallback(): Promise<{
   session: any;
 } | null> {
   try {
+    // URL에서 해시나 쿼리 파라미터 확인
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const queryParams = new URLSearchParams(window.location.search);
+    
+    // Supabase는 URL 해시에 인증 정보를 포함할 수 있음
     const { data, error } = await supabase.auth.getSession();
     
     if (error) {
       console.error('세션 가져오기 오류:', error);
-      toast.error('로그인 처리 중 오류가 발생했습니다.');
+      
+      // URL에 에러 정보가 있는지 확인
+      const errorDescription = hashParams.get('error_description') || queryParams.get('error_description');
+      if (errorDescription) {
+        toast.error(decodeURIComponent(errorDescription));
+      } else {
+        toast.error('로그인 처리 중 오류가 발생했습니다.');
+      }
       return null;
     }
 
@@ -90,17 +102,30 @@ export async function handleOAuthCallback(): Promise<{
       // 세션 저장
       localStorage.setItem('access_token', data.session.access_token);
       
-      toast.success('로그인 성공!');
-      return {
-        user: data.session.user,
-        session: data.session,
-      };
+      // 사용자 정보 가져오기
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        toast.success('로그인 성공!');
+        return {
+          user: user,
+          session: data.session,
+        };
+      }
     }
 
+    // 세션이 없으면 로그인 실패
+    const errorDescription = hashParams.get('error_description') || queryParams.get('error_description');
+    if (errorDescription) {
+      toast.error(decodeURIComponent(errorDescription));
+    } else {
+      toast.error('로그인에 실패했습니다. 다시 시도해주세요.');
+    }
+    
     return null;
-  } catch (error) {
+  } catch (error: any) {
     console.error('OAuth 콜백 처리 오류:', error);
-    toast.error('로그인 처리 중 오류가 발생했습니다.');
+    toast.error(error.message || '로그인 처리 중 오류가 발생했습니다.');
     return null;
   }
 }

@@ -38,14 +38,14 @@ export function MatchingCard({ user, onLike, onMessage, onViewProfile }: Matchin
     ? "hover:from-emerald-600 hover:to-teal-600"
     : "hover:from-pink-600 hover:to-rose-600";
   const borderClass = isUserMale
-    ? "border-emerald-200 hover:border-emerald-300"
-    : "border-pink-200 hover:border-pink-300";
+    ? "border-emerald-200 dark:border-emerald-800 hover:border-emerald-300 dark:hover:border-emerald-700"
+    : "border-pink-200 dark:border-pink-800 hover:border-pink-300 dark:hover:border-pink-700";
   const bgAccentClass = isUserMale
-    ? "bg-emerald-50"
-    : "bg-pink-50";
+    ? "bg-emerald-50 dark:bg-emerald-900/20"
+    : "bg-pink-50 dark:bg-pink-900/20";
   
   return (
-    <Card className={`group overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 backdrop-blur-sm bg-white/90 border-2 ${borderClass}`}>
+    <Card className={`group overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 backdrop-blur-sm bg-white/90 dark:bg-gray-800/90 border-2 ${borderClass}`}>
       <div className="relative">
         <div className="h-56 sm:h-64 overflow-hidden">
           <ImageWithFallback
@@ -73,14 +73,14 @@ export function MatchingCard({ user, onLike, onMessage, onViewProfile }: Matchin
       </div>
 
       <CardContent className="pt-3 sm:pt-4 space-y-2 sm:space-y-3 p-3 sm:p-6">
-        <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{user.bio}</p>
+        <p className="text-xs sm:text-sm text-muted-foreground dark:text-gray-400 line-clamp-2">{user.bio}</p>
 
         <div className="flex flex-wrap gap-1">
           {user.interests.slice(0, 3).map((interest, idx) => (
             <Badge 
               key={idx} 
               variant="secondary" 
-              className={`text-xs ${isUserMale ? 'bg-emerald-100 text-emerald-700' : 'bg-pink-100 text-pink-700'} border-0`}
+              className={`text-xs ${isUserMale ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'} border-0`}
             >
               {interest}
             </Badge>
@@ -88,20 +88,20 @@ export function MatchingCard({ user, onLike, onMessage, onViewProfile }: Matchin
           {user.interests.length > 3 && (
             <Badge 
               variant="secondary" 
-              className={`text-xs ${isUserMale ? 'bg-emerald-100 text-emerald-700' : 'bg-pink-100 text-pink-700'} border-0`}
+              className={`text-xs ${isUserMale ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'} border-0`}
             >
               +{user.interests.length - 3}
             </Badge>
           )}
         </div>
 
-        <div className={`${bgAccentClass} p-2.5 sm:p-3 rounded-lg border ${isUserMale ? 'border-emerald-100' : 'border-pink-100'} shadow-sm`}>
+        <div className={`${bgAccentClass} p-2.5 sm:p-3 rounded-lg border ${isUserMale ? 'border-emerald-100 dark:border-emerald-800' : 'border-pink-100 dark:border-pink-800'} shadow-sm`}>
           <div className="flex items-start gap-2">
-            <Calendar className={`size-3 sm:size-4 ${isUserMale ? 'text-emerald-600' : 'text-pink-600'} shrink-0 mt-0.5`} />
+            <Calendar className={`size-3 sm:size-4 ${isUserMale ? 'text-emerald-600 dark:text-emerald-400' : 'text-pink-600 dark:text-pink-400'} shrink-0 mt-0.5`} />
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-muted-foreground">함께 보고 싶어 해요</p>
-              <p className="text-xs sm:text-sm line-clamp-1">{user.wantToSee.performanceTitle}</p>
-              <p className="text-xs text-muted-foreground">{user.wantToSee.date}</p>
+              <p className="text-xs text-muted-foreground dark:text-gray-400">함께 보고 싶어 해요</p>
+              <p className="text-xs sm:text-sm line-clamp-1 dark:text-gray-200">{user.wantToSee.performanceTitle}</p>
+              <p className="text-xs text-muted-foreground dark:text-gray-400">{user.wantToSee.date}</p>
             </div>
           </div>
         </div>
@@ -110,7 +110,7 @@ export function MatchingCard({ user, onLike, onMessage, onViewProfile }: Matchin
       <CardFooter className="gap-2 pt-0 p-3 sm:p-6">
         <Button
           variant="outline"
-          className={`flex-1 text-xs sm:text-sm h-8 sm:h-10 ${isUserMale ? 'border-emerald-200 hover:bg-emerald-50' : 'border-pink-200 hover:bg-pink-50'} transition-all`}
+          className={`flex-1 text-xs sm:text-sm h-8 sm:h-10 ${isUserMale ? 'border-emerald-200 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/30' : 'border-pink-200 dark:border-pink-800 hover:bg-pink-50 dark:hover:bg-pink-900/30'} transition-all dark:text-gray-200`}
           onClick={() => onViewProfile(user)}
         >
           프로필 보기
@@ -118,7 +118,7 @@ export function MatchingCard({ user, onLike, onMessage, onViewProfile }: Matchin
         <Button
           variant="outline"
           size="icon"
-          className={`size-8 sm:size-10 ${isUserMale ? 'border-emerald-200 hover:bg-emerald-50' : 'border-pink-200 hover:bg-pink-50'} transition-all`}
+          className={`size-8 sm:size-10 ${isUserMale ? 'border-emerald-200 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/30' : 'border-pink-200 dark:border-pink-800 hover:bg-pink-50 dark:hover:bg-pink-900/30'} transition-all dark:text-gray-200`}
           onClick={() => onMessage(user.id)}
         >
           <MessageCircle className="size-3 sm:size-4" />

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { MapPin, Loader2 } from 'lucide-react';
+import { loadKakaoMapSDK } from '@/lib/utils/kakaoMapLoader';
 
 interface Venue {
   name: string;
@@ -28,12 +29,22 @@ export function PerformanceMap({ venue, className = '' }: PerformanceMapProps) {
   useEffect(() => {
     if (!venue || !mapRef.current) return;
 
-    // 카카오 맵 SDK 로드 확인
-    if (!window.kakao || !window.kakao.maps) {
-      setError('카카오 맵 SDK가 로드되지 않았습니다.');
-      setIsLoading(false);
-      return;
-    }
+    let isMounted = true;
+
+    // Kakao Map SDK 로드
+    loadKakaoMapSDK()
+      .then(() => {
+        if (!isMounted || !mapRef.current) return;
+        initializeMap();
+      })
+      .catch((error) => {
+        if (!isMounted) return;
+        console.error('Kakao Map SDK 로드 실패:', error);
+        setError('카카오 맵을 불러올 수 없습니다. API 키를 확인해주세요.');
+        setIsLoading(false);
+      });
+
+    function initializeMap() {
 
     try {
       // 기본 좌표 (서울 시청)
@@ -89,12 +100,20 @@ export function PerformanceMap({ venue, className = '' }: PerformanceMapProps) {
       // 인포윈도우 표시
       infowindow.open(map, marker);
 
-      setIsLoading(false);
+      if (isMounted) {
+        setIsLoading(false);
+      }
     } catch (err) {
-      console.error('지도 초기화 오류:', err);
-      setError('지도를 불러오는 중 오류가 발생했습니다.');
-      setIsLoading(false);
+      if (isMounted) {
+        console.error('지도 초기화 오류:', err);
+        setError('지도를 불러오는 중 오류가 발생했습니다.');
+        setIsLoading(false);
+      }
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [venue]);
 
   if (!venue) {

@@ -26,8 +26,10 @@ vi.mock('../common/figma/ImageWithFallback', () => ({
 }));
 
 vi.mock('./GroupPurchaseProgress', () => ({
-  GroupPurchaseProgress: ({ progress }: { progress: number }) => (
-    <div data-testid="progress-bar">{progress}%</div>
+  GroupPurchaseProgress: ({ current, target }: { current: number; target: number }) => (
+    <div data-testid="progress-bar">
+      <span>{current}명 / {target}명</span>
+    </div>
   ),
 }));
 
@@ -102,7 +104,8 @@ describe('GroupPurchaseCard', () => {
     expect(screen.getByText('테스트 공연')).toBeInTheDocument();
     expect(screen.getByText('테스트 극장')).toBeInTheDocument();
     expect(screen.getByText('10% 할인')).toBeInTheDocument();
-    expect(screen.getByText(/5\/10명/)).toBeInTheDocument();
+    // GroupPurchaseProgress에서 "5명 / 10명" 형태로 표시됨
+    expect(screen.getByText(/5명.*10명/)).toBeInTheDocument();
   });
 
   it('상세보기 버튼 클릭 시 onViewDetail이 호출되어야 함', () => {
@@ -129,7 +132,8 @@ describe('GroupPurchaseCard', () => {
       />
     );
 
-    const joinButton = screen.getByText(/참여하기|공동구매 참여/i);
+    // 실제로는 "참여"로 표시됨
+    const joinButton = screen.getByText(/참여|참여하기/i);
     expect(joinButton).toBeInTheDocument();
   });
 
@@ -142,7 +146,8 @@ describe('GroupPurchaseCard', () => {
       />
     );
 
-    const joinButton = screen.getByText(/참여하기|공동구매 참여/i);
+    // 실제로는 "참여"로 표시됨
+    const joinButton = screen.getByText(/참여|참여하기/i);
     fireEvent.click(joinButton);
 
     expect(mockOnJoin).toHaveBeenCalledWith('gp1');
@@ -162,7 +167,8 @@ describe('GroupPurchaseCard', () => {
       />
     );
 
-    const joinButton = screen.queryByText(/참여하기|공동구매 참여/i);
+    // 실제로는 "참여"로 표시됨
+    const joinButton = screen.queryByText(/참여|참여하기/i);
     expect(joinButton).not.toBeInTheDocument();
   });
 
@@ -175,11 +181,10 @@ describe('GroupPurchaseCard', () => {
       />
     );
 
-    const shareButton = screen.getByLabelText(/공유|share/i) || screen.getByRole('button', { name: /공유/i });
-    if (shareButton) {
-      fireEvent.click(shareButton);
-      expect(shareContent).toHaveBeenCalled();
-    }
+    // title="공유하기"로 되어 있으므로 getByTitle 사용
+    const shareButton = screen.getByTitle(/공유/i) || screen.getByRole('button', { name: /공유/i });
+    fireEvent.click(shareButton);
+    expect(shareContent).toHaveBeenCalled();
   });
 
   it('진행률이 올바르게 표시되어야 함', () => {
@@ -192,7 +197,8 @@ describe('GroupPurchaseCard', () => {
     );
 
     const progressBar = screen.getByTestId('progress-bar');
-    expect(progressBar).toHaveTextContent('50');
+    // GroupPurchaseProgress는 "5명 / 10명" 형태로 표시됨
+    expect(progressBar).toHaveTextContent('5명 / 10명');
   });
 
   it('상태 배지가 올바르게 표시되어야 함', () => {
@@ -217,8 +223,9 @@ describe('GroupPurchaseCard', () => {
       />
     );
 
-    // 원가와 할인가가 표시되는지 확인
-    expect(screen.getByText(/50,000원|45,000원/)).toBeInTheDocument();
+    // 원가와 할인가가 각각 표시되는지 확인
+    expect(screen.getByText('50,000원')).toBeInTheDocument();
+    expect(screen.getByText('45,000원')).toBeInTheDocument();
   });
 
   it('마감일이 임박했을 때 경고 표시가 나타나야 함', () => {

@@ -15,19 +15,27 @@ export default function AuthCallbackPage() {
       try {
         const result = await handleOAuthCallback();
         
-        if (result) {
+        if (result && result.user) {
           // 사용자 정보를 store에 저장
+          const userName = 
+            result.user.user_metadata?.name || 
+            result.user.user_metadata?.full_name ||
+            result.user.user_metadata?.display_name ||
+            result.user.email?.split('@')[0] || 
+            '사용자';
+          
           setUser({
             id: result.user.id,
             email: result.user.email || '',
-            name: result.user.user_metadata?.name || result.user.email?.split('@')[0] || '사용자',
+            name: userName,
+            userType: result.user.user_metadata?.user_type || 'audience',
           });
           
           setStatus('success');
           
-          // 홈으로 리다이렉트
+          // 홈으로 리다이렉트 (성공 메시지 표시 후)
           setTimeout(() => {
-            navigate('/');
+            navigate('/', { replace: true });
           }, 1500);
         } else {
           setStatus('error');

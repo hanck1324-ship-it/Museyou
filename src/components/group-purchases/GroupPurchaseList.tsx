@@ -142,8 +142,8 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="size-8 animate-spin text-purple-500" />
-        <span className="ml-3 text-muted-foreground">로딩 중...</span>
+        <Loader2 className="size-8 animate-spin text-purple-500 dark:text-purple-400" />
+        <span className="ml-3 text-muted-foreground dark:text-gray-400">로딩 중...</span>
       </div>
     );
   }
@@ -151,7 +151,7 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-500 mb-4">{error}</p>
+        <p className="text-red-500 dark:text-red-400 mb-4">{error}</p>
         <Button onClick={() => fetchGroupPurchases()}>다시 시도</Button>
       </div>
     );
@@ -162,10 +162,10 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
       <Tabs defaultValue="all" className="w-full">
         <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
           <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
               문화 공동구매
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground dark:text-gray-400 mt-1">
               함께 참여하면 더 저렴하게 공연을 관람할 수 있어요
             </p>
           </div>
@@ -178,9 +178,9 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
           </Button>
         </div>
 
-        <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="all">전체 공동구매</TabsTrigger>
-          <TabsTrigger value="my">내 공동구매</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 mb-4 dark:bg-gray-800">
+          <TabsTrigger value="all" className="dark:text-gray-300 dark:data-[state=active]:text-white">전체 공동구매</TabsTrigger>
+          <TabsTrigger value="my" className="dark:text-gray-300 dark:data-[state=active]:text-white">내 공동구매</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
@@ -191,10 +191,10 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
           <div className="space-y-4">
         {/* 검색바 */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground dark:text-gray-400" />
           <Input
             placeholder="공연명, 장소 검색..."
-            className="pl-10 border-purple-200 dark:border-purple-800 focus:border-purple-400 dark:focus:border-purple-600 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm"
+            className="pl-10 border-purple-200 dark:border-purple-800 dark:border-purple-800 focus:border-purple-400 dark:focus:border-purple-600 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -205,23 +205,23 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
           {/* 모바일 필터 버튼 */}
           <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="sm" className="sm:hidden border-purple-200">
+              <Button variant="outline" size="sm" className="sm:hidden border-purple-200 dark:border-purple-800 dark:border-purple-800">
                 <SlidersHorizontal className="size-4 mr-2" />
                 필터
               </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="h-[80vh]">
+            <SheetContent side="bottom" className="h-[80vh] dark:bg-gray-900 dark:border-gray-700">
               <SheetHeader>
-                <SheetTitle>필터</SheetTitle>
+                <SheetTitle className="dark:text-gray-100">필터</SheetTitle>
               </SheetHeader>
               <div className="space-y-4 mt-4">
                 <div>
-                  <label className="text-sm mb-2 block">카테고리</label>
+                  <label className="text-sm mb-2 block dark:text-gray-300">카테고리</label>
                   <Select 
                     value={filters.category || "all"} 
                     onValueChange={(value) => updateFilters({ category: value === "all" ? undefined : value })}
                   >
-                    <SelectTrigger className="border-purple-200">
+                    <SelectTrigger className="border-purple-200 dark:border-purple-800 dark:border-purple-800">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -234,12 +234,12 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm mb-2 block">지역</label>
+                  <label className="text-sm mb-2 block dark:text-gray-300">지역</label>
                   <Select 
                     value={filters.district || "all"} 
                     onValueChange={(value) => updateFilters({ district: value === "all" ? undefined : value })}
                   >
-                    <SelectTrigger className="border-purple-200">
+                    <SelectTrigger className="border-purple-200 dark:border-purple-800 dark:border-purple-800">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -257,7 +257,7 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
                     value={filters.status || "all"} 
                     onValueChange={(value) => updateFilters({ status: value === "all" ? undefined : value as StatusType })}
                   >
-                    <SelectTrigger className="border-purple-200">
+                    <SelectTrigger className="border-purple-200 dark:border-purple-800">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -275,7 +275,7 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
                     value={filters.minDiscountRate?.toString() || "all"} 
                     onValueChange={(value) => updateFilters({ minDiscountRate: value === "all" ? undefined : parseInt(value) })}
                   >
-                    <SelectTrigger className="border-purple-200">
+                    <SelectTrigger className="border-purple-200 dark:border-purple-800">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -303,7 +303,7 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
               value={filters.category || "all"} 
               onValueChange={(value) => updateFilters({ category: value === "all" ? undefined : value })}
             >
-              <SelectTrigger className="w-[140px] border-purple-200">
+              <SelectTrigger className="w-[140px] border-purple-200 dark:border-purple-800">
                 <SelectValue placeholder="카테고리" />
               </SelectTrigger>
               <SelectContent>
@@ -319,7 +319,7 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
               value={filters.district || "all"} 
               onValueChange={(value) => updateFilters({ district: value === "all" ? undefined : value })}
             >
-              <SelectTrigger className="w-[140px] border-purple-200">
+              <SelectTrigger className="w-[140px] border-purple-200 dark:border-purple-800">
                 <SelectValue placeholder="지역" />
               </SelectTrigger>
               <SelectContent>
@@ -335,7 +335,7 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
               value={filters.status || "all"} 
               onValueChange={(value) => updateFilters({ status: value === "all" ? undefined : value as StatusType })}
             >
-              <SelectTrigger className="w-[140px] border-purple-200">
+              <SelectTrigger className="w-[140px] border-purple-200 dark:border-purple-800">
                 <SelectValue placeholder="상태" />
               </SelectTrigger>
               <SelectContent>
@@ -351,7 +351,7 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
               value={filters.minDiscountRate?.toString() || "all"} 
               onValueChange={(value) => updateFilters({ minDiscountRate: value === "all" ? undefined : parseInt(value) })}
             >
-              <SelectTrigger className="w-[140px] border-purple-200">
+              <SelectTrigger className="w-[140px] border-purple-200 dark:border-purple-800">
                 <SelectValue placeholder="할인율" />
               </SelectTrigger>
               <SelectContent>
@@ -364,7 +364,7 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
             </Select>
 
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
-              <SelectTrigger className="w-[140px] border-purple-200">
+              <SelectTrigger className="w-[140px] border-purple-200 dark:border-purple-800">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -394,7 +394,7 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
           {/* 목록 */}
           {groupPurchases.length === 0 ? (
         <div className="text-center py-12 bg-muted rounded-lg">
-          <p className="text-muted-foreground mb-4">아직 생성된 공동구매가 없습니다.</p>
+          <p className="text-muted-foreground dark:text-gray-400 mb-4">아직 생성된 공동구매가 없습니다.</p>
           <Button onClick={() => setCreateOpen(true)} variant="outline">
             첫 공동구매 만들기
           </Button>

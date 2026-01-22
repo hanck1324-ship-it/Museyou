@@ -7,6 +7,10 @@ import { Performance } from "./PerformanceCard";
 import { ImageWithFallback } from "../common/figma/ImageWithFallback";
 import { ReviewSection } from "./ReviewSection";
 import { PerformanceMap } from "./PerformanceMap";
+import { useState, useEffect } from "react";
+import { getVenueCoordinates } from "../../lib/utils/geocode";
+import { getVenueCoordinates as getStoredCoordinates, DEFAULT_COORDINATES } from "../../lib/utils/venueCoordinates";
+import { usePerformanceRating } from "../../lib/hooks/usePerformanceRating";
 
 interface PerformanceDetailProps {
   performance: Performance | null;
@@ -17,9 +21,83 @@ interface PerformanceDetailProps {
 export function PerformanceDetail({ performance, open, onOpenChange }: PerformanceDetailProps) {
   if (!performance) return null;
 
+  const [venueInfo, setVenueInfo] = useState<{
+    name: string;
+    address: string;
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [isLoadingCoordinates, setIsLoadingCoordinates] = useState(false);
+  
+  // 실시간 평점 Hook 사용
+  const { rating: realtimeRating, reviewCount: realtimeReviewCount } = usePerformanceRating(performance.id);
+  
+  // 실시간 평점이 있으면 사용, 없으면 기본 평점 사용
+  const displayRating = realtimeRating > 0 ? realtimeRating : performance.rating;
+  const displayReviewCount = realtimeReviewCount > 0 ? realtimeReviewCount : performance.reviewCount;
+
+  // 공연장 좌표 정보 로드
+  useEffect(() => {
+    if (!performance || !open) return;
+
+    const loadCoordinates = async () => {
+      setIsLoadingCoordinates(true);
+
+      // 1. 저장된 좌표가 있으면 사용
+      if (performance.lat && performance.lng) {
+        setVenueInfo({
+          name: performance.venue,
+          address: `서울시 ${performance.district} ${performance.venue}`,
+          lat: performance.lat,
+          lng: performance.lng,
+        });
+        setIsLoadingCoordinates(false);
+        return;
+      }
+
+      // 2. 저장된 좌표 테이블에서 찾기
+      const storedCoords = getStoredCoordinates(performance.venue);
+      if (storedCoords) {
+        setVenueInfo({
+          name: performance.venue,
+          address: `서울시 ${performance.district} ${performance.venue}`,
+          lat: storedCoords.lat,
+          lng: storedCoords.lng,
+        });
+        setIsLoadingCoordinates(false);
+        return;
+      }
+
+      // 3. API로 좌표 검색 (비동기)
+      const address = `서울시 ${performance.district} ${performance.venue}`;
+      const coords = await getVenueCoordinates(performance.venue, address, performance.district);
+      
+      if (coords) {
+        setVenueInfo({
+          name: performance.venue,
+          address: address,
+          lat: coords.lat,
+          lng: coords.lng,
+        });
+      } else {
+        // 4. 기본 좌표 사용
+        setVenueInfo({
+          name: performance.venue,
+          address: address,
+          lat: DEFAULT_COORDINATES.lat,
+          lng: DEFAULT_COORDINATES.lng,
+        });
+      }
+
+      setIsLoadingCoordinates(false);
+    };
+
+    loadCoordinates();
+  }, [performance, open]);
+
   const handleNavigate = () => {
     // 카카오맵 앱 또는 웹으로 길찾기
-    const address = `서울시 ${performance.district} ${performance.venue}`;
+    const address = venueInfo?.address || `서울시 ${performance.district} ${performance.venue}`;
     const encodedAddress = encodeURIComponent(address);
     
     // 카카오맵 앱이 설치되어 있으면 앱으로, 없으면 웹으로
@@ -27,26 +105,11 @@ export function PerformanceDetail({ performance, open, onOpenChange }: Performan
     window.open(kakaoMapUrl, '_blank');
   };
 
-  // 공연장 좌표 정보 생성 (좌표가 없으면 기본값 사용)
-  const venueInfo = performance.lat && performance.lng
-    ? {
-        name: performance.venue,
-        address: `서울시 ${performance.district} ${performance.venue}`,
-        lat: performance.lat,
-        lng: performance.lng,
-      }
-    : {
-        name: performance.venue,
-        address: `서울시 ${performance.district} ${performance.venue}`,
-        lat: 37.5665, // 서울 시청 기본 좌표
-        lng: 126.9780,
-      };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full dark:bg-gray-900 dark:border-gray-700">
         <DialogHeader>
-          <DialogTitle className="pr-6 text-base sm:text-lg lg:text-xl">{performance.title}</DialogTitle>
+          <DialogTitle className="pr-6 text-base sm:text-lg lg:text-xl dark:text-gray-100">{performance.title}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3 sm:space-y-4">
@@ -63,18 +126,18 @@ export function PerformanceDetail({ performance, open, onOpenChange }: Performan
             <Badge variant="outline" className="text-xs sm:text-sm dark:border-gray-600 dark:text-gray-300">{performance.district}</Badge>
             <div className="flex items-center gap-1 ml-auto">
               <Star className="size-3 sm:size-4 fill-yellow-400 text-yellow-400 dark:fill-yellow-500 dark:text-yellow-500" />
-              <span className="text-sm sm:text-base dark:text-gray-200">{performance.rating}</span>
+              <span className="text-sm sm:text-base dark:text-gray-200">{displayRating}</span>
               <span className="text-xs sm:text-sm text-muted-foreground dark:text-gray-400">
-                ({performance.reviewCount}개)
+                ({displayReviewCount}개)
               </span>
             </div>
           </div>
 
           <Tabs defaultValue="info" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 h-auto">
-              <TabsTrigger value="info" className="text-xs sm:text-sm py-2">공연정보</TabsTrigger>
-              <TabsTrigger value="location" className="text-xs sm:text-sm py-2">장소/경로</TabsTrigger>
-              <TabsTrigger value="reviews" className="text-xs sm:text-sm py-2">리뷰</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 h-auto dark:bg-gray-800">
+              <TabsTrigger value="info" className="text-xs sm:text-sm py-2 dark:text-gray-300 dark:data-[state=active]:text-white">공연정보</TabsTrigger>
+              <TabsTrigger value="location" className="text-xs sm:text-sm py-2 dark:text-gray-300 dark:data-[state=active]:text-white">장소/경로</TabsTrigger>
+              <TabsTrigger value="reviews" className="text-xs sm:text-sm py-2 dark:text-gray-300 dark:data-[state=active]:text-white">리뷰</TabsTrigger>
             </TabsList>
 
             <TabsContent value="info" className="space-y-3 sm:space-y-4 pt-4">
@@ -122,12 +185,40 @@ export function PerformanceDetail({ performance, open, onOpenChange }: Performan
                   <p className="text-xs sm:text-sm text-muted-foreground dark:text-gray-400">서울시 {performance.district}</p>
                 </div>
 
-                <PerformanceMap venue={venueInfo} />
+                {venueInfo && <PerformanceMap venue={venueInfo} />}
+                {isLoadingCoordinates && (
+                  <div className="h-40 sm:h-48 rounded-lg bg-muted flex items-center justify-center">
+                    <div className="text-center">
+                      <MapPin className="size-6 mx-auto text-muted-foreground mb-2 animate-pulse" />
+                      <p className="text-xs sm:text-sm text-muted-foreground">위치 정보를 불러오는 중...</p>
+                    </div>
+                  </div>
+                )}
 
-                <Button className="w-full text-sm" onClick={handleNavigate}>
-                  <Navigation className="size-4 mr-2" />
-                  길찾기
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    className="flex-1 text-sm" 
+                    onClick={handleNavigate}
+                    variant="default"
+                  >
+                    <Navigation className="size-4 mr-2" />
+                    카카오맵 길찾기
+                  </Button>
+                  {venueInfo && (
+                    <Button
+                      className="text-sm"
+                      onClick={() => {
+                        // 네이버 지도 길찾기
+                        const address = venueInfo.address;
+                        const naverMapUrl = `https://map.naver.com/v5/search/${encodeURIComponent(address)}`;
+                        window.open(naverMapUrl, '_blank');
+                      }}
+                      variant="outline"
+                    >
+                      네이버 지도
+                    </Button>
+                  )}
+                </div>
 
                 <div className="space-y-2">
                   <h4 className="text-xs sm:text-sm dark:text-gray-200">교통편</h4>

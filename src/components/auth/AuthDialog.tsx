@@ -256,10 +256,10 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-900 dark:border-gray-700">
         <DialogHeader>
-          <DialogTitle>서울 문화예술 로그인</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="dark:text-gray-100">서울 문화예술 로그인</DialogTitle>
+          <DialogDescription className="dark:text-gray-400">
             문화 공동구매와 파트너 매칭을 이용하려면 로그인하세요
           </DialogDescription>
         </DialogHeader>
@@ -281,10 +281,10 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
             <div className="space-y-3">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
+                  <span className="w-full border-t dark:border-gray-700" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
+                  <span className="bg-background dark:bg-gray-900 px-2 text-muted-foreground dark:text-gray-400">
                     소셜 로그인
                   </span>
                 </div>
@@ -294,7 +294,7 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex flex-col items-center justify-center h-auto py-3 border-2 hover:bg-blue-50 hover:border-blue-400 transition-all"
+                  className="flex flex-col items-center justify-center h-auto py-3 border-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-400 dark:hover:border-blue-600 dark:border-gray-700 transition-all"
                   onClick={() => handleSocialLogin('google')}
                   disabled={isLoading}
                 >
@@ -322,7 +322,7 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex flex-col items-center justify-center h-auto py-3 border-2 hover:bg-yellow-50 hover:border-yellow-400 transition-all"
+                  className="flex flex-col items-center justify-center h-auto py-3 border-2 hover:bg-yellow-50 dark:hover:bg-yellow-900/30 hover:border-yellow-400 dark:hover:border-yellow-600 dark:border-gray-700 transition-all"
                   onClick={() => handleSocialLogin('kakao')}
                   disabled={isLoading}
                 >
@@ -335,7 +335,7 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex flex-col items-center justify-center h-auto py-3 border-2 hover:bg-green-50 hover:border-green-400 transition-all"
+                  className="flex flex-col items-center justify-center h-auto py-3 border-2 hover:bg-green-50 dark:hover:bg-green-900/30 hover:border-green-400 dark:hover:border-green-600 dark:border-gray-700 transition-all"
                   onClick={() => handleSocialLogin('naver')}
                   disabled={isLoading}
                 >
@@ -349,10 +349,10 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full border-t dark:border-gray-700" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
+                <span className="bg-background dark:bg-gray-900 px-2 text-muted-foreground dark:text-gray-400">
                   또는
                 </span>
               </div>
@@ -394,10 +394,10 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
             <div className="space-y-3">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
+                  <span className="w-full border-t dark:border-gray-700" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
+                  <span className="bg-background dark:bg-gray-900 px-2 text-muted-foreground dark:text-gray-400">
                     소셜 로그인으로 간편 가입
                   </span>
                 </div>
@@ -407,7 +407,7 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex flex-col items-center justify-center h-auto py-3 border-2 hover:bg-blue-50 hover:border-blue-400 transition-all"
+                  className="flex flex-col items-center justify-center h-auto py-3 border-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-400 dark:hover:border-blue-600 dark:border-gray-700 transition-all"
                   onClick={() => handleSocialLogin('google')}
                   disabled={isLoading}
                 >
@@ -435,7 +435,7 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex flex-col items-center justify-center h-auto py-3 border-2 hover:bg-yellow-50 hover:border-yellow-400 transition-all"
+                  className="flex flex-col items-center justify-center h-auto py-3 border-2 hover:bg-yellow-50 dark:hover:bg-yellow-900/30 hover:border-yellow-400 dark:hover:border-yellow-600 dark:border-gray-700 transition-all"
                   onClick={() => handleSocialLogin('kakao')}
                   disabled={isLoading}
                 >
@@ -448,7 +448,7 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex flex-col items-center justify-center h-auto py-3 border-2 hover:bg-green-50 hover:border-green-400 transition-all"
+                  className="flex flex-col items-center justify-center h-auto py-3 border-2 hover:bg-green-50 dark:hover:bg-green-900/30 hover:border-green-400 dark:hover:border-green-600 dark:border-gray-700 transition-all"
                   onClick={() => handleSocialLogin('naver')}
                   disabled={isLoading}
                 >
@@ -462,10 +462,10 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full border-t dark:border-gray-700" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
+                <span className="bg-background dark:bg-gray-900 px-2 text-muted-foreground dark:text-gray-400">
                   또는
                 </span>
               </div>
@@ -481,8 +481,8 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
                 }}
                 className={`p-4 rounded-lg border-2 transition-all ${
                   signupType === "general"
-                    ? "border-purple-600 bg-purple-50 shadow-md"
-                    : "border-gray-200 hover:border-purple-300"
+                    ? "border-purple-600 dark:border-purple-500 bg-purple-50 dark:bg-purple-900/30 shadow-md"
+                    : "border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600"
                 }`}
               >
                 <UserPlus className="size-6 mx-auto mb-2 text-purple-600" />
@@ -497,8 +497,8 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
                 }}
                 className={`p-4 rounded-lg border-2 transition-all ${
                   signupType === "artist"
-                    ? "border-purple-600 bg-purple-50 shadow-md"
-                    : "border-gray-200 hover:border-purple-300"
+                    ? "border-purple-600 dark:border-purple-500 bg-purple-50 dark:bg-purple-900/30 shadow-md"
+                    : "border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600"
                 }`}
               >
                 <Palette className="size-6 mx-auto mb-2 text-purple-600" />
@@ -549,11 +549,11 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
               </div>
 
               {/* Identity Verification Section */}
-              <div className="space-y-3 p-4 rounded-lg border border-blue-200 bg-blue-50/50">
+              <div className="space-y-3 p-4 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/20">
                 <div className="flex items-start gap-2">
                   <div className="flex-1">
-                    <h4 className="font-medium text-blue-900 mb-1">본인 인증 (필수)</h4>
-                    <p className="text-xs text-blue-700">
+                    <h4 className="font-medium text-blue-900 dark:text-blue-300 mb-1">본인 인증 (필수)</h4>
+                    <p className="text-xs text-blue-700 dark:text-blue-400">
                       회원님의 안전한 만남을 위해 휴대폰 본인 인증이 필요합니다.
                     </p>
                   </div>
@@ -618,10 +618,10 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
                     onChange={(e) => setAgreeToVerification(e.target.checked)}
                     className="mt-1"
                   />
-                  <label htmlFor="agree-verification" className="text-xs text-blue-700 cursor-pointer">
+                  <label htmlFor="agree-verification" className="text-xs text-blue-700 dark:text-blue-400 cursor-pointer">
                     신원 확인 및 개인정보 수집·이용에 동의합니다. (필수)
                     <br />
-                    <span className="text-blue-600">
+                    <span className="text-blue-600 dark:text-blue-500">
                       안전한 만남을 위해 실명과 휴대폰 번호가 확인됩니다.
                     </span>
                   </label>
@@ -631,8 +631,8 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
               {signupType === "artist" ? (
                 <>
                   {/* 예술종사자 전용 필드 */}
-                  <div className="space-y-3 p-4 rounded-lg border border-purple-200 bg-purple-50/50">
-                    <h4 className="font-medium text-purple-900 mb-2">예술종사자 인증</h4>
+                  <div className="space-y-3 p-4 rounded-lg border border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-900/20">
+                    <h4 className="font-medium text-purple-900 dark:text-purple-300 mb-2">예술종사자 인증</h4>
 
                     <div className="space-y-2">
                       <Label htmlFor="artist-profession">예술 분야 *</Label>
