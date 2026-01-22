@@ -76,13 +76,13 @@ export function HomePage({ onStart }: HomePageProps) {
   ];
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Animated Background */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-pink-400/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-emerald-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
-        <div className="absolute bottom-0 right-1/3 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-pink-400/20 dark:bg-pink-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-purple-400/20 dark:bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-emerald-400/20 dark:bg-emerald-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-0 right-1/3 w-96 h-96 bg-blue-400/20 dark:bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
       </div>
 
       {/* Hero Section */}
@@ -103,7 +103,7 @@ export function HomePage({ onStart }: HomePageProps) {
             transition={{ delay: 0.5, duration: 0.8 }}
             className="space-y-4"
           >
-            <p className="text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-xl lg:text-2xl text-muted-foreground dark:text-gray-300 max-w-3xl mx-auto">
               당신의 뮤즈를 찾아, 문화예술과 함께하는
               <br />
               문화 공동구매 플랫폼
@@ -153,8 +153,9 @@ export function HomePage({ onStart }: HomePageProps) {
                   className={`
                     group relative overflow-hidden rounded-2xl lg:rounded-3xl
                     backdrop-blur-xl bg-gradient-to-br ${mission.bgGradient}
-                    border ${mission.borderColor} shadow-xl hover:shadow-2xl ${mission.glowColor}
+                    border ${mission.borderColor} dark:border-gray-700 shadow-xl hover:shadow-2xl ${mission.glowColor}
                     p-8 lg:p-10 transition-all duration-300
+                    dark:bg-gray-800/50
                   `}
                 >
                   {/* Decorative glow */}
@@ -178,12 +179,12 @@ export function HomePage({ onStart }: HomePageProps) {
                     </h3>
 
                     {/* Description */}
-                    <p className="text-center text-muted-foreground leading-relaxed">
+                    <p className="text-center text-muted-foreground dark:text-gray-300 leading-relaxed">
                       {mission.description}
                     </p>
 
                     {/* Detail Description */}
-                    <p className="text-center text-sm text-muted-foreground/80 italic">
+                    <p className="text-center text-sm text-muted-foreground/80 dark:text-gray-400 italic">
                       {mission.detailDescription}
                     </p>
                   </div>
@@ -218,7 +219,7 @@ export function HomePage({ onStart }: HomePageProps) {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.7 + index * 0.1, duration: 0.5 }}
                   whileHover={{ y: -6 }}
-                  className="group relative overflow-hidden rounded-2xl backdrop-blur-xl bg-white/60 border border-white/40 shadow-xl hover:shadow-2xl p-8 transition-all duration-300"
+                  className="group relative overflow-hidden rounded-2xl backdrop-blur-xl bg-white/60 dark:bg-gray-800/60 border border-white/40 dark:border-gray-700 shadow-xl hover:shadow-2xl p-8 transition-all duration-300"
                 >
                   <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
                   
@@ -226,10 +227,10 @@ export function HomePage({ onStart }: HomePageProps) {
                     <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.gradient} shadow-lg`}>
                       <Icon className="size-6 text-white" />
                     </div>
-                    <h3 className="text-foreground">
+                    <h3 className="text-foreground dark:text-gray-100">
                       {feature.title}
                     </h3>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground dark:text-gray-300">
                       {feature.description}
                     </p>
                   </div>
@@ -246,7 +247,7 @@ export function HomePage({ onStart }: HomePageProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2, duration: 0.8 }}
-          className="relative overflow-hidden rounded-3xl backdrop-blur-xl bg-gradient-to-br from-white/70 via-purple-50/50 to-pink-50/50 border border-white/40 shadow-2xl p-8 lg:p-12"
+          className="relative overflow-hidden rounded-3xl backdrop-blur-xl bg-gradient-to-br from-white/70 via-purple-50/50 to-pink-50/50 dark:from-gray-800/70 dark:via-purple-900/30 dark:to-pink-900/30 border border-white/40 dark:border-gray-700 shadow-2xl p-8 lg:p-12"
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-emerald-400/20 to-blue-400/20 rounded-full blur-3xl" />
@@ -273,7 +274,7 @@ export function HomePage({ onStart }: HomePageProps) {
                     <div className="text-3xl lg:text-4xl bg-gradient-to-r from-emerald-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
                       {stat.value}
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground dark:text-gray-400">
                       {stat.label}
                     </div>
                   </motion.div>
@@ -296,7 +297,7 @@ export function HomePage({ onStart }: HomePageProps) {
       </section>
 
       {/* Footer */}
-      <footer className="container mx-auto px-4 py-8 text-center text-sm text-muted-foreground">
+      <footer className="container mx-auto px-4 py-8 text-center text-sm text-muted-foreground dark:text-gray-400">
         <p>© 2025 Muse You. 당신의 뮤즈와 함께 문화예술을 즐기세요.</p>
       </footer>
     </div>

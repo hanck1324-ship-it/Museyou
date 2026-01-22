@@ -390,7 +390,7 @@ export const performanceApi = {
         // 좋아요 취소
         const newLikes = likes.filter(l => l.id !== existingLike.id);
         setToStorage(STORAGE_KEYS.PERFORMANCE_LIKES, newLikes);
-        return { success: true, liked: false };
+        return { success: true, liked: false, likeCount: newLikes.filter(l => l.performanceId === performanceId).length };
       } else {
         // 좋아요 추가
         const newLike = {
@@ -401,13 +401,62 @@ export const performanceApi = {
         };
         likes.push(newLike);
         setToStorage(STORAGE_KEYS.PERFORMANCE_LIKES, likes);
-        return { success: true, liked: true };
+        return { success: true, liked: true, likeCount: likes.filter(l => l.performanceId === performanceId).length };
       }
     }
 
-    return await apiCall(`/performances/${performanceId}/like`, {
-      method: 'POST',
-    }, true);
+    // 실제 Supabase 연동
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('로그인이 필요합니다.');
+      }
+
+      // 기존 좋아요 확인
+      const { data: existing } = await supabase
+        .from('likes')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('performance_id', performanceId)
+        .maybeSingle();
+
+      if (existing) {
+        // 좋아요 취소
+        const { error } = await supabase
+          .from('likes')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('performance_id', performanceId);
+
+        if (error) throw error;
+
+        // 좋아요 수 조회
+        const { count } = await supabase
+          .from('likes')
+          .select('*', { count: 'exact', head: true })
+          .eq('performance_id', performanceId);
+
+        return { success: true, liked: false, likeCount: count || 0 };
+      } else {
+        // 좋아요 추가
+        const { error } = await supabase
+          .from('likes')
+          .insert({ user_id: user.id, performance_id: performanceId });
+
+        if (error) throw error;
+
+        // 좋아요 수 조회
+        const { count } = await supabase
+          .from('likes')
+          .select('*', { count: 'exact', head: true })
+          .eq('performance_id', performanceId);
+
+        return { success: true, liked: true, likeCount: count || 0 };
+      }
+    } catch (error: any) {
+      console.error('좋아요 토글 오류:', error);
+      throw error;
+    }
   },
 
   async getLikes(performanceId?: string) {
@@ -439,18 +488,65 @@ export const performanceApi = {
     if (USE_MOCK_MODE) {
       const currentUser = getFromStorage(STORAGE_KEYS.CURRENT_USER, null);
       if (!currentUser) {
-        return { liked: false };
+        return { liked: false, likeCount: 0 };
       }
 
       const likes = getFromStorage<any[]>(STORAGE_KEYS.PERFORMANCE_LIKES, []);
       const liked = likes.some(
         l => l.userId === currentUser.id && l.performanceId === performanceId
       );
+      const likeCount = likes.filter(l => l.performanceId === performanceId).length;
       
-      return { liked };
+      return { liked, likeCount };
     }
 
-    return await apiCall(`/performances/${performanceId}/like-status`, {}, true);
+    // 실제 Supabase 연동
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // 좋아요 수 조회
+      const { count } = await supabase
+        .from('likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('performance_id', performanceId);
+
+      if (!user) {
+        return { liked: false, likeCount: count || 0 };
+      }
+
+      // 사용자의 좋아요 여부 확인
+      const { data: existing } = await supabase
+        .from('likes')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('performance_id', performanceId)
+        .maybeSingle();
+
+      return { liked: !!existing, likeCount: count || 0 };
+    } catch (error: any) {
+      console.error('좋아요 상태 확인 오류:', error);
+      return { liked: false, likeCount: 0 };
+    }
+  },
+
+  async getLikeCount(performanceId: string): Promise<number> {
+    if (USE_MOCK_MODE) {
+      const likes = getFromStorage<any[]>(STORAGE_KEYS.PERFORMANCE_LIKES, []);
+      return likes.filter(l => l.performanceId === performanceId).length;
+    }
+
+    // 실제 Supabase 연동
+    try {
+      const { count } = await supabase
+        .from('likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('performance_id', performanceId);
+
+      return count || 0;
+    } catch (error: any) {
+      console.error('좋아요 수 조회 오류:', error);
+      return 0;
+    }
   },
 };
 
@@ -458,7 +554,9 @@ export const performanceApi = {
 export const reviewApi = {
   async getByPerformanceId(performanceId: string) {
     if (USE_MOCK_MODE) {
-      return { reviews: [] };
+      // 모킹 모드: localStorage에서 리뷰 가져오기
+      const reviews = getFromStorage<any[]>(`reviews_${performanceId}`, []);
+      return { reviews };
     }
 
     return await apiCall(`/reviews/${performanceId}`);
@@ -480,9 +578,17 @@ export const reviewApi = {
         id: `review_${Date.now()}`,
         ...reviewData,
         userId: currentUser.id,
+        author: currentUser.name,
         userName: currentUser.name,
-        createdAt: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        helpful_count: 0,
       };
+      
+      // localStorage에 저장
+      const reviews = getFromStorage<any[]>(`reviews_${reviewData.performanceId}`, []);
+      reviews.push(review);
+      setToStorage(`reviews_${reviewData.performanceId}`, reviews);
       
       return { review };
     }

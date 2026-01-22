@@ -8,9 +8,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./co
 import { Search, Music, Theater, Palette, Heart, LogIn, LogOut, UserCircle, SlidersHorizontal, X, Users } from "lucide-react";
 import { ThemeToggle } from "./components/common/ThemeToggle";
 import { PerformanceCard, Performance } from "./components/performances/PerformanceCard";
+import { PerformanceCardSkeleton } from "./components/performances/PerformanceCardSkeleton";
 import { PerformanceDetail } from "./components/performances/PerformanceDetail";
 import { PromotionCard, Promotion } from "./components/promotions/PromotionCard";
+import { PromotionCardSkeleton } from "./components/promotions/PromotionCardSkeleton";
 import { MatchingCard, UserMatch } from "./components/matching/MatchingCard";
+import { MatchingCardSkeleton } from "./components/matching/MatchingCardSkeleton";
 import { UserProfile } from "./components/matching/UserProfile";
 import { AuthDialog } from "./components/auth/AuthDialog";
 import { HomePage } from "./components/home/HomePage";
@@ -463,7 +466,7 @@ export default function App() {
                 variant="outline"
                 size="sm"
                 onClick={() => navigate("/boards")}
-                className="hidden sm:inline-flex border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30"
+                className="hidden sm:inline-flex border-purple-200 dark:border-purple-800 dark:border-purple-800 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30"
               >
                 커뮤니티
               </Button>
@@ -477,7 +480,7 @@ export default function App() {
                     variant="outline"
                     size="sm"
                     onClick={handleLogout}
-                    className="border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all"
+                    className="border-purple-200 dark:border-purple-800 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all"
                   >
                     <LogOut className="size-4 sm:mr-2" />
                     <span className="hidden sm:inline">로그아웃</span>
@@ -501,7 +504,7 @@ export default function App() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-purple-400 dark:text-purple-500" />
             <Input
               placeholder="공연, 전시, 장소 검색..."
-              className="pl-10 border-purple-200 dark:border-purple-800 focus:border-purple-400 dark:focus:border-purple-600 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm transition-all"
+              className="pl-10 border-purple-200 dark:border-purple-800 dark:border-purple-800 focus:border-purple-400 dark:focus:border-purple-600 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm transition-all"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -550,20 +553,20 @@ export default function App() {
               {/* Mobile Filter Button */}
               <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="sm:hidden border-purple-200">
+                  <Button variant="outline" size="sm" className="sm:hidden border-purple-200 dark:border-purple-800 dark:border-purple-800">
                     <SlidersHorizontal className="size-4 mr-2" />
                     필터
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="bottom" className="h-[80vh]">
+                <SheetContent side="bottom" className="h-[80vh] dark:bg-gray-900 dark:border-gray-700">
                   <SheetHeader>
-                    <SheetTitle>필터</SheetTitle>
+                    <SheetTitle className="dark:text-gray-100">필터</SheetTitle>
                   </SheetHeader>
                   <div className="space-y-4 mt-4">
                     <div>
-                      <label className="text-sm mb-2 block">지역</label>
+                      <label className="text-sm mb-2 block dark:text-gray-300">지역</label>
                       <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
-                        <SelectTrigger className="border-purple-200">
+                        <SelectTrigger className="border-purple-200 dark:border-purple-800 dark:border-purple-800">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -575,9 +578,9 @@ export default function App() {
                       </Select>
                     </div>
                     <div>
-                      <label className="text-sm mb-2 block">카테고리</label>
+                      <label className="text-sm mb-2 block dark:text-gray-300">카테고리</label>
                       <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                        <SelectTrigger className="border-purple-200">
+                        <SelectTrigger className="border-purple-200 dark:border-purple-800 dark:border-purple-800">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -589,9 +592,9 @@ export default function App() {
                       </Select>
                     </div>
                     <div>
-                      <label className="text-sm mb-2 block">가격</label>
+                      <label className="text-sm mb-2 block dark:text-gray-300">가격</label>
                       <Select value={selectedPriceRange} onValueChange={setSelectedPriceRange}>
-                        <SelectTrigger className="border-purple-200">
+                        <SelectTrigger className="border-purple-200 dark:border-purple-800 dark:border-purple-800">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -602,9 +605,9 @@ export default function App() {
                       </Select>
                     </div>
                     <div>
-                      <label className="text-sm mb-2 block">기간</label>
+                      <label className="text-sm mb-2 block dark:text-gray-300">기간</label>
                       <Select value={selectedDateFilter} onValueChange={setSelectedDateFilter}>
-                        <SelectTrigger className="border-purple-200">
+                        <SelectTrigger className="border-purple-200 dark:border-purple-800 dark:border-purple-800">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -627,7 +630,7 @@ export default function App() {
               {/* Desktop Filters */}
               <div className="hidden sm:flex items-center gap-2 flex-wrap flex-1">
                 <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
-                  <SelectTrigger className="w-[140px] border-purple-200">
+                  <SelectTrigger className="w-[140px] border-purple-200 dark:border-purple-800 dark:border-purple-800">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -639,7 +642,7 @@ export default function App() {
                 </Select>
 
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-[140px] border-purple-200">
+                  <SelectTrigger className="w-[140px] border-purple-200 dark:border-purple-800 dark:border-purple-800">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -651,7 +654,7 @@ export default function App() {
                 </Select>
 
                 <Select value={selectedPriceRange} onValueChange={setSelectedPriceRange}>
-                  <SelectTrigger className="w-[140px] border-purple-200">
+                  <SelectTrigger className="w-[140px] border-purple-200 dark:border-purple-800">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -662,7 +665,7 @@ export default function App() {
                 </Select>
 
                 <Select value={selectedDateFilter} onValueChange={setSelectedDateFilter}>
-                  <SelectTrigger className="w-[140px] border-purple-200">
+                  <SelectTrigger className="w-[140px] border-purple-200 dark:border-purple-800">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -694,16 +697,23 @@ export default function App() {
 
             {/* Performance Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-              {filteredPerformances.map((performance) => (
-                <PerformanceCard
-                  key={performance.id}
-                  performance={performance}
-                  onViewDetails={handleViewDetails}
-                  isLiked={likedPerformances.has(performance.id)}
-                  onToggleLike={handleToggleLike}
-                  isLoggedIn={isLoggedIn}
-                />
-              ))}
+              {isLoading ? (
+                // 로딩 중일 때 스켈레톤 표시
+                Array.from({ length: 6 }).map((_, index) => (
+                  <PerformanceCardSkeleton key={`skeleton-${index}`} />
+                ))
+              ) : (
+                filteredPerformances.map((performance) => (
+                  <PerformanceCard
+                    key={performance.id}
+                    performance={performance}
+                    onViewDetails={handleViewDetails}
+                    isLiked={likedPerformances.has(performance.id)}
+                    onToggleLike={handleToggleLike}
+                    isLoggedIn={isLoggedIn}
+                  />
+                ))
+              )}
             </div>
 
             {filteredPerformances.length === 0 && (
@@ -739,14 +749,30 @@ export default function App() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-              {matches.map((user) => (
-                <MatchingCard
-                  key={user.id}
-                  user={user}
-                  onViewProfile={handleViewProfile}
-                  onLike={handleLike}
-                />
-              ))}
+              {isLoading ? (
+                // 로딩 중일 때 스켈레톤 표시
+                Array.from({ length: 6 }).map((_, index) => (
+                  <MatchingCardSkeleton key={`skeleton-${index}`} />
+                ))
+              ) : matches.length > 0 ? (
+                matches.map((user) => (
+                  <MatchingCard
+                    key={user.id}
+                    user={user}
+                    onViewProfile={handleViewProfile}
+                    onLike={handleLike}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full text-center py-12">
+                  <Heart className="size-12 mx-auto text-muted-foreground dark:text-gray-500 mb-4" />
+                  <p className="text-muted-foreground dark:text-gray-400">
+                    {isLoggedIn 
+                      ? "매칭 가능한 사용자가 없습니다." 
+                      : "로그인 후 매칭 기능을 이용하실 수 있습니다."}
+                  </p>
+                </div>
+              )}
             </div>
           </TabsContent>
 
@@ -767,9 +793,16 @@ export default function App() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-              {filteredPromotions.map((promotion) => (
-                <PromotionCard key={promotion.id} promotion={promotion} />
-              ))}
+              {isLoading ? (
+                // 로딩 중일 때 스켈레톤 표시
+                Array.from({ length: 6 }).map((_, index) => (
+                  <PromotionCardSkeleton key={`skeleton-${index}`} />
+                ))
+              ) : (
+                filteredPromotions.map((promotion) => (
+                  <PromotionCard key={promotion.id} promotion={promotion} />
+                ))
+              )}
             </div>
           </TabsContent>
         </Tabs>

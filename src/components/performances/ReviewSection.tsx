@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/forms/textarea";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Star, ThumbsUp } from "lucide-react";
 import { Separator } from "../ui/separator";
+import { reviewApi } from "../../lib/api/api";
+import { toast } from "sonner";
+import { usePerformanceRating } from "../../lib/hooks/usePerformanceRating";
 
 interface Review {
   id: string;
@@ -20,37 +23,95 @@ interface ReviewSectionProps {
 }
 
 export function ReviewSection({ performanceId }: ReviewSectionProps) {
-  const [reviews] = useState<Review[]>([
-    {
-      id: "1",
-      author: "김예술",
-      rating: 5,
-      date: "2025.10.25",
-      content: "정말 감동적인 공연이었습니다. 배우들의 연기가 훌륭했고 무대 연출도 완벽했어요!",
-      improvements: "좌석이 조금 불편했어요. 쿠션이 있으면 좋겠습니다.",
-      helpful: 12,
-    },
-    {
-      id: "2",
-      author: "이문화",
-      rating: 4,
-      date: "2025.10.23",
-      content: "가족과 함께 관람했는데 모두 만족했습니다. 아이들도 재미있어 했어요.",
-      improvements: "공연 시간이 조금 길어서 아이들이 지루해하는 부분이 있었습니다.",
-      helpful: 8,
-    },
-  ]);
-
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [newReview, setNewReview] = useState("");
   const [newImprovement, setNewImprovement] = useState("");
   const [rating, setRating] = useState(5);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { refresh: refreshRating } = usePerformanceRating(performanceId);
 
-  const handleSubmit = () => {
-    if (!newReview.trim()) return;
-    alert("리뷰가 등록되었습니다! (실제로는 백엔드 저장 필요)");
-    setNewReview("");
-    setNewImprovement("");
-    setRating(5);
+  // 리뷰 목록 로드
+  useEffect(() => {
+    loadReviews();
+  }, [performanceId]);
+
+  const loadReviews = async () => {
+    try {
+      const result = await reviewApi.getByPerformanceId(performanceId);
+      if (result && result.reviews) {
+        // API 응답을 Review 형식으로 변환
+        const formattedReviews: Review[] = result.reviews.map((review: any) => ({
+          id: review.id || `review_${Date.now()}_${Math.random()}`,
+          author: review.author || review.user_name || '익명',
+          rating: review.rating || 5,
+          date: review.created_at 
+            ? new Date(review.created_at).toLocaleDateString('ko-KR', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit' 
+              }).replace(/\./g, '.').replace(/\s/g, '')
+            : new Date().toLocaleDateString('ko-KR'),
+          content: review.content || review.comment || '',
+          improvements: review.improvements || '',
+          helpful: review.helpful_count || 0,
+        }));
+        setReviews(formattedReviews);
+      }
+    } catch (error) {
+      console.error('리뷰 로드 실패:', error);
+      // 에러 발생 시 기본 리뷰 표시
+      setReviews([
+        {
+          id: "1",
+          author: "김예술",
+          rating: 5,
+          date: "2025.10.25",
+          content: "정말 감동적인 공연이었습니다. 배우들의 연기가 훌륭했고 무대 연출도 완벽했어요!",
+          improvements: "좌석이 조금 불편했어요. 쿠션이 있으면 좋겠습니다.",
+          helpful: 12,
+        },
+        {
+          id: "2",
+          author: "이문화",
+          rating: 4,
+          date: "2025.10.23",
+          content: "가족과 함께 관람했는데 모두 만족했습니다. 아이들도 재미있어 했어요.",
+          improvements: "공연 시간이 조금 길어서 아이들이 지루해하는 부분이 있었습니다.",
+          helpful: 8,
+        },
+      ]);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!newReview.trim()) {
+      toast.error('리뷰 내용을 입력해주세요');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await reviewApi.create({
+        performanceId,
+        rating,
+        comment: newReview,
+        improvements: newImprovement || undefined,
+      });
+
+      toast.success('리뷰가 등록되었습니다!');
+      setNewReview("");
+      setNewImprovement("");
+      setRating(5);
+      
+      // 리뷰 목록 및 평점 새로고침
+      await loadReviews();
+      refreshRating();
+    } catch (error: any) {
+      console.error('리뷰 등록 실패:', error);
+      toast.error(error.message || '리뷰 등록에 실패했습니다');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -99,8 +160,12 @@ export function ReviewSection({ performanceId }: ReviewSectionProps) {
           />
         </div>
 
-        <Button onClick={handleSubmit} className="w-full">
-          리뷰 등록
+        <Button 
+          onClick={handleSubmit} 
+          className="w-full"
+          disabled={isSubmitting || !newReview.trim()}
+        >
+          {isSubmitting ? '등록 중...' : '리뷰 등록'}
         </Button>
       </div>
 

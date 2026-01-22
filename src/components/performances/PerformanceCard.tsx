@@ -3,9 +3,10 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { MapPin, Calendar, Star, Clock, Heart, Share2, ShoppingCart } from "lucide-react";
 import { ImageWithFallback } from "../common/figma/ImageWithFallback";
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
 import { useCartStore } from "../../store/useCartStore";
+import { usePerformanceLike } from "../../lib/hooks/usePerformanceLike";
+import { usePerformanceRating } from "../../lib/hooks/usePerformanceRating";
+import { toast } from "sonner";
 
 export interface Performance {
   id: string;
@@ -38,40 +39,38 @@ export function PerformanceCard({
   performance, 
   onViewDetails, 
   onDateProposal,
-  isLiked = false,
+  isLiked: propIsLiked,
   onToggleLike,
   isLoggedIn = false
 }: PerformanceCardProps) {
-  const [localIsLiked, setLocalIsLiked] = useState(isLiked);
-  const [isLiking, setIsLiking] = useState(false);
+  // 좋아요 Hook 사용 (Supabase 연동)
+  const { isLiked, likeCount, toggle, isLoading: isLiking } = usePerformanceLike(performance.id);
+  // 실시간 평점 Hook 사용
+  const { rating: realtimeRating, reviewCount: realtimeReviewCount } = usePerformanceRating(performance.id);
   const { addItem, isInCart, setIsOpen } = useCartStore();
 
-  // isLiked prop이 변경되면 로컬 상태 업데이트
-  useEffect(() => {
-    setLocalIsLiked(isLiked);
-  }, [isLiked]);
+  // 실시간 평점이 있으면 사용, 없으면 기본 평점 사용
+  const displayRating = realtimeRating > 0 ? realtimeRating : performance.rating;
+  const displayReviewCount = realtimeReviewCount > 0 ? realtimeReviewCount : performance.reviewCount;
 
   const handleToggleLike = async (e: React.MouseEvent) => {
     e.stopPropagation(); // 카드 클릭 이벤트 방지
     
     if (!isLoggedIn) {
-      // 로그인 필요 시 부모 컴포넌트에 알림 (App.tsx에서 처리)
+      toast.error('로그인이 필요합니다');
       return;
     }
 
-    if (!onToggleLike) return;
-
-    setIsLiking(true);
-    try {
-      // 낙관적 업데이트
-      setLocalIsLiked(!localIsLiked);
-      await onToggleLike(performance.id);
-    } catch (error) {
-      // 에러 발생 시 롤백
-      setLocalIsLiked(localIsLiked);
-      console.error('좋아요 처리 중 오류:', error);
-    } finally {
-      setIsLiking(false);
+    // Hook의 toggle 함수 사용
+    await toggle();
+    
+    // 부모 컴포넌트에 알림 (선택적)
+    if (onToggleLike) {
+      try {
+        await onToggleLike(performance.id);
+      } catch (error) {
+        // 부모 컴포넌트에서 이미 처리됨
+      }
     }
   };
 
@@ -134,25 +133,33 @@ export function PerformanceCard({
           {performance.category}
         </Badge>
         {/* 좋아요 버튼 - 로그인 여부와 관계없이 표시 */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className={`absolute top-2 sm:top-3 left-2 sm:left-3 size-8 sm:size-9 rounded-full backdrop-blur-sm transition-all ${
-            localIsLiked
-              ? 'bg-red-500/90 hover:bg-red-600/90 text-white'
-              : 'bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-red-500'
-          } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''} ${!isLoggedIn ? 'opacity-70' : ''}`}
-          onClick={handleToggleLike}
-          disabled={isLiking}
-          aria-label={localIsLiked ? '좋아요 취소' : '좋아요'}
-          title={!isLoggedIn ? '로그인이 필요합니다' : localIsLiked ? '좋아요 취소' : '좋아요'}
-        >
-          <Heart 
-            className={`size-4 sm:size-5 transition-all ${
-              localIsLiked ? 'fill-current' : ''
-            }`} 
-          />
-        </Button>
+        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex items-center gap-1.5 sm:gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`size-8 sm:size-9 rounded-full backdrop-blur-sm transition-all ${
+              isLiked
+                ? 'bg-red-500/90 hover:bg-red-600/90 text-white'
+                : 'bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-red-500'
+            } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''} ${!isLoggedIn ? 'opacity-70' : ''}`}
+            onClick={handleToggleLike}
+            disabled={isLiking}
+            aria-label={isLiked ? '좋아요 취소' : '좋아요'}
+            title={!isLoggedIn ? '로그인이 필요합니다' : isLiked ? '좋아요 취소' : '좋아요'}
+          >
+            <Heart 
+              className={`size-4 sm:size-5 transition-all ${
+                isLiked ? 'fill-current' : ''
+              }`} 
+            />
+          </Button>
+          {/* 좋아요 수 표시 */}
+          {likeCount > 0 && (
+            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 shadow-md">
+              {likeCount}
+            </div>
+          )}
+        </div>
         {/* 공유 버튼 */}
         <Button
           variant="ghost"
@@ -171,7 +178,7 @@ export function PerformanceCard({
           <h3 className="line-clamp-2 text-base sm:text-lg group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors dark:text-gray-100">{performance.title}</h3>
           <div className="flex items-center gap-1 shrink-0 bg-yellow-50 dark:bg-yellow-900/30 px-2 py-1 rounded-full">
             <Star className="size-3 sm:size-4 fill-yellow-400 text-yellow-400 dark:text-yellow-500" />
-            <span className="text-xs sm:text-sm dark:text-gray-200">{performance.rating}</span>
+            <span className="text-xs sm:text-sm dark:text-gray-200">{displayRating}</span>
           </div>
         </div>
       </CardHeader>
