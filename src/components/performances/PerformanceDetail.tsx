@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { getVenueCoordinates } from "../../lib/utils/geocode";
 import { getVenueCoordinates as getStoredCoordinates, DEFAULT_COORDINATES } from "../../lib/utils/venueCoordinates";
 import { usePerformanceRating } from "../../lib/hooks/usePerformanceRating";
+import { loadKakaoMapSDK } from "../../lib/utils/kakaoMapLoader";
 
 interface PerformanceDetailProps {
   performance: Performance | null;
@@ -28,6 +29,8 @@ export function PerformanceDetail({ performance, open, onOpenChange }: Performan
     lng: number;
   } | null>(null);
   const [isLoadingCoordinates, setIsLoadingCoordinates] = useState(false);
+  const [subwayStations, setSubwayStations] = useState<Array<{ name: string; distanceM?: number }>>([]);
+  const [isLoadingSubway, setIsLoadingSubway] = useState(false);
   
   // 실시간 평점 Hook 사용
   const { rating: realtimeRating, reviewCount: realtimeReviewCount } = usePerformanceRating(performance.id);
@@ -94,6 +97,57 @@ export function PerformanceDetail({ performance, open, onOpenChange }: Performan
 
     loadCoordinates();
   }, [performance, open]);
+
+  // 주변 지하철역 검색 (Kakao Maps Places)
+  useEffect(() => {
+    if (!open || !venueInfo) return;
+
+    let cancelled = false;
+    setIsLoadingSubway(true);
+    setSubwayStations([]);
+
+    loadKakaoMapSDK()
+      .then(() => {
+        if (cancelled) return;
+        if (!window.kakao?.maps?.services?.Places) {
+          throw new Error("Kakao Maps services.Places is not available");
+        }
+
+        const places = new window.kakao.maps.services.Places();
+        const location = new window.kakao.maps.LatLng(venueInfo.lat, venueInfo.lng);
+
+        places.keywordSearch(
+          "지하철역",
+          (data: any[], status: string) => {
+            if (cancelled) return;
+            if (status !== window.kakao.maps.services.Status.OK || !Array.isArray(data)) {
+              setSubwayStations([]);
+              setIsLoadingSubway(false);
+              return;
+            }
+
+            const top = data.slice(0, 3).map((p: any) => ({
+              name: String(p.place_name || ""),
+              distanceM: p.distance != null ? Number(p.distance) : undefined,
+            })).filter((p: any) => p.name);
+
+            setSubwayStations(top);
+            setIsLoadingSubway(false);
+          },
+          { location, radius: 2000, sort: window.kakao.maps.services.SortBy.DISTANCE }
+        );
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        console.warn("주변 지하철역 검색 실패:", e);
+        setSubwayStations([]);
+        setIsLoadingSubway(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, venueInfo]);
 
   const handleNavigate = () => {
     // 카카오맵 앱 또는 웹으로 길찾기
@@ -223,7 +277,18 @@ export function PerformanceDetail({ performance, open, onOpenChange }: Performan
                 <div className="space-y-2">
                   <h4 className="text-xs sm:text-sm dark:text-gray-200">교통편</h4>
                   <div className="text-xs sm:text-sm text-muted-foreground dark:text-gray-400 space-y-1">
-                    <p>🚇 지하철: 가장 가까운 역에서 도보 5분</p>
+                    <p>
+                      🚇 지하철:{" "}
+                      {isLoadingSubway
+                        ? "가까운 역을 찾는 중..."
+                        : subwayStations.length > 0
+                          ? subwayStations
+                              .map((s) =>
+                                s.distanceM != null ? `${s.name} (${s.distanceM}m)` : s.name
+                              )
+                              .join(", ")
+                          : "가까운 역 정보를 찾지 못했어요"}
+                    </p>
                     <p>🚌 버스: 123, 456, 789번</p>
                     <p>🚗 주차: 공연장 지하 주차장 이용 가능</p>
                   </div>
