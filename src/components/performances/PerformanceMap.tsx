@@ -29,90 +29,80 @@ export function PerformanceMap({ venue, className = '' }: PerformanceMapProps) {
   useEffect(() => {
     if (!venue || !mapRef.current) return;
 
-    let isMounted = true;
+    let cancelled = false;
+    setIsLoading(true);
+    setError(null);
 
-    // Kakao Map SDK 로드
+    const initializeMap = () => {
+      try {
+        const lat = venue.lat;
+        const lng = venue.lng;
+
+        const mapOption = {
+          center: new window.kakao.maps.LatLng(lat, lng),
+          level: 3,
+        };
+
+        const map = new window.kakao.maps.Map(mapRef.current, mapOption);
+        mapInstanceRef.current = map;
+
+        const markerPosition = new window.kakao.maps.LatLng(lat, lng);
+        const marker = new window.kakao.maps.Marker({ position: markerPosition });
+        marker.setMap(map);
+
+        const infowindow = new window.kakao.maps.InfoWindow({
+          content: `
+            <div style="
+              padding: 12px;
+              min-width: 150px;
+              background: white;
+              border-radius: 8px;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            ">
+              <h4 style="
+                margin: 0 0 4px 0;
+                font-weight: 600;
+                font-size: 14px;
+                color: #1f2937;
+              ">${venue.name}</h4>
+              <p style="
+                margin: 0;
+                font-size: 12px;
+                color: #6b7280;
+                line-height: 1.4;
+              ">${venue.address}</p>
+            </div>
+          `,
+        });
+
+        infowindow.open(map, marker);
+
+        if (!cancelled) setIsLoading(false);
+      } catch (err) {
+        if (!cancelled) {
+          console.error('지도 초기화 오류:', err);
+          setError('지도를 불러오는 중 오류가 발생했습니다.');
+          setIsLoading(false);
+        }
+      }
+    };
+
     loadKakaoMapSDK()
       .then(() => {
-        if (!isMounted || !mapRef.current) return;
+        if (cancelled || !mapRef.current) return;
         initializeMap();
       })
-      .catch((error) => {
-        if (!isMounted) return;
-        console.error('Kakao Map SDK 로드 실패:', error);
+      .catch((sdkError) => {
+        if (cancelled) return;
+        console.error('Kakao Map SDK 로드 실패:', sdkError);
         setError('카카오 맵을 불러올 수 없습니다. API 키를 확인해주세요.');
         setIsLoading(false);
       });
 
-    function initializeMap() {
-
-    try {
-      // 기본 좌표 (서울 시청)
-      const defaultLat = 37.5665;
-      const defaultLng = 126.9780;
-
-      const lat = venue.lat || defaultLat;
-      const lng = venue.lng || defaultLng;
-
-      // 지도 생성
-      const mapOption = {
-        center: new window.kakao.maps.LatLng(lat, lng),
-        level: 3, // 확대 레벨 (1-14, 작을수록 확대)
-      };
-
-      const map = new window.kakao.maps.Map(mapRef.current, mapOption);
-      mapInstanceRef.current = map;
-
-      // 마커 생성
-      const markerPosition = new window.kakao.maps.LatLng(lat, lng);
-      const marker = new window.kakao.maps.Marker({
-        position: markerPosition,
-      });
-      marker.setMap(map);
-
-      // 인포윈도우 생성
-      const infowindow = new window.kakao.maps.InfoWindow({
-        content: `
-          <div style="
-            padding: 12px;
-            min-width: 150px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          ">
-            <h4 style="
-              margin: 0 0 4px 0; 
-              font-weight: 600;
-              font-size: 14px;
-              color: #1f2937;
-            ">${venue.name}</h4>
-            <p style="
-              margin: 0; 
-              font-size: 12px; 
-              color: #6b7280;
-              line-height: 1.4;
-            ">${venue.address}</p>
-          </div>
-        `,
-      });
-
-      // 인포윈도우 표시
-      infowindow.open(map, marker);
-
-      if (isMounted) {
-        setIsLoading(false);
-      }
-    } catch (err) {
-      if (isMounted) {
-        console.error('지도 초기화 오류:', err);
-        setError('지도를 불러오는 중 오류가 발생했습니다.');
-        setIsLoading(false);
-      }
-    }
-
     return () => {
-      isMounted = false;
+      cancelled = true;
+      mapInstanceRef.current = null;
     };
   }, [venue]);
 
