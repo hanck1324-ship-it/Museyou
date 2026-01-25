@@ -590,6 +590,9 @@ export const reviewApi = {
       reviews.push(review);
       setToStorage(`reviews_${reviewData.performanceId}`, reviews);
       
+      // 실시간 업데이트를 위한 이벤트 발생
+      window.dispatchEvent(new CustomEvent(`review-updated-${reviewData.performanceId}`));
+      
       return { review };
     }
 
