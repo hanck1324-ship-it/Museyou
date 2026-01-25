@@ -8,6 +8,9 @@ const supabase = createClient(
   publicAnonKey
 );
 
+// 모킹 모드 확인 (api.ts와 동일한 방식)
+const USE_MOCK_MODE = true; // TODO: 환경 변수나 설정에서 가져오기
+
 interface RatingData {
   rating: number;
   reviewCount: number;
@@ -32,32 +35,53 @@ export function usePerformanceRating(performanceId: string) {
 
   // 실시간 업데이트 구독
   useEffect(() => {
-    // 모킹 모드에서는 실시간 업데이트 비활성화
-    const USE_MOCK_MODE = true; // api.ts에서 가져와야 하지만 일단 하드코딩
     if (USE_MOCK_MODE) {
-      return;
-    }
+      // 모킹 모드: CustomEvent를 사용한 실시간 업데이트
+      const eventName = `review-updated-${performanceId}`;
+      
+      const handleReviewUpdate = () => {
+        // 리뷰 변경 시 평점 재계산
+        loadRating();
+      };
 
-    const channel = supabase
-      .channel(`performance-rating-${performanceId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'reviews',
-          filter: `performance_id=eq.${performanceId}`
-        },
-        () => {
-          // 리뷰 변경 시 평점 재계산
+      // 이벤트 리스너 등록
+      window.addEventListener(eventName, handleReviewUpdate);
+
+      // storage 이벤트도 구독 (다른 탭에서 변경된 경우)
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === `reviews_${performanceId}`) {
           loadRating();
         }
-      )
-      .subscribe();
+      };
+      window.addEventListener('storage', handleStorageChange);
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        window.removeEventListener(eventName, handleReviewUpdate);
+        window.removeEventListener('storage', handleStorageChange);
+      };
+    } else {
+      // 실제 Supabase Realtime 구독
+      const channel = supabase
+        .channel(`performance-rating-${performanceId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'reviews',
+            filter: `performance_id=eq.${performanceId}`
+          },
+          () => {
+            // 리뷰 변경 시 평점 재계산
+            loadRating();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [performanceId]);
 
   const loadRating = async () => {

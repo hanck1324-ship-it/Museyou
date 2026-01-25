@@ -105,7 +105,12 @@ export function ReviewSection({ performanceId }: ReviewSectionProps) {
       
       // 리뷰 목록 및 평점 새로고침
       await loadReviews();
+      
+      // 평점 업데이트 (이벤트 기반으로 자동 업데이트되지만 명시적으로 호출)
       refreshRating();
+      
+      // 실시간 업데이트를 위한 이벤트 발생 (api.ts에서도 발생하지만 확실하게)
+      window.dispatchEvent(new CustomEvent(`review-updated-${performanceId}`));
     } catch (error: any) {
       console.error('리뷰 등록 실패:', error);
       toast.error(error.message || '리뷰 등록에 실패했습니다');
