@@ -200,5 +200,26 @@ pnpm dev
 
 ---
 
-**Last Updated:** 2025-01-25  
-**Status:** 로딩 스켈레톤 구현 완료 ✅
+**Last Updated:** 2025-01-27  
+**Status:** 로딩 스켈레톤 확장 완료 ✅
+
+## 최근 업데이트 (2025-01-27)
+
+### 추가 완료된 스켈레톤
+- ✅ **GroupPurchaseCardSkeleton** - 공동구매 카드 스켈레톤
+- ✅ **PerformanceDetailSkeleton** - 공연 상세 페이지 스켈레톤
+- ✅ **GroupPurchaseDetailSkeleton** - 공동구매 상세 페이지 스켈레톤
+
+### 개선 사항
+- GroupPurchaseList에 스켈레톤 적용 (6개 표시)
+- PerformanceDetail 지도 로딩 스켈레톤 개선
+- 지하철역 로딩 중 스켈레톤 표시
+- 모든 스켈레톤에 다크모드 지원
+
+### 적용된 컴포넌트
+- PerformanceCardSkeleton ✅
+- MatchingCardSkeleton ✅
+- PromotionCardSkeleton ✅
+- GroupPurchaseCardSkeleton ✅ (신규)
+- PerformanceDetailSkeleton ✅ (신규)
+- GroupPurchaseDetailSkeleton ✅ (신규)

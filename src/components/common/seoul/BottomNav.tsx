@@ -16,7 +16,7 @@ export function BottomNav({ activeTab = "recommend", onTabChange }: BottomNavPro
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-50 border-t"
+      className="fixed bottom-0 left-0 right-0 z-50 border-t dark:border-gray-700"
       style={{
         backgroundColor: "var(--bg-white)",
         borderColor: "rgba(0, 0, 0, 0.08)",

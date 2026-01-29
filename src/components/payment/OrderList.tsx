@@ -102,8 +102,8 @@ export function OrderList() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <Package className="size-12 text-muted-foreground mx-auto mb-4 animate-pulse" />
-          <p className="text-muted-foreground">주문 내역을 불러오는 중...</p>
+          <Package className="size-12 text-muted-foreground dark:text-gray-400 mx-auto mb-4 animate-pulse" />
+          <p className="text-muted-foreground dark:text-gray-400">주문 내역을 불러오는 중...</p>
         </div>
       </div>
     );
@@ -112,9 +112,9 @@ export function OrderList() {
   if (orders.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <Package className="size-16 text-muted-foreground mb-4 opacity-50" />
-        <p className="text-lg font-medium mb-2">주문 내역이 없습니다</p>
-        <p className="text-sm text-muted-foreground">
+        <Package className="size-16 text-muted-foreground dark:text-gray-400 mb-4 opacity-50" />
+        <p className="text-lg font-medium mb-2 dark:text-gray-200">주문 내역이 없습니다</p>
+        <p className="text-sm text-muted-foreground dark:text-gray-400">
           공연을 예매하고 주문 내역을 확인해보세요!
         </p>
       </div>
@@ -125,11 +125,11 @@ export function OrderList() {
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
+          <h2 className="text-2xl font-bold flex items-center gap-2 dark:text-gray-100">
             <Package className="size-6" />
             주문 내역
           </h2>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground dark:text-gray-400 mt-1">
             총 {orders.length}개의 주문
           </p>
         </div>
@@ -137,15 +137,15 @@ export function OrderList() {
 
       <div className="space-y-4">
         {orders.map((order) => (
-          <Card key={order.id} className="hover:shadow-md transition-shadow">
+          <Card key={order.id} className="hover:shadow-md transition-shadow dark:bg-gray-800/90 dark:border-gray-700">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <CardTitle className="text-lg">주문 #{order.id.slice(-8)}</CardTitle>
+                    <CardTitle className="text-lg dark:text-gray-100">주문 #{order.id.slice(-8)}</CardTitle>
                     {getStatusBadge(order.status)}
                   </div>
-                  <CardDescription className="flex items-center gap-4 mt-2">
+                  <CardDescription className="flex items-center gap-4 mt-2 dark:text-gray-400">
                     <span className="flex items-center gap-1">
                       <Calendar className="size-4" />
                       {formatDate(order.createdAt)}

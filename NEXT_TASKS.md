@@ -38,6 +38,28 @@
 - `ImageWithFallback` 컴포넌트 개선
 - 이미지 최적화 유틸리티 함수 추가
 
+### 7. 다크모드 지원 완성 ✅ (2025-01-27)
+- 결제 컴포넌트 다크모드 적용 (CheckoutPage, OrderList, OrderDetail)
+- BottomNav 다크모드 적용
+- 모든 주요 컴포넌트 다크모드 확인 및 보완
+- 시스템 테마 감지 확인 완료
+- ThemeToggle 위치 확인 완료
+
+### 8. 로딩 스켈레톤 확장 ✅ (2025-01-27)
+- GroupPurchaseCardSkeleton 생성
+- PerformanceDetailSkeleton 생성
+- GroupPurchaseDetailSkeleton 생성
+- GroupPurchaseList에 스켈레톤 적용
+- PerformanceDetail 지도 로딩 스켈레톤 개선
+- 모든 스켈레톤에 다크모드 지원
+
+### 9. 무한 스크롤 구현 ✅ (2025-01-27)
+- useInfiniteScroll 커스텀 훅 생성
+- 공연 목록 무한 스크롤 적용
+- 공동구매 목록 무한 스크롤 적용
+- 로딩 인디케이터 추가
+- 필터 변경 시 페이지 자동 리셋
+
 ---
 
 ## 🔴 즉시 해야 할 작업 (우선순위 높음)
@@ -51,6 +73,8 @@
 ```
 
 ### 2. ~~Performance Detail 지도 개선~~ ✅ 완료
+
+### 3. ~~다크모드 지원 완성~~ ✅ 완료 (2025-01-27)
 **완료된 작업:**
 - ✅ PerformanceMap useEffect/cleanup 안정화
 - ✅ 주변 지하철역 표시 (카카오 Places API)
@@ -79,25 +103,22 @@
 
 ---
 
-### 2순위: 다크모드 지원 완성 ⭐⭐⭐
-**현재 상태:**
-- ✅ `next-themes` 설치됨
-- ✅ `ThemeToggle` 컴포넌트 존재
-- ✅ 다크모드 CSS 변수 정의됨 (`globals.css`)
-- ⚠️ 일부 컴포넌트에만 `dark:` 클래스 적용됨
+### 2순위: ~~다크모드 지원 완성~~ ✅ 완료 (2025-01-27)
+**완료된 작업:**
+- ✅ 결제 컴포넌트 다크모드 적용 (CheckoutPage, OrderList, OrderDetail)
+- ✅ BottomNav 다크모드 적용
+- ✅ 모든 주요 컴포넌트 다크모드 확인 및 보완
+- ✅ 공통 UI 컴포넌트 다크모드 적용 (CSS 변수 기반 자동 지원)
+- ✅ 테마 토글 버튼 위치 확인 (헤더에 위치)
+- ✅ 시스템 테마 감지 확인 (`defaultTheme="system"` 설정됨)
 
-**해야 할 작업:**
-- [ ] 주요 컴포넌트에 `dark:` 클래스 추가
-  - PerformanceCard, PerformanceDetail
-  - MatchingCard, GroupPurchaseCard
-  - AuthDialog, CartSheet
-  - Header, Navigation, Footer
-- [ ] 공통 UI 컴포넌트 다크모드 적용
-- [ ] 테마 토글 버튼 위치 확인 및 개선
-- [ ] 시스템 테마 감지 확인
-
-**예상 시간:** 3-4시간  
-**이유:** 이미 기반이 구축되어 있어 빠르게 완성 가능, 사용자 만족도 높음
+**적용된 컴포넌트:**
+- PerformanceCard, PerformanceDetail ✅
+- MatchingCard, GroupPurchaseCard ✅
+- AuthDialog, CartSheet ✅
+- 결제 관련 컴포넌트 (CheckoutPage, OrderList, OrderDetail) ✅
+- BottomNav ✅
+- 공통 UI 컴포넌트 (Card, Dialog, Button 등 - CSS 변수 기반) ✅
 
 **참고 문서:** `DARK_MODE_IMPLEMENTATION.md`
 
@@ -119,20 +140,25 @@
 
 ---
 
-### 4순위: 로딩 스켈레톤 확장 ⭐⭐
-**현재 상태:**
-- 일부 컴포넌트에만 있음
-- `PerformanceCardSkeleton`, `MatchingCardSkeleton` 존재
+### 4순위: ~~로딩 스켈레톤 확장~~ ✅ 완료 (2025-01-27)
+**완료된 작업:**
+- ✅ GroupPurchaseCardSkeleton 생성
+- ✅ GroupPurchaseList에 스켈레톤 적용
+- ✅ PerformanceDetailSkeleton 생성
+- ✅ GroupPurchaseDetailSkeleton 생성
+- ✅ PerformanceDetail 지도 로딩 스켈레톤 개선
+- ✅ 지하철역 로딩 중 스켈레톤 표시
+- ✅ 모든 스켈레톤에 다크모드 지원
 
-**해야 할 작업:**
-- [ ] 모든 카드 컴포넌트에 스켈레톤 추가
-- [ ] 목록 페이지 스켈레톤
-- [ ] 상세 페이지 스켈레톤
-- [ ] 로딩 상태 관리 개선
+**적용된 스켈레톤:**
+- PerformanceCardSkeleton ✅
+- MatchingCardSkeleton ✅
+- PromotionCardSkeleton ✅
+- GroupPurchaseCardSkeleton ✅ (신규)
+- PerformanceDetailSkeleton ✅ (신규)
+- GroupPurchaseDetailSkeleton ✅ (신규)
 
 **참고 문서:** `LOADING_SKELETON_IMPLEMENTATION.md`
-
-**예상 시간:** 4-6시간
 
 ---
 
@@ -152,17 +178,22 @@
 
 ---
 
-### 6. 무한 스크롤
-**현재 상태:**
-- 페이지네이션 없음
+### 6. ~~무한 스크롤~~ ✅ 완료 (2025-01-27)
+**완료된 작업:**
+- ✅ useInfiniteScroll 커스텀 훅 생성
+- ✅ 공연 목록 무한 스크롤 적용
+- ✅ 공동구매 목록 무한 스크롤 적용
+- ✅ 로딩 인디케이터 추가
+- ✅ 필터 변경 시 페이지 자동 리셋
+- ✅ 더 이상 데이터 없을 때 안내 메시지
 
-**해야 할 작업:**
-- [ ] Intersection Observer API 사용
-- [ ] 공연 목록 무한 스크롤
-- [ ] 공동구매 목록 무한 스크롤
-- [ ] 로딩 인디케이터
+**적용된 기능:**
+- Intersection Observer API 사용
+- 페이지당 12개 항목 표시
+- 스크롤 끝 도달 시 자동 로드
+- 로딩 상태 관리
 
-**예상 시간:** 3-4시간
+**참고 문서:** `INFINITE_SCROLL_IMPLEMENTATION.md`
 
 ---
 
@@ -261,12 +292,12 @@ Test Files  6 passed (6)
 1. ~~**실패한 테스트 수정**~~ ✅ 완료
 2. ~~**Performance Detail 지도 개선**~~ ✅ 완료
 3. ~~**실시간 평점 업데이트**~~ ✅ 완료
-4. **다크모드 지원 완성** - 3-4시간 ⭐⭐ (다음 추천)
+4. ~~**다크모드 지원 완성**~~ ✅ 완료 (2025-01-27)
 
 ### 다음 주
 5. ~~**이미지 최적화**~~ ✅ 완료
-6. **로딩 스켈레톤** - 4-6시간 (다음 추천)
-7. **무한 스크롤** - 3-4시간
+6. ~~**로딩 스켈레톤**~~ ✅ 완료 (2025-01-27)
+7. ~~**무한 스크롤**~~ ✅ 완료 (2025-01-27)
 
 ### 그 다음 주
 8. **Matching Card 스와이프** - 4-6시간

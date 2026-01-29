@@ -18,21 +18,28 @@ interface PerformanceMapProps {
 
 ## 현재 구현 상태 ✅
 
-### 1. Kakao Map 통합
+### 1. Kakao Map 통합 ✅ 완료 (2025-01-27)
 - Kakao Map SDK 로드 확인
 - Map 생성 및 초기화
 - 마커 표시
 - 인포윈도우 표시
+- useEffect/cleanup 안정화
 
-### 2. 상태 관리
+### 2. 상태 관리 ✅ 완료
 - 로딩 상태: `isLoading`
 - 에러 상태: `error`
 - Map 인스턴스: `mapInstanceRef`
 
-### 3. Fallback 처리
+### 3. Fallback 처리 ✅ 완료
 - Venue 없을 때: Fallback UI
 - SDK 로드 실패: 에러 메시지
 - Map 초기화 실패: 에러 처리
+- 좌표 로드 실패 시 graceful fallback
+
+### 4. 주변 지하철역 표시 ✅ 완료 (2025-01-27)
+- 카카오 Places API를 통한 지하철역 검색
+- 공연장 좌표 기준 상위 3개 지하철역 표시
+- 거리 정보 표시
 
 ## 개선이 필요한 기능 🔧
 

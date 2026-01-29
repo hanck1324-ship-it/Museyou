@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useGroupPurchaseStore } from "../../store/useGroupPurchaseStore";
 import { GroupPurchaseCard } from "./GroupPurchaseCard";
+import { GroupPurchaseCardSkeleton } from "./GroupPurchaseCardSkeleton";
 import { Button } from "../ui/button";
 import { Input } from "../ui/forms/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/forms/select";
@@ -8,7 +9,8 @@ import { Plus, Loader2, Search, SlidersHorizontal, X } from "lucide-react";
 import { GroupPurchaseDetail } from "./GroupPurchaseDetail";
 import { GroupPurchaseJoin } from "./GroupPurchaseJoin";
 import { GroupPurchaseCreate } from "./GroupPurchaseCreate";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useInfiniteScroll } from "../../lib/hooks/useInfiniteScroll";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { GroupPurchaseStatus as StatusType } from "../../lib/types/groupPurchase";
@@ -41,13 +43,19 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  
+  // 무한 스크롤 상태
+  const [page, setPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const ITEMS_PER_PAGE = 12;
 
   // 실시간 목록 업데이트 구독
   useGroupPurchaseListRealtime();
 
-  // 필터/정렬 변경 시 목록 새로고침
+  // 필터/정렬 변경 시 목록 새로고침 및 페이지 리셋
   useEffect(() => {
     fetchGroupPurchases();
+    setPage(1);
   }, [fetchGroupPurchases, filters, sortBy]);
 
   // 검색어 변경 시 필터 업데이트
@@ -139,11 +147,49 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
     await fetchGroupPurchaseDetail(selectedGroupPurchase.id);
   };
 
+  // 필터링된 목록에서 현재 페이지까지의 항목만 표시
+  const displayedGroupPurchases = useMemo(() => {
+    return groupPurchases.slice(0, page * ITEMS_PER_PAGE);
+  }, [groupPurchases, page]);
+
+  const hasMore = displayedGroupPurchases.length < groupPurchases.length;
+
+  // 무한 스크롤: 더 많은 공동구매 로드
+  const loadMore = async () => {
+    if (isLoadingMore || !hasMore) return;
+    
+    setIsLoadingMore(true);
+    // 다음 페이지 로드 (실제로는 이미 필터링된 데이터에서 슬라이스만 하므로 즉시 완료)
+    await new Promise(resolve => setTimeout(resolve, 300)); // 로딩 효과를 위한 딜레이
+    setPage(prev => prev + 1);
+    setIsLoadingMore(false);
+  };
+
+  // 무한 스크롤 훅
+  const loadMoreRef = useInfiniteScroll({
+    onLoadMore: loadMore,
+    hasMore,
+    isLoading: isLoadingMore,
+  });
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="size-8 animate-spin text-purple-500 dark:text-purple-400" />
-        <span className="ml-3 text-muted-foreground dark:text-gray-400">로딩 중...</span>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
+          <div>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+              문화 공동구매
+            </h2>
+            <p className="text-sm text-muted-foreground dark:text-gray-400 mt-1">
+              함께 참여하면 더 저렴하게 공연을 관람할 수 있어요
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <GroupPurchaseCardSkeleton key={`skeleton-${index}`} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -400,16 +446,39 @@ export function GroupPurchaseList({ onCreateClick }: GroupPurchaseListProps) {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-          {groupPurchases.map((groupPurchase) => (
-            <GroupPurchaseCard
-              key={groupPurchase.id}
-              groupPurchase={groupPurchase}
-              onViewDetail={handleViewDetail}
-              onJoin={handleJoin}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+            {displayedGroupPurchases.map((groupPurchase) => (
+              <GroupPurchaseCard
+                key={groupPurchase.id}
+                groupPurchase={groupPurchase}
+                onViewDetail={handleViewDetail}
+                onJoin={handleJoin}
+              />
+            ))}
+          </div>
+
+          {/* 무한 스크롤 로딩 인디케이터 */}
+          {hasMore && (
+            <div ref={loadMoreRef} className="flex items-center justify-center py-8">
+              {isLoadingMore && (
+                <div className="flex items-center gap-2 text-muted-foreground dark:text-gray-400">
+                  <Loader2 className="size-5 animate-spin" />
+                  <span>더 많은 공동구매를 불러오는 중...</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 더 이상 데이터가 없을 때 */}
+          {!hasMore && displayedGroupPurchases.length > 0 && (
+            <div className="text-center py-8">
+              <p className="text-sm text-muted-foreground dark:text-gray-400">
+                모든 공동구매를 불러왔습니다
+              </p>
+            </div>
+          )}
+        </>
       )}
         </TabsContent>
 

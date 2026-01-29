@@ -81,26 +81,26 @@ export function OrderDetail({ order, open, onOpenChange }: OrderDetailProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto dark:bg-gray-900 dark:border-gray-700">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 dark:text-gray-100">
             <Package className="size-5" />
             주문 상세
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="dark:text-gray-400">
             주문번호: {order.id}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* 주문 상태 */}
-          <div className="flex items-center justify-between p-4 rounded-lg border bg-gray-50 dark:bg-gray-800/50">
+          <div className="flex items-center justify-between p-4 rounded-lg border bg-gray-50 dark:bg-gray-800/50 dark:border-gray-700">
             <div>
-              <p className="text-sm text-muted-foreground mb-1">주문 상태</p>
+              <p className="text-sm text-muted-foreground dark:text-gray-400 mb-1">주문 상태</p>
               {getStatusBadge(order.status)}
             </div>
             <div className="text-right">
-              <p className="text-sm text-muted-foreground mb-1">결제 금액</p>
+              <p className="text-sm text-muted-foreground dark:text-gray-400 mb-1">결제 금액</p>
               <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                 {formatPrice(order.totalAmount)}
               </p>
@@ -109,29 +109,29 @@ export function OrderDetail({ order, open, onOpenChange }: OrderDetailProps) {
 
           {/* 주문 정보 */}
           <div className="space-y-3">
-            <h3 className="font-semibold flex items-center gap-2">
+            <h3 className="font-semibold flex items-center gap-2 dark:text-gray-200">
               <Calendar className="size-4" />
               주문 정보
             </h3>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <p className="text-muted-foreground mb-1">주문일시</p>
-                <p className="font-medium">{formatDate(order.createdAt)}</p>
+                <p className="text-muted-foreground dark:text-gray-400 mb-1">주문일시</p>
+                <p className="font-medium dark:text-gray-200">{formatDate(order.createdAt)}</p>
               </div>
               {order.paidAt && (
                 <div>
-                  <p className="text-muted-foreground mb-1">결제일시</p>
-                  <p className="font-medium">{formatDate(order.paidAt)}</p>
+                  <p className="text-muted-foreground dark:text-gray-400 mb-1">결제일시</p>
+                  <p className="font-medium dark:text-gray-200">{formatDate(order.paidAt)}</p>
                 </div>
               )}
               <div>
-                <p className="text-muted-foreground mb-1">결제 수단</p>
-                <p className="font-medium">{order.paymentMethod === 'card' ? '신용/체크카드' : order.paymentMethod}</p>
+                <p className="text-muted-foreground dark:text-gray-400 mb-1">결제 수단</p>
+                <p className="font-medium dark:text-gray-200">{order.paymentMethod === 'card' ? '신용/체크카드' : order.paymentMethod}</p>
               </div>
               {order.paymentId && (
                 <div>
-                  <p className="text-muted-foreground mb-1">결제 번호</p>
-                  <p className="font-medium text-xs">{order.paymentId}</p>
+                  <p className="text-muted-foreground dark:text-gray-400 mb-1">결제 번호</p>
+                  <p className="font-medium text-xs dark:text-gray-200">{order.paymentId}</p>
                 </div>
               )}
             </div>
@@ -141,12 +141,12 @@ export function OrderDetail({ order, open, onOpenChange }: OrderDetailProps) {
 
           {/* 주문 상품 목록 */}
           <div className="space-y-3">
-            <h3 className="font-semibold">주문 상품</h3>
+            <h3 className="font-semibold dark:text-gray-200">주문 상품</h3>
             <div className="space-y-3">
               {order.items.map((item, index) => (
                 <div
                   key={index}
-                  className="flex gap-4 p-4 rounded-lg border bg-white dark:bg-gray-800/50"
+                  className="flex gap-4 p-4 rounded-lg border bg-white dark:bg-gray-800/50 dark:border-gray-700"
                 >
                   <div className="relative w-20 h-20 rounded-lg overflow-hidden shrink-0">
                     <ImageWithFallback
@@ -157,23 +157,23 @@ export function OrderDetail({ order, open, onOpenChange }: OrderDetailProps) {
                   </div>
                   <div className="flex-1 min-w-0 space-y-2">
                     <div>
-                      <h4 className="font-semibold line-clamp-2">{item.title}</h4>
+                      <h4 className="font-semibold line-clamp-2 dark:text-gray-200">{item.title}</h4>
                       {item.venue && (
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground dark:text-gray-400 mt-1">
                           {item.venue}
                         </p>
                       )}
                       {item.date && (
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground dark:text-gray-400">
                           {item.date}
                         </p>
                       )}
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-muted-foreground dark:text-gray-400">
                         수량: {item.quantity}개
                       </span>
-                      <span className="font-semibold">
+                      <span className="font-semibold dark:text-gray-200">
                         {formatPrice(item.price * item.quantity)}
                       </span>
                     </div>
@@ -188,20 +188,20 @@ export function OrderDetail({ order, open, onOpenChange }: OrderDetailProps) {
           {/* 결제 요약 */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">상품 금액</span>
-              <span className="font-medium">
+              <span className="text-muted-foreground dark:text-gray-400">상품 금액</span>
+              <span className="font-medium dark:text-gray-200">
                 {formatPrice(order.totalAmount)}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">할인 금액</span>
+              <span className="text-muted-foreground dark:text-gray-400">할인 금액</span>
               <span className="font-medium text-emerald-600 dark:text-emerald-400">
                 -{formatPrice(0)}
               </span>
             </div>
-            <Separator />
+            <Separator className="dark:bg-gray-700" />
             <div className="flex items-center justify-between text-lg font-bold">
-              <span>총 결제금액</span>
+              <span className="dark:text-gray-200">총 결제금액</span>
               <span className="text-emerald-600 dark:text-emerald-400">
                 {formatPrice(order.totalAmount)}
               </span>

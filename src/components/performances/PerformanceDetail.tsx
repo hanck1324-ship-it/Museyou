@@ -7,6 +7,7 @@ import { Performance } from "./PerformanceCard";
 import { ImageWithFallback } from "../common/figma/ImageWithFallback";
 import { ReviewSection } from "./ReviewSection";
 import { PerformanceMap } from "./PerformanceMap";
+import { Skeleton } from "../ui/skeleton";
 import { useState, useEffect } from "react";
 import { getVenueCoordinates } from "../../lib/utils/geocode";
 import { getVenueCoordinates as getStoredCoordinates, DEFAULT_COORDINATES } from "../../lib/utils/venueCoordinates";
@@ -241,11 +242,8 @@ export function PerformanceDetail({ performance, open, onOpenChange }: Performan
 
                 {venueInfo && <PerformanceMap venue={venueInfo} />}
                 {isLoadingCoordinates && (
-                  <div className="h-40 sm:h-48 rounded-lg bg-muted flex items-center justify-center">
-                    <div className="text-center">
-                      <MapPin className="size-6 mx-auto text-muted-foreground mb-2 animate-pulse" />
-                      <p className="text-xs sm:text-sm text-muted-foreground">위치 정보를 불러오는 중...</p>
-                    </div>
+                  <div className="h-40 sm:h-48 rounded-lg overflow-hidden">
+                    <Skeleton className="w-full h-full" />
                   </div>
                 )}
 
@@ -277,18 +275,22 @@ export function PerformanceDetail({ performance, open, onOpenChange }: Performan
                 <div className="space-y-2">
                   <h4 className="text-xs sm:text-sm dark:text-gray-200">교통편</h4>
                   <div className="text-xs sm:text-sm text-muted-foreground dark:text-gray-400 space-y-1">
-                    <p>
-                      🚇 지하철:{" "}
-                      {isLoadingSubway
-                        ? "가까운 역을 찾는 중..."
-                        : subwayStations.length > 0
-                          ? subwayStations
-                              .map((s) =>
-                                s.distanceM != null ? `${s.name} (${s.distanceM}m)` : s.name
-                              )
-                              .join(", ")
-                          : "가까운 역 정보를 찾지 못했어요"}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <span>🚇 지하철:</span>
+                      {isLoadingSubway ? (
+                        <Skeleton className="h-4 w-32" />
+                      ) : subwayStations.length > 0 ? (
+                        <span>
+                          {subwayStations
+                            .map((s) =>
+                              s.distanceM != null ? `${s.name} (${s.distanceM}m)` : s.name
+                            )
+                            .join(", ")}
+                        </span>
+                      ) : (
+                        <span>가까운 역 정보를 찾지 못했어요</span>
+                      )}
+                    </div>
                     <p>🚌 버스: 123, 456, 789번</p>
                     <p>🚗 주차: 공연장 지하 주차장 이용 가능</p>
                   </div>

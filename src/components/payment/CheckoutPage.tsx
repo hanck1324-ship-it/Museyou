@@ -168,15 +168,15 @@ export function CheckoutPage({ open, onOpenChange, onPaymentSuccess }: CheckoutP
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto dark:bg-gray-900 dark:border-gray-700">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 dark:text-gray-100">
             <CreditCard className="size-5" />
             {paymentStep === 'info' && '결제 정보 입력'}
             {paymentStep === 'payment' && '결제 수단 선택'}
             {paymentStep === 'success' && '결제 완료'}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="dark:text-gray-400">
             {paymentStep === 'info' && '결제에 필요한 정보를 입력해주세요'}
             {paymentStep === 'payment' && '결제 수단을 선택하고 결제를 진행해주세요'}
             {paymentStep === 'success' && '결제가 성공적으로 완료되었습니다'}
@@ -228,7 +228,7 @@ export function CheckoutPage({ open, onOpenChange, onPaymentSuccess }: CheckoutP
 
             {/* 구매자 정보 입력 */}
             <div className="space-y-4">
-              <h3 className="font-semibold flex items-center gap-2">
+              <h3 className="font-semibold flex items-center gap-2 dark:text-gray-200">
                 <User className="size-4" />
                 구매자 정보
               </h3>
@@ -301,18 +301,18 @@ export function CheckoutPage({ open, onOpenChange, onPaymentSuccess }: CheckoutP
         {paymentStep === 'payment' && (
           <div className="space-y-6">
             {/* 주문 요약 */}
-            <div className="p-4 rounded-lg border bg-gray-50 dark:bg-gray-800/50">
+            <div className="p-4 rounded-lg border bg-gray-50 dark:bg-gray-800/50 dark:border-gray-700">
               <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-muted-foreground">구매자</span>
-                <span className="font-medium">{buyerName}</span>
+                <span className="text-muted-foreground dark:text-gray-400">구매자</span>
+                <span className="font-medium dark:text-gray-200">{buyerName}</span>
               </div>
               <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-muted-foreground">이메일</span>
-                <span className="font-medium">{buyerEmail}</span>
+                <span className="text-muted-foreground dark:text-gray-400">이메일</span>
+                <span className="font-medium dark:text-gray-200">{buyerEmail}</span>
               </div>
-              <Separator className="my-3" />
+              <Separator className="my-3 dark:bg-gray-700" />
               <div className="flex items-center justify-between font-bold text-lg">
-                <span>총 결제금액</span>
+                <span className="dark:text-gray-200">총 결제금액</span>
                 <span className="text-emerald-600 dark:text-emerald-400">
                   {formatPrice(totalAmount)}
                 </span>
@@ -321,7 +321,7 @@ export function CheckoutPage({ open, onOpenChange, onPaymentSuccess }: CheckoutP
 
             {/* 결제 수단 선택 */}
             <div className="space-y-4">
-              <h3 className="font-semibold flex items-center gap-2">
+              <h3 className="font-semibold flex items-center gap-2 dark:text-gray-200">
                 <CreditCard className="size-4" />
                 결제 수단 선택
               </h3>
@@ -334,13 +334,13 @@ export function CheckoutPage({ open, onOpenChange, onPaymentSuccess }: CheckoutP
                     onClick={() => setSelectedPaymentMethod(method)}
                     className={`p-4 rounded-lg border-2 transition-all text-left ${
                       selectedPaymentMethod?.type === method.type
-                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
-                        : 'border-gray-200 hover:border-emerald-300 dark:border-gray-700'
+                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-600'
+                        : 'border-gray-200 hover:border-emerald-300 dark:border-gray-700 dark:hover:border-emerald-600'
                     }`}
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-2xl">{method.icon}</span>
-                      <span className="font-medium">{method.label}</span>
+                      <span className="font-medium dark:text-gray-200">{method.label}</span>
                     </div>
                   </button>
                 ))}
