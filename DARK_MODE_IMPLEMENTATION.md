@@ -162,5 +162,18 @@ const { theme, setTheme } = useTheme();
 
 ---
 
-**Last Updated:** 2025-01-25  
-**Status:** 다크모드 지원 구현 완료 ✅
+**Last Updated:** 2025-01-27  
+**Status:** 다크모드 지원 완성 ✅
+
+## 최근 업데이트 (2025-01-27)
+
+### 추가 완료된 컴포넌트
+- ✅ **결제 컴포넌트** (CheckoutPage, OrderList, OrderDetail)
+- ✅ **BottomNav** (하단 네비게이션)
+- ✅ 모든 결제 관련 UI 요소 다크모드 적용
+
+### 개선 사항
+- 결제 페이지 Dialog 다크모드 스타일 개선
+- 주문 내역 카드 다크모드 적용
+- 결제 수단 선택 버튼 다크모드 호버 효과
+- 하단 네비게이션 테두리 다크모드 적용

@@ -5,9 +5,10 @@ import { Input } from "./components/ui/forms/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/forms/select";
 import { Button } from "./components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./components/ui/sheet";
-import { Search, Music, Theater, Palette, Heart, LogIn, LogOut, UserCircle, SlidersHorizontal, X, Users } from "lucide-react";
+import { Search, Music, Theater, Palette, Heart, LogIn, LogOut, UserCircle, SlidersHorizontal, X, Users, Loader2 } from "lucide-react";
 import { ThemeToggle } from "./components/common/ThemeToggle";
 import { PerformanceCard, Performance } from "./components/performances/PerformanceCard";
+import { useInfiniteScroll } from "./lib/hooks/useInfiniteScroll";
 import { PerformanceCardSkeleton } from "./components/performances/PerformanceCardSkeleton";
 import { PerformanceDetail } from "./components/performances/PerformanceDetail";
 import { PromotionCard, Promotion } from "./components/promotions/PromotionCard";
@@ -51,12 +52,18 @@ export default function App() {
 
   // Data State
   const [performances, setPerformances] = useState<Performance[]>([]);
+  const [allPerformances, setAllPerformances] = useState<Performance[]>([]); // 전체 데이터
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [matches, setMatches] = useState<UserMatch[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [likedPerformances, setLikedPerformances] = useState<Set<string>>(new Set());
+  
+  // 무한 스크롤 상태
+  const [performancePage, setPerformancePage] = useState(1);
+  const [isLoadingMorePerformances, setIsLoadingMorePerformances] = useState(false);
+  const ITEMS_PER_PAGE = 12;
 
   const districts = [
     "all",
@@ -166,7 +173,10 @@ export default function App() {
       // Load performances from API
       const perfData = await performanceApi.getAll();
       if (perfData.performances) {
-        setPerformances(perfData.performances);
+        setAllPerformances(perfData.performances);
+        // 초기 로드: 첫 페이지만 표시
+        setPerformances(perfData.performances.slice(0, ITEMS_PER_PAGE));
+        setPerformancePage(1);
       }
 
       // Load promotions from API
@@ -288,7 +298,8 @@ export default function App() {
     }
   };
 
-  const filteredPerformances = performances.filter((perf) => {
+  // 필터링된 전체 공연 목록
+  const filteredAllPerformances = allPerformances.filter((perf) => {
     // Search filter
     const matchesSearch = searchQuery === "" ||
       perf.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -328,6 +339,33 @@ export default function App() {
     const matchesDate = isDateInRange(perf.date, selectedDateFilter);
     
     return matchesSearch && matchesDistrict && matchesCategory && matchesPrice && matchesDate;
+  });
+
+  // 필터링된 목록에서 현재 페이지까지의 항목만 표시
+  const filteredPerformances = filteredAllPerformances.slice(0, performancePage * ITEMS_PER_PAGE);
+  const hasMorePerformances = filteredPerformances.length < filteredAllPerformances.length;
+
+  // 무한 스크롤: 더 많은 공연 로드
+  const loadMorePerformances = async () => {
+    if (isLoadingMorePerformances || !hasMorePerformances) return;
+    
+    setIsLoadingMorePerformances(true);
+    // 다음 페이지 로드 (실제로는 이미 필터링된 데이터에서 슬라이스만 하므로 즉시 완료)
+    await new Promise(resolve => setTimeout(resolve, 300)); // 로딩 효과를 위한 딜레이
+    setPerformancePage(prev => prev + 1);
+    setIsLoadingMorePerformances(false);
+  };
+
+  // 필터 변경 시 페이지 리셋
+  useEffect(() => {
+    setPerformancePage(1);
+  }, [selectedDistrict, selectedCategory, selectedPriceRange, selectedDateFilter, searchQuery]);
+
+  // 무한 스크롤 훅
+  const loadMoreRef = useInfiniteScroll({
+    onLoadMore: loadMorePerformances,
+    hasMore: hasMorePerformances,
+    isLoading: isLoadingMorePerformances,
   });
 
   const filteredPromotions = promotions.filter((promo) => {
@@ -716,7 +754,28 @@ export default function App() {
               )}
             </div>
 
-            {filteredPerformances.length === 0 && (
+            {/* 무한 스크롤 로딩 인디케이터 */}
+            {!isLoading && hasMorePerformances && (
+              <div ref={loadMoreRef} className="flex items-center justify-center py-8">
+                {isLoadingMorePerformances && (
+                  <div className="flex items-center gap-2 text-muted-foreground dark:text-gray-400">
+                    <Loader2 className="size-5 animate-spin" />
+                    <span>더 많은 공연을 불러오는 중...</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 더 이상 데이터가 없을 때 */}
+            {!isLoading && !hasMorePerformances && filteredPerformances.length > 0 && (
+              <div className="text-center py-8">
+                <p className="text-sm text-muted-foreground dark:text-gray-400">
+                  모든 공연을 불러왔습니다
+                </p>
+              </div>
+            )}
+
+            {filteredPerformances.length === 0 && !isLoading && (
               <div className="text-center py-12">
                 <Palette className="size-12 mx-auto text-muted-foreground dark:text-gray-500 mb-4" />
                 <p className="text-muted-foreground dark:text-gray-400">검색 결과가 없습니다.</p>

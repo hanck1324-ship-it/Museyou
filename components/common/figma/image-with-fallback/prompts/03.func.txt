@@ -14,18 +14,28 @@ interface ImageWithFallbackProps extends React.ImgHTMLAttributes<HTMLImageElemen
 
 ## 현재 구현 상태 ✅
 
-### 1. 이미지 로드
+### 1. 이미지 로드 ✅ 완료 (2025-01-27)
 - 원본 이미지 표시 (`src` prop)
 - 표준 `<img>` 요소 사용
+- Lazy Loading 지원 (`lazy` prop)
+- WebP 형식 자동 변환 (`useWebP` prop)
 
-### 2. Fallback 처리
+### 2. Fallback 처리 ✅ 완료
 - `onError` 핸들러로 에러 감지
 - `didError` 상태로 Fallback UI 표시
 - Base64 인코딩된 SVG Fallback 이미지 사용
+- 다크모드 지원
 
-### 3. Props 전달
+### 3. Props 전달 ✅ 완료
 - 모든 img 속성 전달 (`...rest`)
 - `data-original-url`에 원본 URL 저장
+
+### 4. 이미지 최적화 ✅ 완료 (2025-01-27)
+- WebP 변환 지원 (URL 기반)
+- 반응형 이미지 (srcset) 자동 생성
+- `size` prop으로 크기 제어 (small, medium, large, auto)
+- 로딩 상태 표시 개선
+- 이미지 최적화 유틸리티 함수 (`imageOptimization.ts`)
 
 ## 개선이 필요한 기능 🔧
 
@@ -54,86 +64,24 @@ return didError ? (
 );
 ```
 
-### 2. 로딩 상태 표시 ⭐
-**필요한 기능:**
-```typescript
-const [isLoading, setIsLoading] = useState(true);
+### 2. 로딩 상태 표시 ✅ 완료 (2025-01-27)
+**구현 완료:**
+- 로딩 상태 표시 (animate-pulse)
+- 이미지 로드 완료 시 페이드 인 효과
+- 다크모드 지원
 
-useEffect(() => {
-  if (src) {
-    setIsLoading(true);
-    const img = new Image();
-    img.onload = () => setIsLoading(false);
-    img.onerror = () => {
-      setIsLoading(false);
-      setDidError(true);
-    };
-    img.src = src;
-  }
-}, [src]);
+### 3. Lazy Loading ✅ 완료 (2025-01-27)
+**구현 완료:**
+- `loading="lazy"` 속성 적용
+- `lazy` prop으로 제어 가능
+- `decoding="async"` 적용
 
-return (
-  <div className={className} style={style}>
-    {isLoading && (
-      <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-        <Loader2 className="size-6 animate-spin text-gray-400" />
-      </div>
-    )}
-    {/* 이미지 */}
-  </div>
-);
-```
-
-### 3. Lazy Loading ⭐
-**필요한 기능:**
-```typescript
-import { useEffect, useRef } from 'react';
-
-const imgRef = useRef<HTMLImageElement>(null);
-const [shouldLoad, setShouldLoad] = useState(false);
-
-useEffect(() => {
-  if (!imgRef.current) return;
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-      if (entries[0].isIntersecting) {
-        setShouldLoad(true);
-        observer.disconnect();
-      }
-    },
-    { rootMargin: '50px' }
-  );
-
-  observer.observe(imgRef.current);
-  return () => observer.disconnect();
-}, []);
-
-<img
-  ref={imgRef}
-  src={shouldLoad ? src : undefined}
-  data-src={src}
-  loading="lazy"
-  // ...
-/>
-```
-
-### 4. 이미지 최적화 (WebP, Responsive)
-**필요한 기능:**
-```typescript
-interface ImageWithFallbackProps {
-  // ...
-  srcSet?: string;  // Responsive images
-  sizes?: string;
-  format?: 'webp' | 'jpg' | 'png';  // 포맷 자동 변환 (서버 측)
-}
-
-<picture>
-  <source srcSet={webpSrc} type="image/webp" />
-  <source srcSet={src} type="image/jpeg" />
-  <img src={src} alt={alt} {...rest} onError={handleError} />
-</picture>
-```
+### 4. 이미지 최적화 (WebP, Responsive) ✅ 완료 (2025-01-27)
+**구현 완료:**
+- WebP 변환 지원 (`useWebP` prop)
+- 반응형 이미지 (srcset) 자동 생성
+- `size` prop으로 크기 제어
+- `imageOptimization.ts` 유틸리티 함수 제공
 
 ### 5. 재시도 기능
 **필요한 기능:**
