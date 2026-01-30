@@ -138,17 +138,16 @@
 
 ## 🟢 중기 작업 (3-4주 내)
 
-### 5. Matching Card 스와이프 기능
-**현재 상태:**
-- 기본 카드 레이아웃만 있음
+### 5. ~~Matching Card 스와이프 기능~~ ✅ 완료 (2025-01-27)
+**완료된 작업:**
+- ✅ SwipeableMatchingCard 컴포넌트 생성 (Framer Motion 기반)
+- ✅ MatchingCardStack 컴포넌트 생성 (카드 스택 UI)
+- ✅ 드래그/스와이프 애니메이션 구현
+- ✅ 좋아요/패스 제스처 처리
+- ✅ App.tsx에 카드 스택 방식 적용
 
-**해야 할 작업:**
-- [ ] Framer Motion 설치 및 설정
-- [ ] 스와이프 애니메이션 구현
-- [ ] 좋아요/패스 제스처 처리
+**남은 작업 (선택사항):**
 - [ ] 매칭 알고리즘 개선
-
-**예상 시간:** 4-6시간
 
 ---
 
@@ -235,8 +234,8 @@
 
 ### 현재 테스트 상태 ✅
 ```
-Test Files  6 passed (6)
-     Tests  79 passed (79)
+Test Files  9 passed (9)
+     Tests  97 passed (97)
 ```
 
 ### 통과한 테스트
@@ -246,11 +245,14 @@ Test Files  6 passed (6)
 - ✅ paymentApi.test.ts (12 tests)
 - ✅ CartSheet.test.tsx (11 tests)
 - ✅ GroupPurchaseCard.test.tsx (10 tests)
+- ✅ CheckoutPage.test.tsx (9 tests) - 신규
+- ✅ PerformanceDetail.test.tsx (6 tests) - 신규
+- ✅ GroupPurchaseDetail.test.tsx (3 tests) - 신규
 
 ### 추가로 작성해야 할 테스트
-- [ ] CheckoutPage 컴포넌트 테스트
-- [ ] PerformanceDetail 컴포넌트 테스트
-- [ ] GroupPurchaseDetail 컴포넌트 테스트
+- [x] CheckoutPage 컴포넌트 테스트 ✅
+- [x] PerformanceDetail 컴포넌트 테스트 ✅
+- [x] GroupPurchaseDetail 컴포넌트 테스트 ✅
 - [ ] E2E 테스트 (Playwright)
 
 ---
