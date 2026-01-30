@@ -14,6 +14,7 @@ import { PromotionCard, Promotion } from "./components/promotions/PromotionCard"
 import { PromotionCardSkeleton } from "./components/promotions/PromotionCardSkeleton";
 import { MatchingCard, UserMatch } from "./components/matching/MatchingCard";
 import { MatchingCardSkeleton } from "./components/matching/MatchingCardSkeleton";
+import { MatchingCardStack } from "./components/matching/MatchingCardStack";
 import { UserProfile } from "./components/matching/UserProfile";
 import { AuthDialog } from "./components/auth/AuthDialog";
 import { HomePage } from "./components/home/HomePage";
@@ -355,6 +356,9 @@ export default function App() {
     try {
       const result = await matchingApi.sendLike(userId);
       if (result.success) {
+        // 매칭 목록에서 제거
+        setMatches(prev => prev.filter(user => user.id !== userId));
+        
         if (result.isMatch) {
           toast.success("🎉 매칭되었습니다! 메시지를 보낼 수 있어요.");
         } else {
@@ -365,6 +369,12 @@ export default function App() {
       console.error('Like error:', error);
       toast.error('좋아요 전송 중 오류가 발생했습니다.');
     }
+  };
+
+  const handlePass = async (userId: string) => {
+    // 매칭 목록에서 제거
+    setMatches(prev => prev.filter(user => user.id !== userId));
+    toast.info("패스했습니다.");
   };
 
   const handleMessage = (userId: string) => {
@@ -746,34 +756,34 @@ export default function App() {
               <p className="text-muted-foreground dark:text-gray-400 text-sm">
                 비슷한 관심사를 가진 사람들과 문화예술을 함께 즐기며, 영감을 주고받는 특별한 인연을 만나보세요.
               </p>
+              <p className="text-xs text-muted-foreground dark:text-gray-500 mt-2">
+                💡 카드를 좌우로 스와이프하거나 버튼을 눌러 좋아요/패스할 수 있습니다.
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-              {isLoading ? (
-                // 로딩 중일 때 스켈레톤 표시
-                Array.from({ length: 6 }).map((_, index) => (
-                  <MatchingCardSkeleton key={`skeleton-${index}`} />
-                ))
-              ) : matches.length > 0 ? (
-                matches.map((user) => (
-                  <MatchingCard
-                    key={user.id}
-                    user={user}
-                    onViewProfile={handleViewProfile}
-                    onLike={handleLike}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full text-center py-12">
-                  <Heart className="size-12 mx-auto text-muted-foreground dark:text-gray-500 mb-4" />
-                  <p className="text-muted-foreground dark:text-gray-400">
-                    {isLoggedIn 
-                      ? "매칭 가능한 사용자가 없습니다." 
-                      : "로그인 후 매칭 기능을 이용하실 수 있습니다."}
-                  </p>
-                </div>
-              )}
-            </div>
+            {!isLoggedIn ? (
+              <div className="text-center py-12">
+                <Heart className="size-12 mx-auto text-muted-foreground dark:text-gray-500 mb-4" />
+                <p className="text-muted-foreground dark:text-gray-400 mb-4">
+                  로그인 후 매칭 기능을 이용하실 수 있습니다.
+                </p>
+                <Button
+                  onClick={() => setAuthDialogOpen(true)}
+                  className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+                >
+                  로그인하기
+                </Button>
+              </div>
+            ) : (
+              <MatchingCardStack
+                users={matches}
+                onLike={handleLike}
+                onPass={handlePass}
+                onMessage={handleMessage}
+                onViewProfile={handleViewProfile}
+                isLoading={isLoading}
+              />
+            )}
           </TabsContent>
 
           {/* Group Purchases Tab */}
