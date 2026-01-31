@@ -1,0 +1,204 @@
+# GroupPurchaseDetail - 기능 명세
+
+## Props 인터페이스
+
+```typescript
+interface GroupPurchaseDetailProps {
+  groupPurchase: GroupPurchase | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onJoin?: (groupId: string) => void;
+  onCancel?: (groupId: string) => void;
+  onEdit?: (groupPurchase: GroupPurchase) => void;
+  onDelete?: (groupId: string) => void;
+}
+```
+
+## 현재 구현 상태 ✅
+
+### 컴포넌트 경로
+`src/components/group-purchases/GroupPurchaseDetail.tsx`
+
+### 주요 기능
+- ✅ Dialog 기반 공동구매 상세 정보 표시
+- ✅ Tab 구조 (정보, 공연정보, 참여자)
+- ✅ 공동구매 진행 상황 표시 (Progress)
+- ✅ 가격 정보 표시 (원가, 할인가, 할인율)
+- ✅ 참여자 목록 표시
+- ✅ 공동구매 참여/취소 기능
+- ✅ 생성자 권한 시 수정/삭제 기능
+- ✅ 공유 기능
+- ✅ 다크모드 지원
+
+### Tab 구조
+1. **정보 탭** (`info`)
+   - 공동구매 설명
+   - 목표 인원 / 현재 인원
+   - 마감일
+   - 가격 정보
+
+2. **공연정보 탭** (`performance`)
+   - 연결된 공연 상세 정보
+   - PerformanceCard 표시
+
+3. **참여자 탭** (`participants`)
+   - 참여자 목록
+   - 참여 일시
+
+## 테스트 계획
+
+### 단위 테스트 ✅
+**구현 완료 (2025-01-27)**
+
+**테스트 파일:** `src/components/group-purchases/GroupPurchaseDetail.test.tsx`
+
+**테스트 케이스 (3개 모두 통과):**
+- ✅ `open`이 false일 때 렌더링 안 함
+- ✅ 공동구매 상세 정보 렌더링 (제목, 할인율)
+- ✅ 탭 표시 (정보, 공연정보, 참여자)
+- ✅ 진행 상황 표시 (Progress 컴포넌트)
+- ✅ 가격 정보 표시 (원가, 할인가)
+- ✅ 참여 버튼 클릭 시 콜백 호출
+
+**Mock 설정:**
+- `useGroupPurchaseStore` (cancelJoin, fetchGroupPurchaseDetail, deleteGroupPurchase)
+- `useGroupPurchaseRealtime` hook
+- `shareContent`, `shareToFacebook`, `shareToTwitter` utilities
+- UI 컴포넌트들 (Dialog, Tabs, Button, Badge, Separator, AlertDialog)
+- GroupPurchaseProgress, GroupPurchaseStatus, GroupPurchaseParticipants 컴포넌트
+- ImageWithFallback 컴포넌트
+
+**테스트 패턴:**
+- `getAllByText`로 중복 텍스트 처리 (가격 정보 등)
+- `data-testid`로 컴포넌트 선택
+- `fireEvent.click`로 버튼 클릭 테스트
+
+### 통합 테스트
+- [ ] 공동구매 참여 플로우
+- [ ] 공동구매 취소 플로우
+- [ ] 공동구매 수정 플로우
+- [ ] 공동구매 삭제 플로우
+- [ ] 공유 기능 테스트
+
+### E2E 테스트
+- [ ] 공동구매 목록 → 상세보기 → 참여 플로우
+- [ ] 공동구매 목록 → 상세보기 → 공유 플로우
+- [ ] 생성자 권한 → 수정/삭제 플로우
+
+## API 연동
+
+### 공동구매 API
+```typescript
+interface GroupPurchase {
+  id: string;
+  performance: Performance;
+  originalPrice: number;
+  discountedPrice: number;
+  discountRate: number;
+  targetParticipants: number;
+  currentParticipants: number;
+  status: 'recruiting' | 'completed' | 'cancelled';
+  deadline: string;
+  creator: User;
+  creatorId: string;
+  participants: Participant[];
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+### API 엔드포인트
+- `GET /api/group-purchases/:id` - 공동구매 상세 조회
+- `POST /api/group-purchases/:id/join` - 공동구매 참여
+- `POST /api/group-purchases/:id/cancel` - 공동구매 취소
+- `PUT /api/group-purchases/:id` - 공동구매 수정
+- `DELETE /api/group-purchases/:id` - 공동구매 삭제
+
+## 상태 관리
+
+### 현재 구현
+- `useGroupPurchaseStore` - 공동구매 상태 관리
+- `useGroupPurchaseRealtime` - 실시간 업데이트 구독
+- 로컬 상태 (`useState`) - Dialog 열림/닫힘, 수정 모달 상태
+
+### Store 구조
+```typescript
+interface GroupPurchaseStore {
+  currentGroupPurchase: GroupPurchase | null;
+  isLoading: boolean;
+  
+  // Actions
+  fetchGroupPurchaseDetail: (id: string) => Promise<void>;
+  joinGroupPurchase: (id: string) => Promise<void>;
+  cancelJoin: (id: string) => Promise<void>;
+  updateGroupPurchase: (id: string, data: Partial<GroupPurchase>) => Promise<void>;
+  deleteGroupPurchase: (id: string) => Promise<void>;
+}
+```
+
+## 실시간 업데이트
+
+### 현재 구현
+- `useGroupPurchaseRealtime` hook으로 Supabase Realtime 구독
+- 참여자 수, 상태 변경 실시간 반영
+
+### Realtime 채널
+```typescript
+const channel = supabase
+  .channel(`group-purchase:${groupId}`)
+  .on('postgres_changes', {
+    event: 'UPDATE',
+    schema: 'public',
+    table: 'group_purchases',
+    filter: `id=eq.${groupId}`,
+  }, (payload) => {
+    // 상태 업데이트
+  })
+  .subscribe();
+```
+
+## 권한 관리
+
+### 생성자 권한
+- 수정 버튼 표시
+- 삭제 버튼 표시
+- 참여자 관리
+
+### 참여자 권한
+- 참여 취소 버튼
+- 공유 버튼
+
+### 비참여자
+- 참여 버튼
+- 공유 버튼
+
+## 에러 처리
+
+### 현재 구현
+- API 실패 시 토스트 메시지
+- 권한 없음 시 버튼 비활성화
+
+### 개선 제안
+- [ ] 네트워크 에러 처리
+- [ ] 재시도 로직
+- [ ] 에러 상태 UI
+
+## 향후 개선 사항
+
+### 1. 알림 기능
+- [ ] 목표 인원 달성 시 알림
+- [ ] 마감 임박 알림
+- [ ] 새로운 참여자 알림
+
+### 2. 채팅 기능
+- [ ] 공동구매 채팅방
+- [ ] 참여자 간 메시지
+
+### 3. 결제 연동
+- [ ] 공동구매 성사 시 자동 결제
+- [ ] 환불 처리
+
+### 4. 통계 및 분석
+- [ ] 공동구매 성사율
+- [ ] 인기 공연 분석

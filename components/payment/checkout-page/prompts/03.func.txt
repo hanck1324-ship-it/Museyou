@@ -1,0 +1,174 @@
+# CheckoutPage - 기능 명세
+
+## Props 인터페이스
+
+```typescript
+interface CheckoutPageProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+```
+
+## 현재 구현 상태 ✅
+
+### 컴포넌트 경로
+`src/components/payment/CheckoutPage.tsx`
+
+### 주요 기능
+- ✅ Dialog 기반 결제 정보 입력 페이지
+- ✅ 구매자 정보 입력 폼 (이름, 이메일, 전화번호)
+- ✅ 주문 요약 표시 (장바구니 아이템 목록)
+- ✅ 폼 유효성 검사
+- ✅ 결제 API 연동 (paymentApi.requestPayment)
+- ✅ 다크모드 지원
+
+### 폼 필드
+1. **구매자 이름** (`buyer-name`)
+   - 필수 입력
+   - 최소 2자 이상
+
+2. **이메일** (`buyer-email`)
+   - 필수 입력
+   - 이메일 형식 검증
+
+3. **전화번호** (`buyer-phone`)
+   - 필수 입력
+   - 전화번호 형식 검증 (010-1234-5678 형식)
+
+## 테스트 계획
+
+### 단위 테스트 ✅
+**구현 완료 (2025-01-27)**
+
+**테스트 파일:** `src/components/payment/CheckoutPage.test.tsx`
+
+**테스트 케이스 (9개 모두 통과):**
+- ✅ `open`이 true일 때 체크아웃 페이지 렌더링
+- ✅ `open`이 false일 때 렌더링 안 함
+- ✅ 장바구니 아이템 목록 표시
+- ✅ 빈 폼 제출 시 유효성 검사 에러 표시
+- ✅ 잘못된 이메일 형식 검증
+- ✅ 잘못된 전화번호 형식 검증
+
+**Mock 설정:**
+- `react-router-dom` (useNavigate)
+- `sonner` (toast)
+- `paymentApi` (requestPayment)
+- UI 컴포넌트들 (Dialog, Button, Input, Label, Separator, Badge)
+- ImageWithFallback 컴포넌트
+
+**테스트 패턴:**
+- `fireEvent.submit`로 폼 제출 테스트
+- `data-testid`로 입력 필드 선택
+- `waitFor`로 비동기 토스트 메시지 확인
+
+### 통합 테스트
+- [ ] 결제 API 호출 테스트
+- [ ] 결제 성공 후 장바구니 비우기
+- [ ] 결제 성공 후 주문 내역 페이지 이동
+
+### E2E 테스트
+- [ ] 장바구니 → 체크아웃 → 결제 플로우
+- [ ] 결제 실패 시 에러 처리
+- [ ] 결제 성공 시 주문 확인
+
+## API 연동
+
+### 결제 API
+```typescript
+interface PaymentRequest {
+  buyerName: string;
+  buyerEmail: string;
+  buyerPhone: string;
+  items: CartItem[];
+  totalPrice: number;
+}
+
+interface PaymentResponse {
+  orderId: string;
+  status: 'success' | 'failed';
+  message?: string;
+}
+```
+
+### API 호출
+```typescript
+import { requestPayment } from '../../lib/api/paymentApi';
+
+const response = await requestPayment({
+  buyerName,
+  buyerEmail,
+  buyerPhone,
+  items: cartItems,
+  totalPrice: getTotalPrice(),
+});
+```
+
+## 상태 관리
+
+### 현재 구현
+- `useCartStore` - 장바구니 아이템 및 총액
+- 로컬 상태 (`useState`) - 폼 입력값, 로딩 상태
+
+### 폼 상태
+```typescript
+const [buyerName, setBuyerName] = useState('');
+const [buyerEmail, setBuyerEmail] = useState('');
+const [buyerPhone, setBuyerPhone] = useState('');
+const [isSubmitting, setIsSubmitting] = useState(false);
+```
+
+## 유효성 검사
+
+### 현재 구현 ✅
+```typescript
+// 필수 필드 검증
+if (!buyerName || !buyerEmail || !buyerPhone) {
+  toast.error('필수 정보를 모두 입력해주세요.');
+  return;
+}
+
+// 이메일 형식 검증
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+if (!emailRegex.test(buyerEmail)) {
+  toast.error('올바른 이메일 주소를 입력해주세요.');
+  return;
+}
+
+// 전화번호 형식 검증
+const phoneRegex = /^010-\d{4}-\d{4}$/;
+if (!phoneRegex.test(buyerPhone)) {
+  toast.error('올바른 전화번호를 입력해주세요.');
+  return;
+}
+```
+
+## 에러 처리
+
+### 현재 구현
+- 폼 유효성 검사 실패 시 토스트 메시지
+- 결제 API 실패 시 에러 처리
+
+### 개선 제안
+- [ ] 필드별 에러 메시지 표시
+- [ ] 네트워크 에러 처리
+- [ ] 재시도 로직
+
+## 향후 개선 사항
+
+### 1. 결제 수단 선택
+- [ ] 신용카드
+- [ ] 계좌이체
+- [ ] 간편결제 (카카오페이, 네이버페이)
+
+### 2. 배송 정보 입력
+- [ ] 배송지 주소 입력
+- [ ] 배송 메시지
+
+### 3. 쿠폰/할인
+- [ ] 쿠폰 코드 입력
+- [ ] 할인 금액 표시
+
+### 4. 주문 확인
+- [ ] 주문 완료 페이지
+- [ ] 주문 내역 이메일 발송
