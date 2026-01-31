@@ -237,20 +237,36 @@ CREATE TABLE related_performances (
 
 ## 테스트 계획
 
-### 단위 테스트
-- Props 전달 테스트
-- Tab 전환 테스트
-- 지도 표시 테스트
+### 단위 테스트 ✅
+**구현 완료 (2025-01-27)**
+
+**테스트 파일:** `src/components/performances/PerformanceDetail.test.tsx`
+
+**테스트 케이스 (6개 모두 통과):**
+- ✅ `performance`가 null일 때 렌더링 안 함
+- ✅ `open`이 false일 때 렌더링 안 함
+- ✅ 공연 상세 정보 렌더링 (제목, 카테고리, 지역)
+- ✅ 공연정보 탭 콘텐츠 표시 (설명, 주최, 가격)
+- ✅ 탭 표시 (공연정보, 장소/경로, 리뷰)
+- ✅ 리뷰 탭 클릭 시 ReviewSection 표시
+
+**Mock 설정:**
+- `usePerformanceRating` hook
+- `getVenueCoordinates` utility
+- `loadKakaoMapSDK` utility
+- UI 컴포넌트들 (Dialog, Tabs, Button, Badge, Skeleton)
+- PerformanceMap, ReviewSection 컴포넌트
 
 ### 통합 테스트
-- 좋아요 기능 테스트
-- 공유 기능 테스트
-- 예매 버튼 클릭 테스트
+- [ ] 좋아요 기능 테스트
+- [ ] 공유 기능 테스트
+- [ ] 예매 버튼 클릭 테스트
+- [ ] 지도 표시 테스트 (실제 좌표 로드)
 
 ### E2E 테스트
-- 상세보기 → 예매 플로우
-- 상세보기 → 공유 플로우
-- 상세보기 → 관련 공연 보기 플로우
+- [ ] 상세보기 → 예매 플로우
+- [ ] 상세보기 → 공유 플로우
+- [ ] 상세보기 → 관련 공연 보기 플로우
 
 ## 접근성 (a11y)
 
